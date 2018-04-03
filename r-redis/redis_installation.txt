@@ -1,0 +1,22 @@
+How to install redis on Windows:
+
+1. download redis for windows at the  link below:
+https://github.com/MicrosoftArchive/redis/releases
+
+2. Choose the .msi package to install or unzip .zip and run redis-server.exe
+
+
+How to install redis on OS X:
+
+
+
+How to install redis on Linux:
+
+1. download latest stable tarball release of redis at:
+https://redis.io/download
+
+2. TBC
+
+3. TBC
+
+
