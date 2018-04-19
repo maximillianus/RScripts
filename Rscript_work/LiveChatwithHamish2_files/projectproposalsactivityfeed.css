@@ -1,0 +1,10 @@
+﻿div.ngPPHeader
+{
+	font-weight:bold;
+	letter-spacing:2px;
+	min-height:16px;
+	padding:5px 0 3px 25px;
+	text-transform:uppercase;
+	margin-left: 5px;
+	background: #eee url("/_layouts/NewsGator.Innovation/images/pp.png") no-repeat 4px 4px;
+}

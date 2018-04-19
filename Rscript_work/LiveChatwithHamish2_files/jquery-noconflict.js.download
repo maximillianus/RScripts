@@ -1,0 +1,1 @@
+typeof window.jQuery != "undefined" && window.jQuery.noConflict && (window.jQuery142 = window.jQuery.noConflict(!0), window.jQuery142.fn.jquery !== "1.10.2" && Sys.Debug.trace("jQuery version 1.10.2 is a requirement for Social Sites to operate as intended."));

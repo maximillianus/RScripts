@@ -1,0 +1,121 @@
+/*!
+	Autosize v1.18.0 - 2013-10-20
+	Automatically adjust textarea height based on user input.
+	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
+	license: http://www.opensource.org/licenses/mit-license.php
+ *
+ * This code has been changed by NewsGator to explicitly reference the jQuery142 variable instead of vanilla jQuery
+ * And has been essentially rewritten for performance reasons
+ */
+(function(n)
+{
+typeof define == "function" && define.amd ? define(["jquery"], n) : n(window.jQuery142 || window.jQuery || window.$)
+})(function(n)
+{
+var u={
+className: "autosizejs", append: "", callback: !1, resizeDelay: 10
+},
+r=["fontFamily", "fontSize", "fontWeight", "fontStyle", "letterSpacing", "textTransform", "wordSpacing", "textIndent"],
+i,
+t=n('<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>').data("autosize", !0)[0];
+t.style.lineHeight = "99px",
+n(t).css("lineHeight") === "99px" && r.push("lineHeight"),
+t.style.lineHeight = "",
+n.fn.autosize = function(f)
+{
+return this.length ? (f = n.extend({}, u, f || {}), t.parentNode !== document.body && n(document.body).append(t), this.each(function()
+{
+function v()
+{
+var r,
+i;
+"getComputedStyle" in window ? (r = window.getComputedStyle(u, null), i = u.getBoundingClientRect().width, n.each(["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"], function(n, t)
+{
+i -= parseInt(r[t], 10)
+}), t.style.width = i + "px") : t.style.width = Math.max(e.width(), 0) + "px"
+}
+function b()
+{
+var o={},
+h,
+c;
+i = u,
+t.className = f.className,
+s = parseInt(e.css("maxHeight"), 10),
+n.each(r, function(n, t)
+{
+o[t] = e.css(t)
+}),
+n(t).css(o),
+v(),
+window.chrome && (h = u.style.width, u.style.width = "0px", c = u.offsetWidth, u.style.width = h)
+}
+function o()
+{
+var n,
+r;
+i !== u ? b() : v(),
+t.value = u.value + f.append,
+t.style.overflowY = u.style.overflowY,
+r = parseInt(u.style.height, 10),
+t.scrollTop = 0,
+t.scrollTop = 9e4,
+n = t.scrollTop,
+s && n > s ? (u.style.overflowY = "scroll", n = s) : (u.style.overflowY = "hidden", n < h && (n = h)),
+n += c,
+r !== n && (u.style.height = n + "px", p && f.callback.call(u, u))
+}
+function y()
+{
+clearTimeout(l),
+l = setTimeout(function()
+{
+var n=e.width();
+n !== a && (a = n, o())
+}, parseInt(f.resizeDelay, 10))
+}
+var u=this,
+e=n(u),
+s,
+h,
+c=0,
+p=n.isFunction(f.callback),
+w={
+height: u.style.height, overflow: u.style.overflow, overflowY: u.style.overflowY, wordWrap: u.style.wordWrap, resize: u.style.resize
+},
+l,
+a=e.width();
+if (!e.data("autosize"))
+{
+if (e.data("autosize", !0), (e.css("box-sizing") === "border-box" || e.css("-moz-box-sizing") === "border-box" || e.css("-webkit-box-sizing") === "border-box") && (c = e.outerHeight() - e.height()), h = Math.max(parseInt(e.css("minHeight"), 10) - c || 0, e.height()), e.css({
+overflow: "hidden", overflowY: "hidden", wordWrap: "break-word", resize: e.css("resize") === "none" || e.css("resize") === "vertical" ? "none" : "horizontal"
+}), "onpropertychange" in u)
+if ("oninput" in u)
+e.on("input.autosize keyup.autosize", o);
+else
+e.on("propertychange.autosize", function()
+{
+event.propertyName === "value" && o()
+});
+else
+e.on("input.autosize", o);
+if (f.resizeDelay !== !1)
+n(window).on("resize.autosize", y);
+e.on("autosize.resize", o);
+e.on("autosize.resizeIncludeStyle", function()
+{
+i = null,
+o()
+});
+e.on("autosize.destroy", function()
+{
+i = null,
+clearTimeout(l),
+n(window).off("resize", y),
+e.off("autosize").off(".autosize").css(w).removeData("autosize")
+});
+o()
+}
+})) : this
+}
+});

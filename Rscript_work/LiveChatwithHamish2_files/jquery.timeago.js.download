@@ -1,0 +1,87 @@
+(function(n)
+{
+function u()
+{
+var t=f(this);
+return isNaN(t.datetime) || n(this).text(r(t.datetime)), this
+}
+function f(t)
+{
+var r,
+u;
+if (t = n(t), !t.data("timeago"))
+if (t.data("timeago", {datetime: i.datetime(t)}), r = n.trim(t.text()), r.length > 0)
+t.attr("title", r);
+else
+try
+{
+t.attr("title", t.data("timeago").datetime.localeFormat(""))
+}
+catch(f)
+{
+u = t.data("timeago").datetime,
+t.attr("title", u.toLocaleDateString() + " " + u.toLocaleTimeString())
+}
+return t.data("timeago")
+}
+function r(n)
+{
+return i.inWords(e(n))
+}
+function e(n)
+{
+return (new Date).getTime() - n.getTime()
+}
+function t(t, i)
+{
+var r=n.isFunction(t) ? t(i) : t;
+return r.replace(/%d/i, i)
+}
+n.timeago = function(t)
+{
+return t instanceof Date ? r(t) : typeof t == "string" ? r(n.timeago.parse(t)) : r(n.timeago.datetime(t))
+};
+var i=n.timeago;
+window.ngText = window.ngText || {},
+n.extend(n.timeago, {
+settings: {
+refreshMillis: 6e4, allowFuture: !1, strings: {
+prefixAgo: null, prefixFromNow: null, suffixAgo: ngText.suffixAgo, suffixFromNow: ngText.suffixFromNow, ago: null, fromNow: null, seconds: ngText.timeAgoSeconds, minute: ngText.timeAgoMinute, minutes: ngText.timeAgoMinutes, hour: ngText.timeAgoHour, hours: ngText.timeAgoHours, day: ngText.timeAgoDay, days: ngText.timeAgoDays, month: ngText.timeAgoMonth, months: ngText.timeAgoMonths, year: ngText.timeAgoYear, years: ngText.timeAgoYears
+}
+}, inWords: function(i)
+{
+var r=this.settings.strings,
+s=r.prefixAgo,
+c=r.suffixAgo || r.ago;
+this.settings.allowFuture && (i < 0 && (s = r.prefixFromNow, c = r.suffixFromNow || r.fromNow), i = Math.abs(i));
+var f=i / 1e3,
+e=f / 60,
+o=e / 60,
+u=o / 24,
+h=u / 365,
+l=f < 45 && t(r.seconds, Math.round(f)) || f < 90 && t(r.minute, 1) || e < 45 && t(r.minutes, Math.round(e)) || e < 90 && t(r.hour, 1) || o < 24 && t(r.hours, Math.round(o)) || o < 48 && t(r.day, 1) || u < 30 && t(r.days, Math.floor(u)) || u < 60 && t(r.month, 1) || u < 365 && t(r.months, Math.floor(u / 30)) || h < 2 && t(r.year, 1) || t(r.years, Math.floor(h));
+return n.trim([s, l].join(" "))
+}, parse: function(t)
+{
+var i=n.trim(t),
+r=new Date(i);
+return isNaN(r.getTime()) ? (i = i.replace(/-/, "/").replace(/-/, "/"), i = i.replace(/T/, " ").replace(/Z/, " UTC"), i = i.replace(/([\+-]\d\d)\:?(\d\d)/, " $1$2"), new Date(i)) : r
+}, datetime: function(t)
+{
+var r=n(t).get(0).tagName.toLowerCase() == "time",
+u=r ? n(t).attr("datetime") : n(t).attr("title");
+return i.parse(u)
+}
+}),
+n.fn.timeago = function()
+{
+var n=this,
+t;
+return n.each(u), t = i.settings, t.refreshMillis > 0 && setInterval(function()
+{
+n.each(u)
+}, t.refreshMillis), n
+},
+document.createElement("abbr"),
+document.createElement("time")
+})(jQuery142);

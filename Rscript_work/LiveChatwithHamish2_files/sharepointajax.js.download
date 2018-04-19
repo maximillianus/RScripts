@@ -1,0 +1,711 @@
+﻿function MaxConnectUrlForMax(orgUrl) {
+    var subStr = orgUrl.substring(orgUrl.indexOf("//") + 2);
+    //return "http://maxconnect-staging.global.anz.com:50004" + subStr.substring(subStr.indexOf("/"));
+    //return "http://maxconnect-uat.globaltest.anz.com:50004" + subStr.substring(subStr.indexOf("/"));
+    return "http://maxconnect.global.anz.com:50004" + subStr.substring(subStr.indexOf("/"));
+}
+$ie8flag = null;
+function IsIE8() {
+    //"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0E; .NET4.0C)"
+    if ($ie8flag == null) {
+        $ie8flag = /MSIE.+Trident\/4.0/i.test(navigator.userAgent);
+    }
+    return $ie8flag;
+}
+
+function IsMaxSite() {
+    //return /https:[\/][\/]max-staging.global.anz.com[\/].+/i.test(window.location.href); //staging env
+    //return /https:[\/][\/]max-uat.globaltest.anz.com[\/].+/i.test(window.location.href); //UAT env
+    return /https:[\/][\/]max.global.anz.com[\/].+/i.test(window.location.href);
+}
+
+function IsFeedUrl(url) {
+    return /_vti_bin\/ng\/activityfeed.svc/i.test(url);
+}
+
+function IsMaxConnectDefaultZoneUrl(src) {
+    //return /https:[\/][\/]maxconnect-staging.global.anz.com[\/].+/i.test(src); //staging env
+    //return /https:[\/][\/]maxconnect-uat.globaltest.anz.com[\/].+/i.test(src); //UAT env
+    return /https:[\/][\/]maxconnect.global.anz.com[\/].+/i.test(src);
+}
+
+function ProcessSummary(xmlObj, $) {
+    $(xmlObj).find("summary").each(function () {
+        var sm = $(this).text();
+        var patt = new RegExp('(http(s?):\/\/(?!(maxconnect\.global\.anz\.com:50004)).+\.(?:png|jpg|jpeg|gif|bmp|tiff|tif))', 'igm');
+        //var patt = new RegExp('(http(s?):\/\/(?!max).+\.(?:png|jpg|jpeg|gif|bmp|tiff|tif))', 'igm');
+        var resultstr = [];
+        var result;
+
+        var previousIndex = 0;
+
+        while ((result = patt.exec(sm)) != null) {
+            var src = result[0];
+            if (IsMaxConnectDefaultZoneUrl(src)) {
+                if (!IsIE8()) {
+                    src = MaxConnectUrlForMax(src);
+                }
+            }
+            else if (IsIE8()
+                         && /^http:[\/][\/]/i.test(src)) {
+                var subStr = src.substring(src.indexOf("//") + 2);
+                src = subStr.substring(subStr.indexOf("/"));
+            }
+            if (result.index - previousIndex > 0) {
+                resultstr.push(sm.substring(previousIndex, result.index - previousIndex));
+            }
+            resultstr.push(src);
+            previousIndex = patt.lastIndex;
+        }
+
+        if (previousIndex > 0) {
+            resultstr.push(sm.substring(previousIndex));
+            $(this).text(resultstr.join(""));
+        }
+    });
+    return xmlObj;
+}
+
+function ProcessProfileUrl(xmlObj, $) {
+    $(xmlObj).find("author>PictureUrl").each(function () {
+        var sm = $(this).text();
+        if (IsMaxConnectDefaultZoneUrl(sm)) {
+            if (IsIE8()) {
+                $(this).text("/_layouts/images/O14_person_placeHolder_96.png");
+            } else {
+                $(this).text(MaxConnectUrlForMax(sm));
+            }
+        }
+    });
+    return xmlObj;
+}
+
+function ProcessLinkedPicture(xmlObj, $) {
+    var processLinkImage = function (str) {
+        if (IsMaxConnectDefaultZoneUrl(str)) {
+            return MaxConnectUrlForMax(str);
+        }
+        return str;
+    };
+    $(xmlObj).find("link[rel='enclosure']").each(function () {
+        var sm = $(this).text();
+        var thumbnail = $(this).attr("a:thumbnail");
+        thumbnail = processLinkImage(thumbnail);
+        $(this).attr("a:thumbnail", thumbnail);
+
+        var websize = $(this).attr("a:websize");
+        websize = processLinkImage(websize);
+        $(this).attr("a:websize", websize);
+
+        var fileicon = $(this).attr("a:fileiconurl");
+        fileicon = processLinkImage(fileicon);
+        $(this).attr("a:fileiconurl", fileicon);
+    });
+    return xmlObj;
+}
+
+function generatePageToken(oldtoken, lastitemdate) {
+    $splits = oldtoken.split(';');
+    $pageToken = [];
+ 
+    for (var i = 0; i < $splits.length; i++) {
+        switch (i) {
+            case 0:
+                $pageToken.push(parseInt($splits[i]) + 1);
+                break;
+            case 1:
+                $pageToken.push(parseInt($splits[i]));
+                break;
+            case 2:
+                $pageToken.push(lastitemdate);
+                break;
+            default:
+                $pageToken.push($splits[i]);
+                break;
+        }
+
+    }
+
+    return $pageToken.join(';');
+}
+
+function EnsureMore(xml, dataUrl) {
+    $ = jQuery || jQuery142;
+    try {
+
+        var parseXml = getXmlParser(xml);
+
+        if (parseXml) {
+            try {
+                var xmlObj = parseXml(xml);
+
+                if ($(xmlObj).find("pagingToken").length == 0) {
+                    $entryCount = $(xmlObj).find("entry").length;
+
+                    $oldPageToken = NG.GetQueryStringValue(dataUrl, "pagingToken");
+
+                    $pageSize = parseInt($oldPageToken.split(';')[1]);
+
+
+                    if ($entryCount == $pageSize) {
+                        $index = xml.indexOf('<entry>');
+                        $substr = xml.substr(0, $index);
+                        $xmlarray = [];
+
+                        $xmlarray.push($substr);
+
+                        $xmlarray.push('<pagingToken xmlns="uri://newsgator.com/social">');
+
+                        //Generating paging token
+                        $lastitem = $(xmlObj).find("entry:last > updated").text();
+                        $pagetoken = generatePageToken($oldPageToken, $lastitem);
+
+                        $xmlarray.push($pagetoken);
+                        $xmlarray.push('</pagingToken>');
+
+                        $xmlarray.push('<hasMoreItems xmlns="uri://newsgator.com/social">true</hasMoreItems>');
+                        $xmlarray.push(xml.substr($index));
+
+                        xml = $xmlarray.join('');
+                    }
+                }
+            }
+            catch (o)
+            { }
+
+        }
+
+    }
+    catch (e) { }
+
+    return xml;
+}
+
+function getXmlParser(xml) {
+    if (typeof window.DOMParser != "undefined") {
+        return function (xmlStr) {
+            return (new window.DOMParser()).parseFromString(xmlStr, "text/xml");
+        };
+    } else if (typeof window.ActiveXObject != "undefined" &&
+       new window.ActiveXObject("Microsoft.XMLDOM")) {
+        return function (xmlStr) {
+            var xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
+            xmlDoc.async = "false";
+            xmlDoc.loadXML(xmlStr);
+            return xmlDoc;
+        };
+    }
+    return null;
+}
+
+function PreProcessXML(xml) {
+    $ = jQuery || jQuery142;
+    try {
+        var parseXml = getXmlParser(xml);
+        if (parseXml) {
+            try {
+                var xmlObj = parseXml(xml);
+                xmlObj = ProcessSummary(xmlObj, $);
+                xmlObj = ProcessProfileUrl(xmlObj, $);
+                xmlObj = ProcessLinkedPicture(xmlObj, $);
+                $xmlnew = xmlObj.xml || xmlObj.documentElement.outerHTML;
+                if (!$xmlnew && window.XMLSerializer) {
+                    $xmlnew = (new XMLSerializer()).serializeToString(xmlObj.documentElement);
+                }
+
+                if ($xmlnew) {
+                    xml = $xmlnew;
+                }
+            }
+            catch (o)
+            { }
+
+        }
+
+    }
+    catch (e) { }
+
+    return xml;
+}
+
+typeof SharePoint == "undefined" && Type.registerNamespace("SharePoint"),
+typeof SharePointAjax == "undefined" && Type.registerNamespace("SharePointAjax"),
+SharePointAjax.navigator = {},
+SharePointAjax.navigator.$_uaMatch = function (n) {
+    n = n.toLowerCase();
+    var t = /(chrome)[ \/]([\w.]+)/.exec(n) || /(webkit)[ \/]([\w.]+)/.exec(n) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(n) || /(msie) ([\w.]+)/.exec(n) || n.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(n) || [];
+    return {
+        browser: t[1] || "", version: t[2] || "0"
+    }
+},
+SharePointAjax.navigator.sayswho = function () {
+    "use strict";
+    var t = SharePointAjax.navigator.$_uaMatch(navigator.userAgent),
+n = {};
+    return t.browser && (n[t.browser] = !0, n.version = t.version), n.chrome ? n.webkit = !0 : n.webkit && (n.safari = !0), n
+} (),
+SharePointAjax.SetDivContent = function (n, t, i, r) {
+    SharePointAjax.SetTagContent(n, "DIV", t, i, r)
+},
+SharePointAjax.SetSpanContent = function (n, t, i, r) {
+    SharePointAjax.SetTagContent(n, "SPAN", t, i, r)
+},
+SharePointAjax.SetTagContent = function (n, t, i, r, u, f) {
+    var o,
+e;
+    for (u == null && (u = ""), o = n.getElementsByTagName(t), e = 0; e < o.length; e++)
+        o[e].id == i && (o[e].innerHTML = r, o[e].style.display = u, f != null && (o[e].style.visibility = f))
+},
+SharePointAjax.FindParentControl = function (n, t) {
+    var i = n;
+    if (i != null) {
+        while (i != null && i.controlType != t)
+            if (i.parentElement)
+                i = i.parentElement;
+            else if (i.parentNode)
+                i = i.parentNode;
+            else if (i.controlType != t)
+                return null;
+        return i.controlType == t ? i : null
+    }
+},
+SharePointAjax.GetXmlRequester = function () {
+    var t,
+n,
+i;
+    if (window.XMLHttpRequest)
+        return new XMLHttpRequest;
+    for (t = ["Microsoft.XMLHTTP", "Msxml2.XMLHTTP.3.0", "Msxml2.XMLHTTP"], n = 0, i = t.length; n < i; n++)
+        try {
+            return new ActiveXObject(t[n])
+        }
+        catch (r) { }
+},
+SharePointAjax.SetAjaxRequester = function () {
+    var t = jQuery142 || jQuery,
+n = SharePointAjax.GetXmlRequester();
+    return "responseType" in n ? (n.onreadystatechange = function () {
+        if (n.readyState === 1)
+            try {
+                n.responseType = "msxml-document"
+            }
+            catch (t) { }
+    }, n) : t.ajaxSettings.xhr()
+},
+SharePointAjax.XmlTransform = function (n, t, i) {
+    var u,
+f,
+e,
+r,
+o;
+    if (typeof n == "string")
+        throw "Expected an XML DOM document.";
+    if (typeof t == "string")
+        throw "Expected an XSLT DOM document.";
+    u = jQuery142 || jQuery;
+
+    try {
+        i.innerHTML = "";
+        $flag = false;
+        if (IsMaxSite() || IsFeedUrl(n.URL)) {
+            var xml = n.xml || n.documentElement.outerHTML;
+            if (IsFeedUrl(n.URL)) {
+                if (xml.indexOf('<pagingToken') < 0) {
+                    xml = EnsureMore(xml, n.URL);
+                    $flag = true;
+                }
+            }
+
+            if (IsMaxSite()) {
+                xml = PreProcessXML(xml);
+                $flag = true;
+            }
+
+            if ($flag) {
+                if (typeof n.loadXML != "undefined") {
+                    n.loadXML(xml);
+                }
+                else if (typeof window.DOMParser != "undefined") {
+                    n = (new window.DOMParser()).parseFromString(xml, "text/xml")
+                }
+            }
+        }
+        //n.xml = PreProcessXML(n.xml);
+        if (window.XSLTProcessor)
+            o = new XSLTProcessor,
+o.importStylesheet(t),
+f = o.transformToFragment(n, document),
+i.innerHTML = "",
+i.appendChild(f),
+u && (SharePointAjax.navigator.sayswho.mozilla ? u(".xslDisableOutputEscaping", i).each(function () {
+    var n = u(this);
+    n.html(n.text())
+}).removeClass("xslDisableOutputEscaping") : u(".xslDisableOutputEscaping", i).removeClass("xslDisableOutputEscaping"));
+        else {
+            if ("transformNode" in n)
+                f = n.transformNode(t);
+            else if (window.XMLSerializer) {
+                e = (new XMLSerializer).serializeToString(n),
+r = new ActiveXObject("Msxml2.DOMDocument.6.0"),
+r.async = !1,
+r.loadXML(e);
+                try {
+                    f = r.transformNode(t)
+                }
+                catch (s) {
+                    r = new ActiveXObject("Msxml2.DOMDocument.3.0"),
+r.async = !1,
+r.loadXML(e),
+f = r.transformNode(t)
+                }
+            }
+
+            i.innerHTML = f; // ProcessHTMLForIE8(f),
+            u && u(".xslDisableOutputEscaping", i).removeClass("xslDisableOutputEscaping")
+        }
+    }
+    catch (s) {
+        throw s;
+    }
+},
+typeof SharePointAjax == "undefined" && Type.registerNamespace("SharePointAjax"),
+typeof Sys.Net.XMLDOM == "undefined" && typeof XMLDOM == "function" && (Sys.Net.XMLDOM = XMLDOM),
+typeof XMLDOM == "undefined" && typeof Sys.Net.XMLDOM == "function" && (XMLDOM = Sys.Net.XMLDOM),
+SharePointAjax.XmlControl = function (n) {
+    SharePointAjax.XmlControl.initializeBase(this, [n]),
+n.controlType = "XmlControl"
+},
+SharePointAjax.XmlControl.prototype = {
+    initialize: function () {
+        this.element = this.get_element(),
+SharePointAjax.XmlControl.callBaseMethod(this, "initialize"),
+this.xslUrl && this.LoadXsl(this.xslUrl),
+this.xmlUrl && this.LoadXml(this.xmlUrl)
+    }, _rendered: !1, _xml: null, _xsl: null, _visible: !0, element: null, interval: 0, timerID: null, xmlUrl: null, xslUrl: null, onrender: null, _active: !0, _etag: null, _clientID: null, clientProperties: null, renderComplete: !1, success: null, _xmlDoc: null, get_etag: function () {
+        return this._etag
+    }, set_etag: function (n) {
+        this._etag = n
+    }, get_clientProperties: function () {
+        return this.clientProperties
+    }, set_clientProperties: function (n) {
+        this.clientProperties = n
+    }, xmlLoaderDelegate: null, xslLoaderDelegate: null, lastModXml: null, lastModXmlSource: null, _setLastModXml: function (n, t) {
+        n != null && n != "" ? (this.lastModXml = n, this.lastModXmlSource = t) : (this.lastModXml = null, this.lastModXmlSource = null)
+    }, _setXmlDoc: function (n) {
+        if (this._xmlDoc = n, n && n.xml)
+            try {
+                this._xmlDoc = new XMLDOM(n.xml)
+            }
+            catch (t) {
+                Sys.Debug.fail("Could not create xmlDoc.")
+            }
+    }, Connection: null, XmlErrorHandler: function (n) {
+        Sys.Debug.trace(n),
+this._rendered || (this.element.innerHTML = n),
+this.success = !1,
+this.renderComplete = !0
+    }, get_clientID: function () {
+        return this._clientID
+    }, set_clientID: function (n) {
+        this._clientID = n
+    }, get_xmlUrl: function () {
+        return this.xmlUrl
+    }, set_xmlUrl: function (n) {
+        this.xmlUrl = n
+    }, get_xslUrl: function () {
+        return this.xslUrl
+    }, set_xslUrl: function (n) {
+        this.xslUrl = n
+    }, set_Xml: function (n, t, i) {
+        var u,
+r,
+f;
+        if (typeof n == "string") {
+            u = !1;
+            try {
+                if(IsFeedUrl(i)){
+                    if (n.indexOf('<pagingToken') < 0) {
+                        n = EnsureMore(n, i);
+                    }
+                }
+                r = new XMLDOM(n);
+            }
+            catch (e) {
+                u = !0
+            }
+            if (u || r.firstChild == null || r.firstChild.tagName == "parsererror" || r.nodeValue == null) {
+                f = "Expected XML from " + this.xmlUrl,
+this.XmlErrorHandler(f),
+this.success = !1,
+this.renderComplete = !0;
+                return
+            }
+            n = r
+        }
+        else
+        {
+            if(IsFeedUrl(i)){
+                    dataxml=n.xml||n.documentElement.outerHTML;
+                    if (dataxml.indexOf('<pagingToken') < 0) {
+                        dataxml = EnsureMore(dataxml, i);
+                        if (typeof n.loadXML != "undefined") {
+                            n.loadXML(dataxml);
+                        }
+                        else if (typeof window.DOMParser != "undefined") {
+                            n = (new window.DOMParser()).parseFromString(dataxml, "text/xml")
+                        }
+                    }
+                }
+        }
+        if (this.lastModXml != null && t != null && this.lastModXml == t && this.lastModXmlSource == i) {
+            Sys.Debug.trace("XmlControl: content not modified, skipping the render.");
+            return
+        }
+        this._setLastModXml(t, i),
+this._xml = n,
+this._setXmlDoc(n),
+this._xml != null & this._xsl != null && this.Render()
+    }, set_Xsl: function (n) {
+        this._xsl = n,
+this._xml != null & this._xsl != null && this.Render()
+    }, set_Visible: function (n) {
+        (this._visible = n, this.element != null) && (n ? (this.element.style.display = "block", this.parentElement != null && (this.parentElement.style.display = "block")) : (this.element.style.display = "none", this.parentElement != null && (this.parentElement.style.display = "none")))
+    }, add_init: function (n) {
+        if (n)
+            try {
+                n(this)
+            }
+            catch (t) {
+                Sys.Debug.trace(t)
+            }
+    }, remove_init: function () { }, add_render: function (n) {
+        n && this.get_events().addHandler("render", n)
+    }, remove_render: function (n) {
+        this.get_events().removeHandler("render", n)
+    }, add_prerender: function (n) {
+        this.get_events().addHandler("prerender", n)
+    }, remove_prerender: function (n) {
+        this.get_events().removeHandler("prerender", n)
+    }, set_refresh: function (n) {
+        this.timerID != null && (window.clearInterval(this.timerID), this.timerID = null),
+n > 0 && n < 1e3 && (Sys.Debug.trace("ERROR IN XmlControl: INTERVAL IS SET TOO LOW!!!!! "), Sys.Debug.traceDump(this), Sys.Debug.trace("ERROR IN XmlControl: INTERVAL IS SET TOO LOW!!!!! "), n = n * 1e3),
+this.interval = n,
+this.setRefreshTimeout()
+    }, get_refresh: function () {
+        return this.interval
+    }, get_Active: function () {
+        return this._active
+    }, set_Active: function (n) {
+        this._active = n,
+n ? this.clearRefreshTimeout() : this.setRefreshTimeout()
+    }, updateInterval: function () {
+        this._active && this.setRefreshTimeout()
+    }, _init: function (n) {
+        try {
+            var t = eval(n);
+            typeof t == "function" && t(this)
+        }
+        catch (i) {
+            Sys.Debug.trace("Could not execute the init function.")
+        }
+    }, set_OnRender: function (n) {
+        try {
+            var t = eval(n);
+            typeof t == "function" && (this.onrender = t)
+        }
+        catch (i) {
+            Sys.Debug.trace("Could not set the on render function.")
+        }
+    }, clearRefreshTimeout: function () {
+        this.timerID != null && (window.clearInterval(this.timerID), this.timerID = null)
+    }, setRefreshTimeout: function () {
+        if (this.clearRefreshTimeout(), this.interval > 0) {
+            var n = this;
+            this.timerID = window.setInterval(function () {
+                n.Reload()
+            }, this.interval)
+        }
+    }, parentElement: null, set_Parent: function (n) {
+        this.parentElement = n
+    }, Reload: function () {
+        this.xrefresh = !0,
+this.LoadXml(this.xmlUrl)
+    }, LoadXml: function (n) {
+        var t,
+i,
+r;
+        (this.xmlUrl != n && (this._rendered = !1), this.xmlUrl = n, n != null && n != "") && (this.renderComplete = !1, this.xmlLoaderDelegate == null && (this.xmlLoaderDelegate = Function.createDelegate(this, this.LoadXmlComplete)), t = SharePointAjax.GetXmlRequester(), t.open("GET", n, !0), i = (new Date).toISOString(), typeof t.setRequestHeader != "undefined" && (t.setRequestHeader("X-SPAJAX", "XmlControl.LoadXml"), this.xrefresh && (t.setRequestHeader("X-FORCE", "true"), this.xrefresh = null), t.setRequestHeader("X-REQUESTDATE", i), t.setRequestHeader("x-ng-webrequest", "1")), r = this, t.onreadystatechange = function () {
+            if (t.readyState === 1 && "responseType" in t)
+                try {
+                    t.responseType = "msxml-document"
+                }
+                catch (n) { }
+            t.readyState === 4 && r.LoadXmlComplete(t, i)
+        }, t.send())
+    }, LoadXmlComplete: function (n, t) {
+        var e,
+u,
+i,
+f,
+a,
+v,
+c;
+        if (n != null)
+            if (e = n.status, u = this.xmlUrl, e == 200)
+                try {
+                    if (i = n.getResponseHeader("ETag"), i == "" && (i = n.getResponseHeader("X-ETag")), i != null && i != "" && this.get_etag() == i) {
+                        Sys.Debug.trace("Skipping render as per ETag: " + u);
+                        return
+                    }
+                    this.set_etag(i);
+                    var y = n.getResponseHeader("LAST-MODIFIED"),
+r = n.getResponseHeader("X-REFRESH"),
+o = n.getResponseHeader("X-DEBUG"),
+s = n.getResponseHeader("X-TIME"),
+p = n.getResponseHeader("X-PARTIAL-RESPONSE") == "1",
+h = n.getResponseHeader("X-REQUESTDATE");
+                    if (this.xrefresh || r == "" || h == null || h == "" || h == t + "" ? p || (r = null) : Sys.Debug.trace("Expecting to do a reload!!! X-REFRESH:" + r), o != "" && o != null && Sys.Debug.trace("X-DEBUG: " + o), s != "" && s != null && Sys.Debug.trace("X-TIME: " + s), f = null, r != null & r != "")
+                        try {
+                            f = Number.parseInvariant(r)
+                        }
+                        catch (l) {
+                            Sys.Debug.fail("Could not parse the refresh interval.")
+                        }
+                    a = n.responseXML,
+this.set_Xml(a, y, u),
+this.element != null & !this.xrefresh & f != null & f != "NaN" && (this.xrefresh = !0, this.setRefreshTimeout())
+                }
+                catch (l) {
+                    Sys.Debug.fail(String.format("Could not process callback method in XML Component: {0}", l))
+                }
+            else {
+                v = n.statusText,
+c = String.format('ERROR: {0} replied "{1}" ({2}).', u, v, e),
+Sys.Debug.trace(c);
+                try {
+                    this.errorHandler && this.errorHandler(c, n)
+                }
+                catch (l) {
+                    Sys.Debug.trace(l.description)
+                }
+            }
+    }, LoadXsl: function (n) {
+        var t,
+i;
+        this.xslUrl = n,
+t = SharePointAjax.GetXmlRequester(),
+t.open("GET", n, !0),
+i = this,
+t.onreadystatechange = function () {
+    if (t.readyState === 1 && "responseType" in t)
+        try {
+            t.responseType = "msxml-document"
+        }
+        catch (n) { }
+    t.readyState === 4 && i.LoadXslComplete(t)
+},
+t.send()
+    }, LoadXslComplete: function (n) {
+        var t = n.responseXML;
+        this.set_Xsl(t)
+    }, errorHandler: function (n) {
+        this.element.innerHTML = n
+    }, Render: function () {
+        var u,
+i,
+n,
+r;
+        if (Sys.Debug.trace("XmlControl Render"), this._visible) {
+            this.renderComplete = !1,
+u = this.element,
+i = this.get_events().getHandler("prerender"),
+i && i(this, Sys.EventArgs.Empty);
+            try {
+                SharePointAjax.XmlTransform(this._xml, this._xsl, u),
+this.success = !0
+            }
+            catch (t) {
+                n = String.format("Could not transform data from {0}. \n", this.xmlUrl),
+t.description != null ? n = n + t.description : t.message != null && (n = n + t.message),
+Sys.Debug.trace(n),
+this.XmlErrorHandler(n),
+this.success = !1,
+this.renderComplete = !0
+            }
+            this.parentElement != null && (this.parentElement.style.display = ""),
+this._rendered = !0;
+            try {
+                this.onrender != null && this.onrender()
+            }
+            catch (t) {
+                Sys.Debug.trace("Could not call the XmlControl's onrender method: " + t.description),
+this.success = !1
+            }
+            r = this.get_events().getHandler("render"),
+r && r(this, Sys.EventArgs.Empty),
+this.renderComplete = !0
+        }
+    }, dispose: function (n) {
+        if (this.timerID != null)
+            try {
+                window.clearInterval(this.timerID)
+            }
+            catch (t) {
+                Sys.Debug.trace("Could not clear interval: " + t)
+            }
+        if (this.timeoutID != null)
+            try {
+                window.clearTimeout(this.timeoutID)
+            }
+            catch (t) {
+                Sys.Debug.trace("Could not clear timeout: " + t)
+            }
+        if (this.xmlLoaderDelegate && delete this.xmlLoaderDelegate, this.xslLoaderDelegate && delete this.xslLoaderDelegate, this._xml = null, this.element != null && !n)
+            try {
+                this.element.parentNode ? this.element.parentNode.removeChild(this.element) : this.element.parent && this.element.parent.removeChild(this.element)
+            }
+            catch (t) {
+                Sys.Debug.trace("Error in Xml Component dispose: " + t)
+            }
+        this.element = null,
+SharePointAjax.XmlControl.callBaseMethod(this, "dispose")
+    }
+},
+SharePointAjax.XmlControl.ReloadCollection = function (n) {
+    var i,
+r,
+t;
+    if (n != null)
+        for (i = 0; i < n.length; i++)
+            r = n[i],
+t = t = typeof r == "object" ? r : $get(r),
+t && t.XmlControl && (t.XmlControl.Reload(), t.XmlControl.timeoutID = null)
+    },
+SharePointAjax.XmlControl.Init = function () {
+    var t,
+i;
+    if (window.__XmlControlTemplates != "undefined" && window.__XmlControlTemplates != null) {
+        while (window.__XmlControlTemplates.length > 0) {
+            var n = Array.dequeue(window.__XmlControlTemplates),
+r = $get(n.elementID || n.clientID),
+u = [];
+            for (t in n.events)
+                n.events[t] != null && n.events[t] != "" && (u[t] = n.events[t]);
+            r && (i = $create(SharePointAjax.XmlControl, n.properties, u, n.references, r), i.clientID = n.properties.clientID, i.clientProperties = n.properties.clientProperties, n.OnInit != null && i._init(n.OnInit))
+        }
+        window.__XmlControlTemplates = null
+    }
+},
+SharePointAjax.XmlControl.registerClass("SharePointAjax.XmlControl", Sys.UI.Control),
+Sys.Application.add_load(SharePointAjax.XmlControl.Init),
+Sys.Application.notifyScriptLoaded(),
+typeof JSON == "undefined" && (JSON = function () { }),
+typeof JSON.stringify == "undefined" && (JSON.stringify = function (n) {
+    return Sys.Serialization.JavaScriptSerializer.serialize(n)
+}),
+Date.prototype.toISOString || (Date.prototype.toISOString = function () {
+    function n(n) {
+        return n < 10 ? "0" + n : n
+    }
+    return this.getUTCFullYear() + "-" + n(this.getUTCMonth() + 1) + "-" + n(this.getUTCDate()) + "T" + n(this.getUTCHours()) + ":" + n(this.getUTCMinutes()) + ":" + n(this.getUTCSeconds()) + "Z"
+});

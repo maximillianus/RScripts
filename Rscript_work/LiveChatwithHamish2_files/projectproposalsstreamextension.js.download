@@ -1,0 +1,53 @@
+﻿(function ($) {
+    var activityStreamDataElement = "";
+    var loaded = false;
+
+    function renderHeaders(container) {
+        $("div.ActivityType-NgProjectProposals", container).each(function (e) {
+            var element = $(this);
+            if (element.children(".ngPPHeader").length > 0)
+                return;
+
+            var label = NG.CA.COMMON.JavaScriptResource.Get("InnovationJs").ProjectProposalHeader;
+            $('<div class="ngPPHeader"><span>' + label + '</span></div>').prependTo(element);
+        });
+    };
+
+    function loadJsResources() {
+        NG.CA.COMMON.JavaScriptResource.Load("InnovationJs");
+    };
+
+    function attachDialogs(element) {
+        $('a[href*="ViewProjectProposal.aspx"]', element).click(doDialogClick);
+    }
+
+    function doDialogClick(e) {
+        var $link = $(this),
+            dialogOptions = {
+                url: $link.attr('href'),
+                allowMaximize: false,
+                showClose: true,
+                width: 1000,
+                title: $link.text()
+            };
+
+        e.preventDefault();
+        SP.UI.ModalDialog.showModalDialog(dialogOptions);
+        return false;
+    };
+
+    $(NG.Events).bind("activityStreamRendered activityStreamAllCommentsRendered", function (event, data) {
+        activityStreamDataElement = data.element;
+        loaded = false;
+
+        attachDialogs(activityStreamDataElement);
+        ExecuteOrDelayUntilScriptLoaded(loadJsResources, "sp.js");
+    });
+
+    $('body').bind('InnovationJsloaded', function (event) {
+        if (loaded) return;
+
+        renderHeaders(activityStreamDataElement);
+        loaded = true;
+    });
+}(jQuery142));

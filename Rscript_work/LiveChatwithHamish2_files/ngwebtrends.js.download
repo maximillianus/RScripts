@@ -1,0 +1,20 @@
+Type.registerNamespace("NG"),
+function(n)
+{
+n(document).ready(function()
+{
+typeof NG.Events == "undefined" && (NG.Events = n(document.createElement("DIV"))),
+NG.Events.bind("like unlike comment askQuestion answerQuestion uploadFile deleteComment markAnswer unmarkAnswer vote unvote microblog directMessage followUp unFollowUp joinCommunity leaveCommunity poll deletepoll", function(n, t)
+{
+if (typeof Webtrends != "undefined")
+{
+var i={"DCSext.NGEvent": n.Type || n.type};
+t && t.eventId && (i["DCSext.NGEventId"] = t.eventId),
+t && t.eventText && (i["DCSext.NGEeventText"] = t.eventText.substr(0, 100)),
+t === Array && t[0] && t[0].eventId && (i["DCSext.NGEventId"] = t[0].eventId),
+t === Array && t[0] && t[0].eventText && (i["DCSext.NGEeventText"] = t[0].eventText.substr(0, 100)),
+Webtrends.multiTrack({args: i})
+}
+})
+})
+}(jQuery142, window);

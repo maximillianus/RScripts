@@ -1,0 +1,306 @@
+window.ngUserProfiles = window.ngUserProfiles || {},
+function(n)
+{
+var t={
+init: function()
+{
+function i(t, i)
+{
+n(NG.Events).trigger(t, i)
+}
+if (window.ngMiniProfileEnabled)
+{
+var t=500,
+r="<div class='ngMiniProfilePopup ngMiniProfileShadow ngWrapper' style='visibility:hidden'><div style='visibility:hidden'><div class='ngMiniInfoHolder'><a href='' target='_parent' class='ngMiniProfileIconLink'><img src='' class='ngMiniProfileIcon' alt='' /><\/a><div><span class='ngPresenceSpan'><\/span><span class='ngMiniName'><\/span><span class='ngMiniRemoteSource'><\/span><\/div><div class='ngMiniShortProperties'><\/div><div class='ngMiniAboutMe ngMiniLongProperties wordwrap'><\/div><div class='ngMiniClear'><div class='ngMvpCommunities'><div class='label'><\/div><\/div><div class='ngMiniCommonColleagues'><div class='label'><\/div><div><ul><\/ul><\/div><\/div><div class='ngMiniBadges'><div class='label'><\/div><div><ul><\/ul><\/div><\/div><\/div><\/div><\/div><div class='ngMiniActionBar' style='visibility:hidden'><a target='_parent' href='javascript:void(0);' userId='' class='ngAddColleague ngMiniAddColleagueLink localtext' text='AddColleague'><\/a><a target='_parent' href='' class='ngSendMail localtext' text='SendEmailLabel'><\/a><\/div><div class='ngAskUserAboutBar' style='display:none'><div class='ngAskUser'><\/div><\/div><div class='ngInfluenceScore' style='display:none;' title='" + ngText.InfluenceMiniProfileTitle + "'><\/div><\/div>";
+return this.each(function()
+{
+var f=n(this),
+u=this,
+a=!1,
+s=null,
+h=null,
+e=f.attr("authorId"),
+c,
+o,
+l,
+v;
+e && e == ngUserId || e && e == 0 || (c = f.attr("accountname") || NG.GetQueryStringValue(f.attr("href"), "accountname"), o = null, e && e.length > 0 ? o = window.spWebUrl + "/_vti_bin/ng/userprofile.svc/" + e + "/" : (l = n(this).parents(".ngActivityRow").attr("remoteSourceId") != null, l || c == "" ? l && (v = n(this).parents(".ngActivityRow").attr("remoteSourceId"), o = window.spWebUrl + "/_vti_bin/ng/remote/userprofile." + v + ".ashx/?useraccount=" + encodeURIComponent(c)) : o = window.spWebUrl + "/_vti_bin/ng/userprofile.svc/?useraccount=" + encodeURIComponent(c)), o) && (f.attr("title", ""), f.hover(function()
+{
+u.show()
+}, function()
+{
+u.hide()
+}), u.show = function()
+{
+if (s && clearTimeout(s), h && clearTimeout(h), !a)
+{
+var i=function()
+{
+var t,
+s,
+i,
+h;
+if (n(".ngMiniProfilePopup").remove(), t = n(r), NG.Localize(t), s = f.offset(), t.css({
+top: s.top + f.height(), left: s.left
+}).appendTo(n("body")), t.hover(function()
+{
+u.show()
+}, function()
+{
+u.hide()
+}), a = !0, e = f.attr("authorId"), i = null, e != "" && (i = ngUserProfiles[f.attr("authorId")]), !i)
+for (h in ngUserProfiles)
+if (n(ngUserProfiles[h]).children("User").children("AccountName").text() == decodeURIComponent(c))
+{
+i = ngUserProfiles[h];
+break
+}
+i ? u.setContent(i, t) : n.ajax({
+type: "GET", url: o, success: function(n)
+{
+u.setContent(n, t)
+}, error: function()
+{
+u.remove(),
+Sys.Debug.trace("Could not retrieve profile")
+}
+})
+};
+h = setTimeout(i, t)
+}
+}, u.getMvpCommunitiesCachedAjaxCall = n.ngCreateCache(function(t, i)
+{
+l || n.ajax({
+url: i, type: "GET", context: document.body, dataType: "json"
+}).done(function(n)
+{
+t.resolve(n)
+}).fail(function()
+{
+t.resolve(!1),
+Sys.Debug.trace("Could not retrieve mvp communities")
+})
+}), u.setMvpCommunitiesForUser = function()
+{
+var t=String.format("{0}/_vti_bin/ng/userprofile.svc/GetMvpCommunities/{1}/", window.spWebUrl, e);
+n.when(u.getMvpCommunitiesCachedAjaxCall(t)).done(function(n)
+{
+u.renderMvpCommunities(n)
+})
+}, u.renderMvpCommunities = function(t)
+{
+var i,
+u,
+r,
+e;
+if (t && typeof t.Communities != "undefined")
+{
+if (i = t.Communities, i && i.length > 0)
+u = String.format(ngText.CommunitiesMvpLabelFormat, t.MvpLabel),
+n(".ngMvpCommunities .label").text(u),
+n(".ngMvpCommunities .label").show();
+else
+{
+n(".ngMvpCommunities .label").hide();
+return
+}
+for (r = 0; r < i.length; r++)
+{
+var o=i[r].CommunityName,
+s=i[r].CommunityUrl,
+f="";
+r + 1 != i.length && (f = ","),
+e = String.format("<a href='{1}' class='communityLink'>@[{0}]{2}<\/a>", o, s, f),
+n(".ngMvpCommunities").append(e)
+}
+}
+}, u.setContent = function(t, r)
+{
+var e,
+o,
+c,
+a,
+v,
+w,
+b,
+d,
+g,
+nt,
+tt;
+if (t == null)
+{
+u.remove();
+return
+}
+e = n(t).children("User:first"),
+o = e.children("UserId").text() + e.children("RemoteSourceId").text(),
+f.attr("authorId", o),
+ngUserProfiles[o] == null && (ngUserProfiles[o] = t),
+c = e.children("Uri").text(),
+a = e.children("PictureUrl").text(),
+n(".ngMiniProfileIcon", r).attr("src", a).parent().attr("href", c),
+v = e.children("Name").text(),
+n(".ngMiniName", r).html(String.format("<a target='_parent' href='{0}'>{1}<\/a>", c, v)),
+e.children("InfluenceScore").length > 0 && n(".ngInfluenceScore", r).text(e.children("InfluenceScore").text()).show();
+var h=e.children("RemoteSource"),
+y=null,
+p=null,
+s=h.length == 1;
+s && (h = h.text(), y = e.children("RemoteSourceUrl").text(), p = e.children("RemoteSourceId").text(), n(".ngMiniRemoteSource", r).html(String.format(" [Source: <a target='_parent' href='{0}'>{1}<\/a>]", y, h))),
+w = /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g,
+b = /(([a-z0-9*._+]){1,}\@(([a-z0-9]+[-]?){1,}[a-z0-9]+\.){1,}([a-z]{2,4}|museum)(?![\w\s?&.\/;#~%"=-]*>))/g,
+e.children("AdditionalMiniProfileProperties").children().each(function(t, i)
+{
+var o=n(n(i).children()[0]).text(),
+f=n(n(i).children()[1]).text(),
+e;
+f.length > 50 && (f = f.substring(0, 50) + "...");
+var s=n(".ngMiniShortProperties", r),
+h=n(document.createElement("span")).addClass("ngMiniShortPropertiesName").html(o + ": "),
+u=f.replace(/;/gi, ", ").replace(b, '<a href="mailto:$1">$1<\/a>').replace(w, '<a href="$1">$1<\/a> ');
+u.endsWith(", ") && (u = u.slice(0, u.length - 2)),
+e = n(document.createElement("span")).addClass("ngMiniShortPropertiesValue").html(u),
+s.append(h).append(e).append(document.createElement("br"))
+}),
+u.setMvpCommunitiesForUser();
+var k=e.children("IsColleague").text(),
+it=k == "true" || k == "",
+l=e.children("WorkEmail").text(),
+rt=e.children("SipAddress").text();
+n(".ngPresenceSpan", r).attr({
+email: l, sip: rt
+}),
+NG.SetupPresence(r),
+n(".ngAddColleague", r).attr("userId", o).css("display", s || it || ngUserId == o ? "none" : "").click(NG.AddColleague),
+n(".ngSendMail", r).attr("href", "mailto:" + l).css("display", l.length > 0 ? "" : "none"),
+d = e.children("ArrayOfColleague"),
+s || d.length != 0 ? s || u.setCommonColleagues(ngUserProfiles[o], r) : (g = s ? String.format("{0}/_vti_bin/ng/remote/userprofile.{1}.ashx/CommonColleagues/{2}/", window.spWebUrl, p, o) : String.format("{0}/_vti_bin/ng/userprofile.svc/CommonColleagues/{1}/", window.spWebUrl, o), n.ajax({
+type: "GET", url: g, success: function(t)
+{
+n(ngUserProfiles[o]).children("User:first").append(n(t).find("ArrayOfColleague")),
+u.setCommonColleagues(ngUserProfiles[o], r)
+}, error: function()
+{
+Sys.Debug.trace("Could not retrieve common colleagues")
+}
+})),
+s || (window.spotlightInstalled && (nt = e.find("EarnedBadge"), nt.length == 0 ? n.ajax({
+type: "GET", url: String.format("{0}/_vti_bin/ng/spotlight/spotlightservice.svc/Users/RecentEarnedBadges/?accountName={1}", window.spWebUrl, encodeURIComponent(n(ngUserProfiles[o]).children("User:first").children("AccountName").text())), dataType: "xml", success: function(t)
+{
+n(ngUserProfiles[o]).children("User:first").append(n(t.firstChild.firstChild).find("EarnedBadge")),
+n(ngUserProfiles[o]).children("User:first").find("EarnedBadge").length == 0 ? u.noMiniBadges(r) : u.setMiniBadges(ngUserProfiles[o], r)
+}, error: function()
+{
+Sys.Debug.trace("Could not retrieve mini badges. Recognition module may not be installed."),
+u.noMiniBadges(r)
+}
+}) : u.setMiniBadges(ngUserProfiles[o], r)), f.attr("data-ng-askMeAboutThis") ? (tt = f.attr("data-ng-askMeAboutThis"), u.showAskUserAboutBar(tt, r)) : n(".ngAskUserAboutBar", r).css("display", "none")),
+setTimeout(function()
+{
+n(".ngMiniProfilePopup, .ngMiniProfilePopup > *").css("visibility", "visible"),
+NG.AdjustPopupOnScreen(r),
+i("showMiniProfile")
+}, 100)
+}, u.showAskUserAboutBar = function(t, i)
+{
+var e=ngText.AskQuestion,
+r=n(".ngAskUser", i),
+u=n.parseJSON(f.attr("data-ng-rawdata"));
+r.empty().append(n('<a target="_parent" href="javascript:void(0)"><\/a>').text(String.format(e, u.Name, t)).click(function()
+{
+var i=n('<textarea class="ngPostInput" maxlength="1000" style="width:290px;"><\/textarea>'),
+f=n(String.format('<input type="button" value="{0}" style="vertical-align:top" />', ngText.AskLabel));
+r.empty().append(n('<div style="position:relative"><\/div>').append(i).append(f)),
+NG.InputControl(i, f, function()
+{
+var f=(/\s/.test(t) ? "#[" + t + "]" : "#" + t) + " " + i.val().trim();
+n.ajax({
+type: "POST", contentType: "application/x-www-form-urlencoded", url: String.format("{0}/_vti_bin/ng/activityfeed.svc/{1}/ask/", window.spWebUrl, u.RecordId), data: f, success: function()
+{
+r.empty(),
+new NG.Tooltip(r, ngText.UpdateSaved, 2500, "top"),
+NG.NewsFeedReload()
+}, error: function(n)
+{
+new NG.Tooltip(i.parent(), NG.GetDefaultErrorMessage(n.status), 5e3, "top")
+}
+})
+}, {
+autoGrow: !0, suppressEnter: !0
+})
+})),
+n(".ngAskUserAboutBar", i).show()
+}, u.setMiniBadges = function(t, i)
+{
+var e=ngText.MiniBadge;
+n(".ngMiniBadges .label", i).html(ngText.MiniBadge);
+var r=n(".ngMiniBadges ul", i),
+u=n(t).children("User:first").children("Uri").text(),
+f=n(t).children("User:first").find("EarnedBadge");
+f.each(function()
+{
+var e=String.format("{0}/_layouts/ng/spotlight/badge.ashx?bid={1}&maxsize=28", window.spWebUrl, n(this).find("BadgeId").text()),
+i=n(this).children("Rule").find("CurrentCultureName").text(),
+t,
+f;
+i.length == "" && (i = n(this).children("Badge").find("CurrentCultureName").text()),
+t = n(this).children("Rule").find("CurrentCultureDescription").text(),
+t.length == "" && (t = n(this).children("Badge").find("CurrentCultureDescription").text()),
+f = n(String.format('<li><a target="_parent" href="{0}" title="{1} - {2}"><img src="{3}" alt="{1}"/><\/a><\/li>', u, i, t, e)),
+r.append(f)
+})
+}, u.noMiniBadges = function(t)
+{
+n(".ngMiniBadges", t).hide(),
+n(".ngMiniCommonColleagues", t).width(260)
+}, u.setCommonColleagues = function(t, i)
+{
+var r=n(t).find("ArrayOfColleague").children("Colleague"),
+f=n(".ngMiniCommonColleagues ul", i),
+u=ngText.CommonColleaguesLabelNone;
+r.length == 1 ? u = ngText.CommonColleaguesLabelSingular : r.length > 1 && (u = String.format(ngText.CommonColleaguesLabelPlural, r.length)),
+n(".ngMiniCommonColleagues .label").html(u),
+r.each(function(t)
+{
+if (t == 7)
+return !1;
+var i=n(this).children("PictureUrl").text(),
+r=n(this).children("Name").text(),
+u=n(this).children("Uri").text(),
+e=n(String.format('<li><a target="_parent" href="{0}" title="{2}"><img src="{1}" alt="{2}"/><\/a><\/li>', u, i, r));
+f.append(e)
+})
+}, u.hide = function()
+{
+s && clearTimeout(s),
+h && clearTimeout(h),
+s = setTimeout(function()
+{
+u.remove()
+}, t),
+i("hideMiniProfile")
+}, u.remove = function()
+{
+n(".ngMiniProfilePopup").remove(),
+a = !1
+})
+})
+}
+}, destroy: function()
+{
+return this.each(function()
+{
+n(this).unbind("mouseenter mouseleave")
+})
+}
+};
+n.fn.miniProfile = function(n)
+{
+if (t[n])
+return t[n].apply(this, Array.prototype.slice.call(arguments, 1));
+if (typeof n != "object" && n)
+Sys.Debug.trace("Method " + n + " does not exist on jQuery.miniProfile");
+else
+return t.init.apply(this, arguments)
+}
+}(jQuery142);

@@ -1,0 +1,539 @@
+Type.registerNamespace("NG"),
+function(n, t, i)
+{
+var r={
+init: function(t)
+{
+var i=n.extend({}, n.fn.setuptour.defaults, t),
+u=n(this).data("options", i);
+return this.each(function()
+{
+if (n(i.tutorialContent).length !== 0)
+{
+r.initalizeSteps.call(u);
+var t=function()
+{
+n.ajax({
+type: "GET", url: i.xmlUrl, dataType: "xml", success: function(n)
+{
+r.handleNewStateXml.call(u, n)
+}
+})
+};
+NG.LoadCurrentUserProfile(t)
+}
+})
+}, show: function()
+{
+var u=this,
+i=this.data("options");
+i.dialogButtons[ngText.CloseVerb] = function()
+{
+n(this).dialog("close")
+},
+n(i.tutorialContent).dialog({
+width: i.dialogWidth, resize: "auto", modal: !0, dialogClass: "ng-ui-wrapper", title: ngText.NewUserHeader, buttons: i.dialogButtons, create: function()
+{
+n(i.dialogButtonContainer).empty(),
+n(function()
+{
+n(t).resize(function()
+{
+if ($dialog = n(i.tutorialContent).parent(), $dialog.height() > n(t).height() || $dialog.height() < i.dialogMaxHeight)
+{
+var r=n(t).height() * .95;
+$dialog.height(r > i.dialogMaxHeight ? i.dialogMaxHeight : r)
+}
+else
+$dialog.height("auto");
+n(i.tutorialContent).css("height", $dialog.height() - 10 - n(i.tutorialContent).position().top - n(".ui-dialog-buttonset", $dialog).height() - n(".ui-dialog-titlebar", $dialog).height())
+})
+})
+}, open: function()
+{
+var e,
+f;
+$dialog = n(i.tutorialContent).parent(),
+e = n(i.dialogButtonContainer).parent(),
+e.css({
+position: "absolute", right: "0px", bottom: "0px"
+}),
+($dialog.height() > n(t).height() || $dialog.height() < i.dialogMaxHeight) && (f = n(t).height() * .95, $dialog.height(f > i.dialogMaxHeight ? i.dialogMaxHeight : f)),
+(i.showGuiders || i.showFinish) && n(i.dialogButtonContainer).prepend(n('<button type="button" />').attr({
+id: "steps-finish", "class": "ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only finish", style: "display:none;", role: "button", "aria-disabled": !1
+}).html('<span class="ui-button-text">' + (i.showGuiders ? ngText.StepFinishVerb : ngText.StepFinishTitle) + "<\/span>")),
+n(i.tutorialSteps).stepy({
+finishButton: i.showGuiders || i.showFinish, titleClick: i.titleClick, next: function(t)
+{
+var f=parseInt(t - 2),
+e=tutorialSteps[f],
+i=n("#newUserSteps-step-" + f);
+if (i.find("iframe").length == 0)
+{
+if (n.trim(n("textarea", i).val() || "").length < 1)
+return n(".notification", i).length < 1 && n('<span class="notification"><span class="star-white-24"><\/span>' + String.format(ngText.NewUserValidationText, e.name) + "<\/span>").appendTo(n("p", i)), !1;
+n(".notification", i).remove()
+}
+return r.updateProfileAndSave.call(u, n("#newUserSteps-step-" + f), tutorialSteps[f]), e.nextTrigger ? e.nextTrigger(i) : void 0
+}, back: function(t)
+{
+var r=parseInt(t - 1),
+f=tutorialSteps[r].id,
+u;
+f === "11" ? (n(i.dialogButtonContainer).hide(), u = n(i.tutorialSteps).find(i.tutorialSteps + "-step-" + r + ".step").find("p"), u.empty(), u.html(n(tutorialSteps[r].getContent())), tutorialSteps[r].postRender && tutorialSteps[r].postRender(u)) : n(i.dialogButtonContainer).show()
+}, finish: function(t)
+{
+var r=parseInt(t - 1),
+u=tutorialSteps[r],
+f=n("#newUserSteps-step-" + r);
+u.finishTrigger && u.finishTrigger(f),
+i.showGuiders && n(this).guiders({
+guiderStartAtId: i.guiderStartAtId, appendGuiderTo: i.appendGuiderTo, guiders: i.guiders
+}),
+setTimeout(function()
+{
+n(i.tutorialContent).dialog("close")
+}, 100)
+}, select: function(t)
+{
+var r=parseInt(t - 1),
+u=tutorialSteps[r].id,
+e=tutorialSteps[r],
+f=n(i.tutorialSteps).find(i.tutorialSteps + "-step-" + r + ".step").find("p.step-content");
+u === "11" || u === "23" ? (u === "11" && n(i.dialogButtonContainer).hide(), f.empty(), f.append(n(tutorialSteps[r].getContent())), tutorialSteps[r].postRender && tutorialSteps[r].postRender(f)) : n(i.dialogButtonContainer).show(),
+e.selectTrigger && e.selectTrigger()
+}, buttonTarget: n(".ui-dialog-buttonset"), backLabel: "&lt; " + ngText.StepBackVerb, nextLabel: ngText.StepSaveContinueVerb + " &gt;"
+}),
+n(i.tutorialSteps).stepy("step", i.firstStep),
+n(i.tutorialContent).css("height", $dialog.height() - 10 - n(i.tutorialContent).position().top - n(".ui-dialog-buttonset", $dialog).height() - n(".ui-dialog-titlebar", $dialog).height())
+}, close: function()
+{
+n(this).dialog("destroy"),
+n(this).html(""),
+i.onCloseCallback()
+}
+})
+}, handleNewStateXml: function(i)
+{
+var f=this,
+e=this.data("options"),
+u;
+tutorialSteps = [],
+n(i).find("TutorialStep").each(function()
+{
+var t=n(this),
+i=t.find("id").text(),
+r=steps[i],
+u=n.extend(r, {
+isComplete: t.find("isComplete").text() == "true", id: i, order: parseInt(t.find("order").text(), 10)
+});
+tutorialSteps.push(u)
+}),
+typeof t.ngIsLookout != "undefined" && t.ngIsLookout ? (u = n.extend(steps["1000"], {
+name: ngText.StepFinishTitle, id: 1e3, order: parseInt(1e3), final: !0
+}), tutorialSteps.push(u)) : e.showFinish && (u = n.extend(steps["1001"], {
+name: ngText.StepFinishTitle, id: 1001, order: parseInt(1001), final: !0
+}), tutorialSteps.push(u)),
+tutorialSteps.sort(function(n, t)
+{
+return n.order == t.order ? 0 : n.order < t.order ? -1 : 1
+}),
+n(e.tutorialContent).append(r.buildTutorial.call(f, tutorialSteps)),
+r.show.call(f)
+}, updateProfileAndSave: function(t, i)
+{
+var f=this,
+e=this.data("options"),
+u=n.trim(n("textarea", t).val() || "");
+u.length > 0 && (ngUserProfile[i.profileFieldName] = u, r.saveProfileUpdates.call(f, ngUserProfile, "setProfileStepCompleted", i))
+}, buildTutorial: function(t)
+{
+var o=this,
+i=this.data("options"),
+f=n("<div>").attr("id", "newUserSteps"),
+u,
+r,
+e=0;
+return tutorialSteps = n.grep(t, function(t)
+{
+return t.stepType === i.inlineFieldType ? (e++, t.order = e, i.firstStep = !t.isComplete && t.order < i.firstStep ? t.order : i.firstStep, u = n("<fieldset />").attr("title", t.final ? t.name : ngText.StepVerb + " " + t.order), r = n('<p class="step-content" />'), (t.id != 23 && t.id != 11 || t.order == i.firstStep) && r.append(n(t.getContent())), u.append(n("<legend />").text(t.final ? "" : t.name)), u.append(r).append("<br/>"), f.append(u), r.html().indexOf("iframe") < 0 && !t.final, t.postRender && t.postRender(r), !0) : !1
+}), tutorialSteps.length === i.firstStep && (i.titleClick = !0), f
+}, stepCompleted: function(t)
+{
+var r=this,
+i=this.data("options");
+n.ajax({
+type: "POST", url: i.xmlUrl + "complete/" + t.id + "/", success: function(){}, error: function()
+{
+Sys.Debug.trace("Could not set tutorial step to completed")
+}
+}),
+t.isComplete = !0
+}, undoStep: function(t)
+{
+var r=this,
+i=this.data("options");
+n.ajax({
+type: "POST", url: i.xmlUrl + "undo/" + t.id + "/", success: function(){}, error: function()
+{
+Sys.Debug.trace("Could not undo tutorial step")
+}
+}),
+t.isComplete = !1
+}, getInlineField: function(i, r)
+{
+var s=this,
+o=this.data("options"),
+u,
+f,
+e;
+return ngUserProfile = t.ngUserProfile, ngUserProfile ? (u = n(o.inlineFieldHtml), f = "", ngUserProfile[i.profileFieldName] && (f = n("<div><\/div>").html(ngUserProfile[i.profileFieldName]).text()), u.filter("textarea").val(f), u.filter(".ngButton").val(ngText.SaveVerb), e = u.filter(".fieldIsListWarning"), i.listField ? e.html(o.resx.FieldIsListWarning) : e.remove(), r && $hintPopup.length > 0 && n(".ngPopupContent", $hintPopup).empty().append(u), u) : void 0
+}, saveProfileUpdates: function(t, i, u)
+{
+var f=this,
+e=this.data("options");
+n.ajax({
+type: "POST", url: "/_vti_bin/NG/UserProfile.svc/" + u.profileFieldName + "/", data: JSON.stringify(t), contentType: "application/json; charset=utf-8", success: function()
+{
+r[i].call(f, !0, u)
+}, error: function()
+{
+r[i].call(f, !1, u)
+}
+})
+}, setProfileStepCompleted: function(n, t)
+{
+var i=this,
+u=this.data("options");
+r.stepCompleted.call(i, t, !0, n)
+}, initalizeSteps: function()
+{
+var u=this,
+i=this.data("options");
+steps = {
+"11": {
+stepType: i.inlineFieldType, getContent: function()
+{
+var f=this,
+o=ngSharepointVersion == 15 ? "/_layouts/15/ng15/pages/ProfileImageUpload.aspx?IsDlg=1" : "/_layouts/ng/pages/ProfileImageUpload.aspx?IsDlg=1",
+e=n("<div>" + i.resx.Step11Help + "<\/div><div class='frameHolder' style='width:98%;'><span class='ngLoading'><\/span><iframe style='width:100%;height:100%;min-height:350px;visibility:hidden' frameborder='0' src='" + o + (typeof ngIsMetro != "undefined" && ngIsMetro ? "&dashboard=1" : "") + "'><\/iframe><\/div>");
+return t.onNgProfileImageUploadClosed = function(t)
+{
+t && (r.stepCompleted.call(u, f, !0), n("#newUserSteps-step-" + (f.order - 1)).find("p:first").html("").append(e), n(i.tutorialSteps).stepy("step", f.order + 1), n(i.dialogButtonContainer).show())
+}, e
+}, postRender: function(t)
+{
+var r=n("span.ngLoading", t),
+i=n("iframe", t);
+i.bind("load", function()
+{
+r.remove(),
+i.css("visibility", "visible")
+})
+}
+}, "14": {
+stepType: i.inlineFieldType, profileFieldName: "Responsibilities", listField: !0, getContent: function()
+{
+var f=this;
+return t.onNgRESPONSIBILITIESClosed = function(t, e)
+{
+t && (ngUserProfile[f.profileFieldName] = e, r.stepCompleted.call(u, f, !0), n(i.tutorialSteps).stepy("step", f.order + 1))
+}, n("<div>" + i.resx.Step14Help + "<\/div><div class='frameHolder' style='width:100%;'><span class='ngLoading'><\/span><iframe style='width:100%; height:auto;visibility:hidden' frameborder='0' src='/_layouts/ng/pages/ProfileProperty.aspx?IsDlg=1&property=responsibilities'><\/iframe><\/div>")
+}, postRender: function(t)
+{
+var u=n("span.ngLoading", t),
+r=n("iframe", t),
+e=this;
+r.bind("load", function()
+{
+u.remove(),
+r.css({
+visibility: "visible", height: "auto"
+}),
+r.contents().find(".ngSaveHolder").hide(),
+r.contents().find(".ngWrapper").css("height", "auto"),
+r.contents().find(".s4-workspace").css("overflow", "visible"),
+f(function()
+{
+n(i.tutorialSteps).stepy("step", e.order + 1)
+}, !1, i.autocompleteOptions, r, t)
+})
+}, nextTrigger: function(t)
+{
+var i=n("iframe", t);
+return i.contents().find("form").submit(), !1
+}, finishTrigger: function(t)
+{
+var i=n("iframe", t);
+i.contents().find("form").submit()
+}
+}, "15": {
+stepType: i.inlineFieldType, profileFieldName: "AboutMe"
+}, "16": {
+stepType: i.inlineFieldType, profileFieldName: "Interests", getContent: function()
+{
+var f=this;
+return t.onNgINTERESTSClosed = function(t, e)
+{
+t && (ngUserProfile[f.profileFieldName] = e, r.stepCompleted.call(u, f, !0), n(i.tutorialSteps).stepy("step", f.order + 1))
+}, n("<div>" + i.resx.Step16Help + "<\/div><div class='frameHolder' style='width:100%;'><span class='ngLoading'><\/span><iframe style='width:100%;height:auto;visibility:hidden' frameborder='0' src='/_layouts/ng/pages/ProfileProperty.aspx?IsDlg=1&property=interests'><\/iframe><\/div>")
+}, postRender: function(t)
+{
+var u=n("span.ngLoading", t),
+r=n("iframe", t),
+e=this;
+r.bind("load", function()
+{
+u.remove(),
+r.css("visibility", "visible"),
+r.contents().find(".ngSaveHolder").hide(),
+r.contents().find(".ngWrapper").css("height", "auto"),
+r.contents().find(".s4-workspace").css("overflow", "visible"),
+f(function()
+{
+n(i.tutorialSteps).stepy("step", e.order + 1)
+}, !1, i.autocompleteOptions, r, t)
+})
+}, nextTrigger: function(t)
+{
+var i=n("iframe", t);
+return i.contents().find("form").submit(), !1
+}, finishTrigger: function(t)
+{
+var i=n("iframe", t);
+i.contents().find("form").submit()
+}
+}, "17": {
+stepType: i.inlineFieldType, profileFieldName: "Skills", getContent: function()
+{
+var f=this;
+return t.onNgSKILLSClosed = function(t, e)
+{
+t && (ngUserProfile[f.profileFieldName] = e, r.stepCompleted.call(u, f, !0), n(i.tutorialSteps).stepy("step", f.order + 1))
+}, n("<div>" + i.resx.Step17Help + "<\/div><div class='frameHolder' style='width:100%;'><span class='ngLoading'><\/span><iframe style='width:100%;height:auto;visibility:hidden' frameborder='0' src='/_layouts/ng/pages/ProfileProperty.aspx?IsDlg=1&property=skills'><\/iframe><\/div>")
+}, postRender: function(t)
+{
+var u=n("span.ngLoading", t),
+r=n("iframe", t),
+e=this;
+r.bind("load", function()
+{
+u.remove(),
+r.css("visibility", "visible"),
+r.contents().find(".ngSaveHolder").hide(),
+r.contents().find(".ngWrapper").css("height", "auto"),
+r.contents().find(".s4-workspace").css("overflow", "visible"),
+f(function()
+{
+n(i.tutorialSteps).stepy("step", e.order + 1)
+}, !1, i.autocompleteOptions, r, t)
+})
+}, nextTrigger: function(t)
+{
+var i=n("iframe", t);
+return i.contents().find("form").submit(), !1
+}, finishTrigger: function(t)
+{
+var i=n("iframe", t);
+i.contents().find("form").submit()
+}
+}, "18": {
+stepType: i.inlineFieldType, profileFieldName: "PastProjects", getContent: function()
+{
+var f=this;
+return t.onNgPASTPROJECTSClosed = function(t, e)
+{
+t && (ngUserProfile[f.profileFieldName] = e, r.stepCompleted.call(u, f, !0), n(i.tutorialSteps).stepy("step", f.order + 1))
+}, n("<div>" + i.resx.Step18Help + "<\/div><div class='frameHolder' style='width:100%;'><span class='ngLoading'><\/span><iframe style='width:100%;height:100px;visibility:hidden' frameborder='0' src='/_layouts/ng/pages/ProfileProperty.aspx?IsDlg=1&property=pastprojects'><\/iframe><\/div>")
+}, postRender: function(t)
+{
+var u=n("span.ngLoading", t),
+r=n("iframe", t),
+e=this;
+r.bind("load", function()
+{
+u.remove(),
+r.css("visibility", "visible"),
+r.contents().find(".ngSaveHolder").hide(),
+r.contents().find(".ngWrapper").css("height", "auto"),
+r.contents().find(".s4-workspace").css("overflow", "visible"),
+f(function()
+{
+n(i.tutorialSteps).stepy("step", e.order + 1)
+}, !1, i.autocompleteOptions, r, t)
+})
+}, nextTrigger: function(t)
+{
+var i=n("iframe", t);
+return i.contents().find("form").submit(), !1
+}, finishTrigger: function(t)
+{
+var i=n("iframe", t);
+i.contents().find("form").submit()
+}
+}, "19": {
+stepType: i.inlineFieldType, profileFieldName: "School", getContent: function()
+{
+var f=this;
+return t.onNgSCHOOLClosed = function(t, e)
+{
+t && (ngUserProfile[f.profileFieldName] = e, r.stepCompleted.call(u, f, !0), n(i.tutorialSteps).stepy("step", f.order + 1))
+}, n("<div>" + i.resx.Step19Help + "<\/div><div class='frameHolder' style='width:100%;'><span class='ngLoading'><\/span><iframe style='width:100%;height:100px;visibility:hidden' frameborder='0' src='/_layouts/ng/pages/ProfileProperty.aspx?IsDlg=1&property=school'><\/iframe><\/div>")
+}, postRender: function(t)
+{
+var r=n("span.ngLoading", t),
+i=n("iframe", t),
+u=this;
+i.bind("load", function()
+{
+i.css("visibility", "visible"),
+i.contents().find(".ngSaveHolder").hide(),
+i.contents().find(".ngWrapper").css("height", "auto"),
+i.contents().find(".s4-workspace").css("overflow", "visible"),
+r.remove()
+})
+}, nextTrigger: function(t)
+{
+var i=n("iframe", t);
+return i.contents().find("form").submit(), !1
+}, finishTrigger: function(t)
+{
+var i=n("iframe", t);
+i.contents().find("form").submit()
+}
+}, "23": {
+stepType: i.inlineFieldType, profileFieldName: "TimeZoneId", getContent: function()
+{
+var f=this;
+return t.onNgTimeZoneClosed = function(t, e)
+{
+t && (ngUserProfile[f.profileFieldName] = e, r.stepCompleted.call(u, f, !0), n(i.tutorialSteps).stepy("step", f.order + 1))
+}, n("<div>" + i.resx.Step23Help + "<\/div><div class='frameHolder' style='width:98%;'><span class='ngLoading'><\/span><iframe style='width:100%;height:100%;min-height:200px;visibility:hidden' frameborder='0' src='/_layouts/ng/pages/TimeZonePicker.aspx?IsDlg=1'><\/iframe><\/div>")
+}, postRender: function(t)
+{
+var r=n("span.ngLoading", t),
+i=n("iframe", t);
+i.bind("load", function()
+{
+r.remove(),
+i.css("visibility", "visible"),
+i.contents().find(".ngSaveHolder").hide(),
+i.contents().find(".ngWrapper").css("height", "auto"),
+i.contents().find(".s4-workspace").css("overflow", "visible")
+})
+}, nextTrigger: function(t)
+{
+var i=n("iframe", t);
+return i.contents().find("form").submit(), !1
+}, finishTrigger: function(t)
+{
+var i=n("iframe", t);
+i.contents().find("form").submit()
+}
+}, "1000": {
+stepType: i.inlineFieldType, getContent: function()
+{
+var t=this;
+return n("<p>").html(ngText.NewUserCompletedText)
+}, postRender: function(){}, selectTrigger: function(){}
+}, "1001": {
+stepType: i.inlineFieldType, getContent: function()
+{
+var t=this;
+return n("<p>").html("")
+}, postRender: function(){}, selectTrigger: function(){}
+}
+};
+var f=function(t, i, r, u, f)
+{
+NG.InputControl(u.contents().find(".ngProfileProperty"), n("#newUserSteps-next", f), t, {
+autoGrow: i, autocomplete: r
+})
+},
+e={
+getHelp: function()
+{
+return this.helpHtml || null
+}, hasHelp: function()
+{
+return !!this.helpHtml
+}, getHints: function()
+{
+return this.hints
+}, hasHints: function()
+{
+return !!this.hints
+}, eventName: null, checkHintsAvailable: function()
+{
+return null
+}
+},
+o={
+selector: "", events: "focus, click", ngEvents: "", bindCompletionEvents: function(t, i)
+{
+var r;
+if (this.events)
+{
+r = this.events;
+t.one(r, i)
+}
+if (this.ngEvents)
+{
+r = this.ngEvents;
+n(NG.Events).one(r, i)
+}
+}, unbindCompletionEvents: function(t)
+{
+var i;
+this.events && (i = this.events, t.unbind(i)),
+this.ngEvents && (i = this.ngEvents, n(NG.Events).unbind(i))
+}
+},
+s={
+profileFieldName: null, getContent: function()
+{
+return r.getInlineField.call(u, this)
+}, postRender: function(n)
+{
+var t=this;
+n.find("input.ngButton").click(function()
+{
+r.updateProfileAndSave.call(u, n, t)
+})
+}
+};
+return n.each(steps, function(t, r)
+{
+var u="Step" + t,
+f;
+r.helpHtml = i.resx[u + "Help"] || i.resx.NoHelp,
+r.name = i.resx[u + "Name"],
+r = n.extend({}, e, r),
+r.stepType == i.inlineFieldType && (r = n.extend({}, s, r)),
+steps[t] = r,
+r.hints && (f = u + "Hint", n.each(r.hints, function(t, u)
+{
+u.message = i.resx[f + (parseInt(t, 10) + 1)] || u.message,
+r.hints[t] = n.extend({}, o, u)
+}))
+}), steps
+}
+};
+n.fn.setuptour = function(t)
+{
+if (r[t])
+return r[t].apply(this, Array.prototype.slice.call(arguments, 1));
+if (typeof t != "object" && t)
+n.error("Method " + t + " does not exist on jQuery.setuptour");
+else
+return r.init.apply(this, arguments)
+},
+n.fn.setuptour.defaults = {
+xmlUrl: String.format("{0}/_vti_bin/NG/Tutorial.svc/", t.spWebUrl), tutorialContent: "#ngNewUser", tutorialSteps: "#newUserSteps", dialogButtons: {}, dialogButtonContainer: ".ui-dialog-buttonset", dialogWidth: n(t).width() * .98, dialogMaxHeight: 800, steps: [], firstStep: 100, titleClick: !1, resx: tutorialResources, inlineFieldType: 1, autocompleteOptions: {
+multiple: !0, mustMatch: !1, autoFill: !0, matchContains: !0, multipleSeparator: ";", selectFirst: !0, formatItem: function(n)
+{
+return n
+}, getFunc: NG.TagAutoCompleteLoad, scroll: !0, max: 20, cacheLength: 50
+}, inlineFieldHtml: '<div class="tutorialStepHelp"><\/div><br /><div class="fieldIsListWarning"><\/div><textarea width="100%" rows="4" class="ngTutorialInlineField"><\/textarea><input type="button" class="ngButton" style="float:right; margin:5px; display:none;" /><br style="clear:both" />', showGuiders: !1, showFinish: !1, guiderStartAtId: i, appendGuiderTo: "#s4-workspace", guiders: i, onCloseCallback: function(){}
+}
+}(jQuery142, window);

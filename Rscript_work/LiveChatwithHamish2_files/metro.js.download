@@ -1,0 +1,44 @@
+(function(n, t)
+{
+n(document).ready(function()
+{
+var i,
+f,
+r,
+u;
+t.isNgMetro = !0,
+i = n(".ngStatusHolder"),
+f = n(".ngActivityHeader"),
+NG && NG.navigator && NG.navigator.sayswho && NG.navigator.sayswho.mozilla && n("#ngEventNotificationDiv").css({
+"margin-top": "-40px", "margin-left": "-4px"
+}),
+f.text(ngText.AddPostTitle).smartFit({maxFontPx: 44}).show(),
+r = n("#ngCustomInput", i),
+n("#ngAddPost", i).wordSwap({
+initial: ngText.PostVerb, alt: ngText.AddPostTitle, target: ".ngActivityHeader"
+}),
+n("#ngAskQuestion", i).wordSwap({
+initial: ngText.PostVerb, alt: ngText.AskQuestionTitle, target: ".ngActivityHeader"
+}),
+n("#ngDirectMessage", i).wordSwap({
+initial: ngText.PostVerb, alt: ngText.PrivateMessageHeader, target: ".ngActivityHeader"
+}),
+r.wordSwap({
+initial: ngText.PostVerb, alt: n("a", r).text(), target: ".ngActivityHeader"
+}),
+i.find("#ngInputTypes li").on("click", function()
+{
+n(this).wordSwap("swaptoalt").smartFit({maxFontPx: 44})
+}).append(n("<span>").addClass("arrow-up")),
+n("#ngInputTypes ul li a").wrap('<div class="iehelper" />'),
+n(".ngCommunityNavButton").removeAttr("value").css("color", "transparent"),
+n("#ngInputTypes ul li.active a").trigger("click"),
+u = 0,
+n("#ngPostControl #ngInputTypes ul.ngInputToggles li").each(function()
+{
+u += n(this).width() + 4
+}),
+n("#ngPostControl #ngInputTypes ul.ngInputToggles").width(u),
+n(".ngPostMessage a").css("color", "#FFFFFF")
+})
+})(jQuery142, window);

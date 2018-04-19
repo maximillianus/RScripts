@@ -1,0 +1,253 @@
+var guiders=function(n)
+{
+var t={},
+i;
+return t.version = "1.2.6", t._defaultSettings = {
+attachTo: null, autoFocus: !1, buttons: [{name: "Close"}], buttonCustomHTML: "", classString: null, description: "", highlight: null, isHashable: !0, offset: {
+top: null, left: null
+}, onShow: null, onHide: null, overlay: !1, position: 0, title: "", width: 400, xButton: !1, appendGuiderTo: "body"
+}, t._htmlSkeleton = "<div class='guider'>  <div class='guider_content'>    <h1 class='guider_title'><\/h1>    <div class='guider_close'><\/div>    <p class='guider_description'><\/p>    <div class='guider_buttons'>    <\/div>  <\/div>  <div class='guider_arrow'>  <\/div><\/div>", t._arrowSize = 42, t._buttonElement = "<a><\/a>", t._buttonAttributes = {href: "javascript:void(0);"}, t._closeButtonTitle = "Close", t._currentGuiderID = null, t._guiders = {}, t._lastCreatedGuiderID = null, t._nextButtonTitle = "Next", t._previousButtonTitle = "Pervious", t._offsetNameMapping = {
+topLeft: 11, top: 12, topRight: 1, rightTop: 2, right: 3, rightBottom: 4, bottomRight: 5, bottom: 6, bottomLeft: 7, leftBottom: 8, left: 9, leftTop: 10
+}, t._windowHeight = 0, t._addButtons = function(i)
+{
+var e=i.elem.find(".guider_buttons"),
+f,
+r,
+u,
+o;
+if (i.buttons === null || i.buttons.length === 0)
+{
+e.remove();
+return
+}
+for (f = i.buttons.length - 1; f >= 0; f--)
+r = i.buttons[f],
+u = n(t._buttonElement, n.extend({
+"class": "guider_button", html: r.name
+}, t._buttonAttributes, r.html || {})),
+typeof r.classString != "undefined" && r.classString !== null && u.addClass(r.classString),
+e.append(u),
+r.onclick ? u.bind("click", r.onclick) : r.onclick || r.name.toLowerCase() !== t._closeButtonTitle.toLowerCase() ? r.onclick || r.name.toLowerCase() !== t._nextButtonTitle.toLowerCase() ? r.onclick || r.name.toLowerCase() !== t._previousButtonTitle.toLowerCase() || u.bind("click", function()
+{
+i.elem.data("locked") || t.previous()
+}) : u.bind("click", function()
+{
+i.elem.data("locked") || t.next()
+}) : u.bind("click", function()
+{
+t.hideAll()
+});
+i.buttonCustomHTML !== "" && (o = n(i.buttonCustomHTML), i.elem.find(".guider_buttons").append(o)),
+i.buttons.length === 0 && e.remove()
+}, t._addXButton = function(i)
+{
+var u=i.elem.find(".guider_close"),
+r=n("<div><\/div>", {
+"class": "x_button", role: "button"
+});
+u.append(r),
+r.click(function()
+{
+t.hideAll()
+})
+}, t._attach = function(i)
+{
+var a;
+if (i !== null)
+{
+var s=n(i.attachTo),
+u=i.elem.innerHeight(),
+f=i.elem.innerWidth(),
+v=n(i.appendGuiderTo).offset();
+if (i.position === 0 || s.length === 0)
+{
+i.elem.css("position", "fixed"),
+i.elem.css("top", (n(window).height() - v.top - u) / 3 + "px"),
+i.elem.css("left", (n(window).width() - f) / 2 + "px");
+return
+}
+var l=s.offset(),
+h=l.top - v.top,
+c=l.left,
+p=n(i.appendGuiderTo).outerHeight(!0) - n(i.appendGuiderTo).outerHeight(!1);
+l -= p,
+t._offsetNameMapping[i.position] && (i.position = t._offsetNameMapping[i.position]);
+var e=s.innerHeight(),
+o=s.innerWidth(),
+r=.9 * t._arrowSize,
+w={
+1: [-r - u, o - f], 2: [0, r + o], 3: [e / 2 - u / 2, r + o], 4: [e - u, r + o], 5: [r + e, o - f], 6: [r + e, o / 2 - f / 2], 7: [r + e, 0], 8: [e - u, -f - r], 9: [e / 2 - u / 2, -f - r], 10: [0, -f - r], 11: [-r - u, 0], 12: [-r - u, o / 2 - f / 2]
+},
+y=w[i.position];
+return h += y[0], c += y[1], a = "absolute", s.css("position") == "fixed" && (a = "fixed", h -= n(window).scrollTop(), c -= n(window).scrollLeft()), i.offset.top !== null && (h += i.offset.top), i.offset.left !== null && (c += i.offset.left), i.elem.css({
+position: a, top: h, left: c
+})
+}
+}, t._guiderById = function(n)
+{
+if (typeof t._guiders[n] == "undefined")
+throw"Cannot find guider with id " + n;
+return t._guiders[n]
+}, t._showOverlay = function()
+{
+n("#guider_overlay").fadeIn("fast", function()
+{
+this.style.removeAttribute && this.style.removeAttribute("filter")
+})
+}, t._highlightElement = function(t)
+{
+n(t).addClass("guider_highlight")
+}, t._dehighlightElement = function(t)
+{
+n(t).removeClass("guider_highlight")
+}, t._hideOverlay = function()
+{
+n("#guider_overlay").fadeOut("fast")
+}, t._initializeOverlay = function()
+{
+n("#guider_overlay").length === 0 && n('<div id="guider_overlay"><\/div>').hide().appendTo("body")
+}, t._styleArrow = function(i)
+{
+var u=i.position || 0,
+f,
+e;
+if (u)
+{
+f = n(i.elem.find(".guider_arrow")),
+e = {
+1: "guider_arrow_down", 2: "guider_arrow_left", 3: "guider_arrow_left", 4: "guider_arrow_left", 5: "guider_arrow_up", 6: "guider_arrow_up", 7: "guider_arrow_up", 8: "guider_arrow_right", 9: "guider_arrow_right", 10: "guider_arrow_right", 11: "guider_arrow_down", 12: "guider_arrow_down"
+},
+f.addClass(e[u]);
+var o=i.elem.innerHeight(),
+s=i.elem.innerWidth(),
+r=t._arrowSize / 2,
+h={
+1: ["right", r], 2: ["top", r], 3: ["top", o / 2 - r], 4: ["bottom", r], 5: ["right", r], 6: ["left", s / 2 - r], 7: ["left", r], 8: ["bottom", r], 9: ["top", o / 2 - r], 10: ["top", r], 11: ["left", r], 12: ["left", s / 2 - r]
+},
+u=h[i.position];
+f.css(u[0], u[1] + "px")
+}
+}, t._showIfHashed = function(n)
+{
+var i="guider=",
+r=window.location.hash.indexOf(i),
+u;
+r !== -1 && (u = window.location.hash.substr(r + i.length), n.id.toLowerCase() === u.toLowerCase() && t.show(n.id))
+}, t.reposition = function()
+{
+var n=t._guiders[t._currentGuiderID];
+t._attach(n)
+}, t.next = function()
+{
+var n=t._guiders[t._currentGuiderID],
+i,
+r,
+u;
+typeof n != "undefined" && (n.elem.data("locked", !0), i = n.next || null, i !== null && i !== "" && (r = t._guiderById(i), u = r.overlay ? !0 : !1, t.hideAll(u, !0), n && n.highlight && t._dehighlightElement(n.highlight), t.show(i)))
+}, t.previous = function()
+{
+var n=t._guiders[t._currentGuiderID],
+i,
+r,
+u;
+typeof n != "undefined" && (i = n.previous || null, i !== null && i !== "" && (r = t._guiderById(i), u = r.overlay ? !0 : !1, t.hideAll(u, !0), n && n.highlight && t._dehighlightElement(n.highlight), t.show(i)))
+}, t.createGuider = function(i)
+{
+var r,
+u;
+return (i === null || i === undefined) && (i = {}), myGuider = n.extend({}, t._defaultSettings, i), myGuider.id = myGuider.id || String(Math.floor(Math.random() * 1e3)), r = n(t._htmlSkeleton), myGuider.elem = r, typeof myGuider.classString != "undefined" && myGuider.classString !== null && myGuider.elem.addClass(myGuider.classString), myGuider.elem.css("width", myGuider.width + "px"), u = r.find(".guider_title"), u.html(myGuider.title), r.find(".guider_description").html(myGuider.description), t._addButtons(myGuider), myGuider.xButton && t._addXButton(myGuider), r.hide(), r.appendTo(myGuider.appendGuiderTo), r.attr("id", myGuider.id), typeof myGuider.attachTo != "undefined" && myGuider !== null && t._attach(myGuider) && t._styleArrow(myGuider), t._initializeOverlay(), t._guiders[myGuider.id] = myGuider, t._lastCreatedGuiderID = myGuider.id, myGuider.isHashable && t._showIfHashed(myGuider), t
+}, t.hideAll = function(i, r)
+{
+r = r || !1,
+n(".guider:visible").each(function(i, u)
+{
+var f=t._guiderById(n(u).attr("id"));
+if (f.onHide)
+f.onHide(f, r)
+}),
+n(".guider").fadeOut("fast");
+var u=t._guiders[t._currentGuiderID];
+return u && u.highlight && t._dehighlightElement(u.highlight), typeof i != "undefined" && i === !0 || t._hideOverlay(), t
+}, t.show = function(i)
+{
+var r;
+if (n().cookie !== null && n.cookie("last_guider", i), !i && t._lastCreatedGuiderID && (i = t._lastCreatedGuiderID), r = t._guiderById(i), r.overlay && (t._showOverlay(), r.highlight && t._highlightElement(r.highlight)), r.onShow)
+r.onShow(r);
+t._attach(r),
+r.elem.fadeIn("fast").data("locked", !1),
+t._currentGuiderID = i;
+var e=t._windowHeight = n(window).height(),
+u=n(window).scrollTop(),
+f=r.elem.offset(),
+o=r.elem.height(),
+s=u + e < f.top + o,
+h=f.top < u;
+return r.autoFocus && (s || h) && setTimeout(t.scrollToCurrent, 10), n(r.elem).trigger("guiders.show"), t
+}, t.scrollToCurrent = function()
+{
+var i=t._guiders[t._currentGuiderID];
+if (typeof i != "undefined")
+{
+var r=t._windowHeight,
+o=n(window).scrollTop(),
+u=i.elem.offset(),
+f=i.elem.height(),
+e=Math.round(Math.max(u.top + f / 2 - r / 2, 0));
+window.scrollTo(0, e)
+}
+}, i = undefined, n(window).resize(function()
+{
+typeof i != "undefined" && clearTimeout(i),
+i = setTimeout(function()
+{
+i = undefined,
+typeof myGuider != "undefined" && t.reposition()
+}, 20)
+}), t
+}.call(this, jQuery142);
+(function(n)
+{
+var t={
+init: function(i)
+{
+var u=n.extend({}, n.fn.guiders.defaults, i),
+o=n(this).data("options", u),
+f,
+r,
+e;
+if (u.guiders !== n.noop)
+return e = [], n.each(u.guiders, function(t, i)
+{
+if (typeof i.attachTo != "undefined" && !n(i.attachTo).is(":visible") && (typeof i.onShow == "undefined" || !n(i.attachTo).length))
+return i.id === u.guiderStartAtId && (u.guiderStartAtId = i.next), f = i, !0;
+typeof f != "undefined" && f !== null && (i.previous = r.id, typeof r != "undefined" && (r.next = i.id), f = null),
+i.appendGuiderTo = u.appendGuiderTo,
+typeof r != "undefined" && e.push(r),
+r = i
+}), typeof r != "undefined" && e.push(r), n.each(e, function(n, t)
+{
+guiders.createGuider(t)
+}), this.each(function()
+{
+t.show.call(o)
+})
+}, show: function()
+{
+var i=this,
+t=this.data("options");
+t.guiderStartAtId !== n.noop && guiders.show(t.guiderStartAtId)
+}
+};
+n.fn.guiders = function(i)
+{
+if (t[i])
+return t[i].apply(this, Array.prototype.slice.call(arguments, 1));
+if (typeof i != "object" && i)
+n.error("Method " + i + " does not exist on jQuery.guiders");
+else
+return t.init.apply(this, arguments)
+},
+n.fn.guiders.defaults = {
+guiderStartAtId: n.noop, appendGuiderTo: "body", guiders: n.noop
+}
+})(jQuery142, window);

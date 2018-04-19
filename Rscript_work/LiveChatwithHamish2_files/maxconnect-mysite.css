@@ -1,0 +1,331 @@
+﻿/*
+MAX CONNECT MYSITE
+11/10/2014
+*/
+* {font-family:Verdana}
+.wysibb-toolbar {font-family:WysiBBiconFont !important} 
+body #s4-bodyContainer {width:975px!important;margin:0 auto 0 auto!important;}
+body #s4-workspace {background-color:#007cba}
+.container {background:url(banner-bg.png) no-repeat 0 0;height:100%;min-height:100%}
+.container #s4-mainarea {background:transparent url(bg-shadow-ms.png) repeat-y center top;width: 990px;margin-top: -1px;}
+.container .s4-ca {width:100%!important;background-color:transparent}
+.container .s4-ba .s4-ca {width:800px!important;background-color:transparent}
+.container .s4-ca .s4-ca { min-height: 540px;}
+.container .s4-ba {padding: 0 4px;width: 982px;}
+.ms-globalnav, .ms-cui-topBar2, .s4-ribbonrowhidetitle {display: none;
+}/**/
+body #s4-ribbonrow { background: #fff url('ribbon-bg.gif') left bottom repeat-x!important;}
+#ScoreCardContainer {
+    background-color: #ffffff;
+    background-image: none;
+}
+#ScoreCardContainer .clearfix {
+    display: block;
+}
+#MiddleRightCell a,#MiddleRightCell a:hover, #MiddleRightCell a:visited {
+    color: #fff;
+    
+}
+#ngDefaultRefresh { background-color: #ffffff;margin-right:-4px}
+#MiddleRightCell .ms-WPBody a:link, #MiddleRightCell .ms-WPBody a:visited, #MiddleRightCell .ms-WPBody a:hover { color: #fff;}
+.ngWrapper .ngHeader {color:#fff!important}
+#MiddleRightCell  .ngWrapper .ngHeader {font-size:14px}
+.ms-contactcardtext3, .ms-contactcardtext3 a:visited {color:#007dba}
+.ngRibbonAdditionalLinks li {padding-right:15px;width:87px}
+.ngRibbonAdditionalLinks li a {background:transparent url(icon-myprofile.png) no-repeat right 3px;display:block;width:100%;padding-right: 5px;;}
+@media screen and (-webkit-min-device-pixel-ratio:0) { .ngRibbonAdditionalLinks { margin-top:0!important;margin-bottom: -2px !important;height: auto !important;}}
+
+/* ==========================| MAX CONNECT HEADER |========================== */
+.maxconnect-hdr {width:990px;margin:0 auto 0 auto;background-color:transparent;height: 79px;padding-left: 4px;position: relative;}
+.maxconnect-hdr div {height:79px;float:left;border-left:solid 1px #e2e2e2;width: 140px;}
+.maxconnect-hdr div:first-child {width:88px;}
+.max-logo-1 a {display:block;height:79px;background: transparent url(logo-max.png) no-repeat center center;}
+.max-logo-2 a {display:block;height:79px;background: transparent url(logo-maxconnect.png) no-repeat center center;}
+.max-logo-2 { border-right: solid 1px #e2e2e2;}
+.max-logo-3 {width:110px!important;height:86px!important;background:transparent url(nav-arrw-btm-white.png) no-repeat center bottom;border:none!important;;position:absolute;margin-left:228px;z-index:99}
+.max-logo-3 span {text-align:center;font-size:13px;font-weight:bold;height:78px;display:table-cell;vertical-align:middle;text-align:center;width:110px;border-right:solid 1px #e2e2e2!important;
+padding-top:-1px;}
+div.support-link { background: url("support-icon.png") no-repeat scroll 0 2px transparent;float: right!important;padding: 10px 0 10px 30px;position: absolute;right: 25px;top: 20px;width: auto !important;height: auto !important;border: none !important;}
+div.support-link a, div.support-link a:visited {color: #0291d5;}
+div.support-link a:hover {color: #0291d5;text-decoration: underline;}
+
+/* ==========================| View my profile as seen by |========================== */
+.ms-profileasseenby { margin-left: 326px;position: absolute;top: -51px;background:none!important;border: none !important;}
+.ms-identitypiecenoteindent { color: #0072bc;}
+
+/* ==========================| Org Browser |========================== */
+.orgBrowser {border-left:none!important;border-right:none!important;}
+
+/* ==========================| Page Layout |========================== */
+#MiddleRow > td {display:none!important;}
+#MiddleRow > #MiddleRightCell {display: table-cell !important;background: #6c6b6b none !important;}
+#MiddleRow > #MiddleLeftCell { display:table-cell!important;}
+
+/*#TopRow,*/
+ #BottomRow {display:none}
+.container #MiddleLeftCell .s4-wpcell-plain > table { padding-top: 0 !important;}
+.container #MiddleRightCell .s4-wpcell-plain > table { padding-top: 0 !important;}
+.s4-ba #TopRow {
+    display: none;
+}
+.s4-ba .s4-ca  #TopRow {
+    display: block;
+}
+.ms-askmeabout,#ngMyTopTagsWrapper {
+    margin-bottom: 26px;   
+    
+}
+/*#MiddleRow #MiddleLeftCell #ngPostControl.ngPostWrapper {padding-top:30px;background-color:#589199;}*/
+/*ms-SrvMenuUI*/
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+#MiddleRow #MiddleLeftCell #ngPostControl.ngPostWrapper {margin-left:-1px}	
+.ngRibbonAdditionalLinks {top:0!important}
+#ngPostControl .ngMainMicroblogTextLength {min-width:162px!important}
+.ngActivityRow {margin-left:-1px!important}
+}
+
+.ms-toolbar {margin-left:5px;width:99.3%}
+
+/* ==========================| ADD POST |========================== */
+#ngPostControl, .ngStatusHolder, .ngStatusHolder { background-color: #589199 !important;}
+.ngInputTo { border-color: #589199 !important;}
+.ngStatusHolder .ngPostButton .ngButton {background-color:#205660!important;border:none!important;padding: 8px 25px 8px 25px;}
+
+/* ==========================| WEBPARTS |========================== */
+.ms-WPHeader {height:47px;background: transparent url(wp-hdr-bg.jpg) repeat-x 0 0;}
+.ms-WPHeader td { border-bottom: none !important;}
+.ms-WPTitle { padding: 10px !important;}
+.ms-WPHeader h3 {color:#DF7A00;font-size: 14px;}
+.ms-WPTitle span {color:#fff;font-size: 14px;}
+.ms-WPHeader td { color: #DF7A00;}
+.ms-WPHeader h3 a { color: #DF7A00;}
+.ms-WPHeaderTd {padding-left:0;}
+.ms-WPBody { padding-left: 5px;}
+#MiddleRightCell .ms-WPBody { color: #fff;}
+#MiddleLeftCell .ms-WPBody { padding-left: 0 !important;}
+.ms-WPHeaderTdMenu { border-top: none !important;}
+.ms-wpContentDivSpace { padding-top: 8px;}
+.ms-WPHeaderTdMenu:hover {border-color:#737272!important;background: #737272 none !important;}
+.ngTutorialProgress {background-color:#fff}
+#MiddleRightCell > table > tbody > tr:first-child .ms-WPHeader { background: #383737 none !important;}
+#MiddleRightCell > table > tbody > tr:first-child .s4-wpTopTable {background-color:#383737!important;padding-bottom: 0;}
+#MiddleRightCell > table > tbody > tr:first-child .s4-wpTopTable .ms-WPBody  {padding-top:0;margin-right:10px;}
+#MiddleRightCell > table > tbody > tr:first-child .s4-wpTopTable .ms-standardheader { padding-bottom: 0 !important;}
+.ngTutorialProgress .ngStepCurrent {background:#589199 url(get-started-arrow.jpg) no-repeat right center!important;color: #fff !important;}
+.ngTutorialProgress td { color: #589199 !important;}
+.ngActivityAction:hover { color: #fff !important;}
+.ngActivityAction span { color: #fff !important;}
+.ngNotificationAction .ngActivityAction span {color: #589199!important;}
+.ngCommunityResults li div.ngHolder { width: 84% !important;}
+#ngMyCommunityHolder .chosen-container { min-width: 322px !important;}
+.ngNewsFeedContent { border-left: none;background-color: #fff;}
+
+DIV.ngActivityRowHeader, .ngKBHeader, .ng-idea-default-icon { background-color: #589199 !important;}
+#ngNewsControlDiv .ngFilterShow { margin-left: 5px;}
+#ngNewsControlDiv > ul { margin-right: 7px !important;}
+.ngControlDiv {background:#f0f0f0 url(control-bg.jpg) repeat-x bottom;width:100.6%!important;}
+#ngNewsControlDiv > ul > li {text-align:center;display: inline;}
+#ngNewsFeedSettings { padding-right: 7px !important;}
+#ngNewsFeedSettings a.ngActivityAction { color: #676767 !important;}
+.ngAllCommentsDiv, .ngPartialCommentsDiv {background-color:#f5f5e8!important;border:solid 1px #e4e4e4;padding:12px;margin-right: 6px;}
+
+#ngSSColleagueDiv {background:#737172 url(icon-colleagues.png) no-repeat 5px 5px!important;border-color:#686667!important;padding-left:55px!important;padding-bottom:15px!important}
+#ngSSColleagueDiv > a > span { color: #fff !important;}
+#MiddleRightCell #ngSSColleagueDiv > a:hover { color: #fff !important;}
+#ngSSColleagueDiv div { color: #fff;}
+.ngColleagueResults span { color: #fff;}
+#MiddleRightCell .ngTutorialStepNext {font-size:12px!important;color:#fff!important;white-space: nowrap !important;}
+#MiddleRightCell .ngTutorialStepSkip { color: #fff !important;}
+
+/* ==========================| LINK TO COMMUNITIES |========================== */
+.s4-wpcell-plain > table {
+    padding-bottom: 0px !important;
+}
+.ret-communities {border:solid 1px #686767;background:#737272 url(icon-returncommunities.png) no-repeat 6px center;margin:12px 10px 0px 6px;height: 66px;}
+
+.ret-expertise {border:solid 1px #686767;background:#737272 url(icon-returnexpertisesearch.png) no-repeat 6px center;margin:12px 10px 12px 6px;height: 66px;}
+
+
+
+.ret-expertise a,.ret-communities a {color:#fff;font-size:14px;display:block;padding:23px 0 23px 70px;font-family: Verdana;}
+.ret-expertise a:hover, .ret-expertise a:visited ,.ret-communities a:hover, .ret-communities a:visited  { color: #fff !important;}
+
+/* ==========================| SITRION STYLES |========================== */
+.nga_h2 {font-weight:normal!important;color:#007dba!important}
+.ngWrapper, .ng-ui-wrapper.ui-dialog, .ng-ui-wrapper.ui-widget .ui-widget, .guider, .ngWrapper td { font-size: 12px !important;}
+#MiddleRightCell .ms-WPBorder a { color: #fff;}
+.ngBadgeHolder div.ngBadgeName .options { background-color: transparent !important;}
+.ngBadgeName { color: #c6c5c5;}
+.ngNoSearchResults { color: #fff;}
+.ngClearSearchButton {background-position:-86px -133px!important;}
+#ngMyCommunityHolder #ngMyCommunityNavButton {left: 265px !important}
+#ngMyCommunityOptions_chosen a:hover {color:#999!important;text-decoration: none;}
+#ReportingHierarchy { background-color: #fff;}
+#ReportingHierarchy  td a, #ReportingHierarchy  .ms-orgname a, #ReportingHierarchy  .ms-orgme a {color:#059bda !important}
+#ReportingHierarchy .ms-orgname {background-color: #ebebeb!important;border:1px solid #ccc;color: #666!important;border-bottom:none!important} 
+#ReportingHierarchy .ms-orgme {background-color: #ebebeb!important;border:1px solid #ccc;color: #666!important;}
+.NG_UsersFollowingMeTable .row a.ngColleagueLink { color: #fff!important;}
+
+.chosen-results .group-result, .chosen-results .active-result { color: #589199 !important;}
+.chosen-container .chosen-results .highlighted {background-color:#589199!important;color: #fff !important;}
+.no-results { color: #666 !important;}
+.ngRecCommHolder a { color: #fff !important;}
+.ngRecCommHolder a:hover { color: #fff !important;}
+.ngRecCommHolder a:visited { color: #fff !important;}
+#MiddleRightCell .chosen-container-single a:hover { color: #999 !important;}
+#MiddleRightCell a.ngActivityAction {background:transparent url(icon-bullet-sm.gif) no-repeat 0 3px!important;}
+#MiddleRightCell .ngActivityAction:hover { color: #4d4b4c !important;}
+.ngTrendingTagCloud a.ngTag  { color: #fff !important;}
+.ngTrendingTagCloud div {float:left;margin-right: 13px;}
+.ngColleagueName a.ngColleagueLink, #ngSSColleagueDiv a:hover, .ngCommunityResults li div.ngHolder a { color: #fff !important;}
+#MiddleRightCell .ngColleagueName a.ngColleagueLink { color: #fff !important;}
+#MiddleRightCell .ms-WPBody a:hover { color: #fff;}
+.ngCommunityResults li div.ngHolder a { line-height: 34px;}
+.ngCommunityResults li div.ngHolder a img { margin-right: 8px;}
+#ngMyCommunityHolder .chosen-container-single .chosen-single { background-color: #fff !important;}
+.ngStatusHolder .ngInput TEXTAREA { color: #333 !important;}
+.ngMainMicroblogTextLength {white-space:nowrap!important;padding-top: 5px;}
+#ngEventNotificationHolder #ngNotificationFilterLink, #ngManageGroupLink { float: left;}
+#ngTagFilterLink, #ngSearchFilterLink, .ngRefreshFilterLink { float: left !important;}
+#ngNewsControlDiv > UL { height: 45px;}
+#ngNewsControlDiv > UL > LI {padding-top:14px!important;padding-bottom: 0 !important;}
+#ngTagFilterLink, #ngSearchFilterLink, .ngRefreshFilterLink, #ngManageGroupLink { padding: 12px !important;}
+.ActivityType-SysNotification { margin: 9px !important;}
+
+.ms-contactcardtext3 { color: #7c7c7c;}
+#ProfileViewer_ValueAboutMe.ms-contactcardtext3 { color: #49494a;}
+#MiddleRightCell .ngColleagueResults li img.ngProfileIcon { border: none;}
+div.ngKBHeader, DIV.ngIdeaHeader { margin-left: 0 !important;}
+.ngActivityRow {}
+.ng-idea-stream-Vote-Div { margin-right: 6px;}
+#MiddleRightCell .ngColleagueResults li img.ngProfileIcon {max-height:40px;max-width: 40px;}
+.ngActivityRow {margin-left:-1px\9;}
+.ngCommunityResults .ngCommunityRow { border-bottom: none !important;}
+#MiddleRightCell #ngCommunityResults, #MiddleRightCell #ngCommunityResults .ngCommList { margin-top: 0;}
+.ngActivityMore {background-position:-43px -1768px!important;padding-left: 28px !important;}
+#MiddleLeftCell > table > tbody > tr > td >table { padding-bottom: 0 !important;}
+#ngMoreDiv { padding-bottom: 20px;}
+
+.ngWrapper .ngInput {
+    width: 572px;
+    
+}
+/* ==========================| PROFILE PAGE =========================================================== */
+.ms-profilepageheader {background-color: #f8fcff;border-right:none!important;margin: 0 auto;width: 982px;}
+.ms-profilepageheader { background-color: #d5d5d5 !important;}
+.ms-profilepageheader .s4-sn {background-color:#49494a;border:none;height:auto;padding-bottom: 0 !important;} 
+.s4-sn li.static > a {color:#fff!important;padding:15px 10px 15px 10px!important;font-size: 14px !important;}
+.s4-sn li.static > a.selected {color:#fff!important;background:#9f9f9f  url(nav-active-up.png) no-repeat center bottom!important;border: none !important;}
+.ms-descriptiontext { color: #fff !important;}
+.ngActionLabel { color: #fff !important;}
+
+/* ==========================| Navigation |========================== */
+.ms-profilepageheader .menu-horizontal ul li { border-right: solid 1px #565657;}
+.ms-profilepageheader .menu-horizontal ul li a:hover {background-color:#9f9f9f;display:block;}
+.ms-profilepageheader .menu-horizontal ul li:first-child { display: none;}
+
+/* ==========================| DIALOGUE STYLE |========================== */
+.ms-dialog #s4-workspace { background: none;}
+form[action*="person.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+form[action*="Person.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+form[action*="OrganizationView.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+form[action*="personcontent.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+form[action*="thoughts.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+form[action*="MyContactLinks.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+form[action*="MyMemberships.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+form[action*="default.aspx"] .max-logo-3 > span:before  {content:"My Newsfeed"}
+form[action*="EditProfile.aspx"] .max-logo-3 > span:before  {content:"My Profile"}
+.ms-profilepagecontent { min-height: 530px;}
+
+/* ==========================|  DIALOG BOXES  |========================== */
+html.ms-dialog body .maxconnect-hdr {display:none!important;}
+html.ms-dialog body .container, html.ms-dialog body .container #s4-mainarea {width: 100%!important;background:#fff none!important;}
+
+
+/* ==========================|  SITRION POP-UP WINDOW  |========================== */
+html.ms-dialog body #s4-bodyContainer  { width: auto !important;margin: 0 !important;}
+html.ms-dialog body .container .s4-ba  { width: auto !important;margin: 0 !important;}
+html.ms-dialog .ngColleagueName a.ngColleagueLink, html.ms-dialog #ngSSColleagueDiv a:hover, html.ms-dialog .ngCommunityResults li div.ngHolder a { color:#059bda !important;}
+html.ms-dialog .ngActionLabel label{color: #666 !important;}
+form[action*="AdminReportsQuestions.aspx"] #ctl00_MSO_ContentDiv 
+{
+    width: 980px;
+    /*overflow-x: scroll;*/
+    
+}
+
+form[action*="AdminReportsQuestions.aspx"] .ngQuestionReportWrap /*#ctl00_MSO_ContentDiv */
+{
+   /* width: 980px;*/
+    overflow-x: scroll;
+    
+}
+form[action*="personcontent.aspx"] #MiddleRow
+{
+   /* width: 980px;*/
+    display: none;
+    
+}
+
+.ms-contactcardtext2 {
+    display: none;
+    
+}
+/*notifications on Mysite*/
+
+#ngEventNotificationDiv #ngNotificationCloseLink {
+    display: block;
+    float: right;
+    width: 5px;
+    height: 25px;
+}
+#ngEventNotificationDiv #ngEventActionLinks {
+    display: block;
+    float: left;
+}
+
+/*Rebranding*/
+
+.RebrandingWorkspace
+{
+background:rgb(197,219,231) !important;
+ margin:0px auto;
+}
+.Rebradninghdr
+{
+ padding-left:0px;
+}
+.RebrandingMainarea
+{
+float:left; 
+clear:none;
+ width:982px !important;
+ min-height:835px;
+}
+.Rebrandings4ba
+{
+padding-left:0px !important;
+ padding-right:0px !important;
+}
+.RebrandingLeftBackground
+{
+width: 243px; 
+height: 900px; 
+ position:absolute; 
+background: url(MaxHomepageBorderL01.png) repeat-y center top;
+  top:13px; 
+overflow:visible;
+}
+.RebrandingContainer
+{
+position:relative;
+}
+.RebrandingRightBackground
+{
+	width: 243px; 
+height: 900px;
+ position:absolute; 
+background: url(MaxHomepageBorderR01.png) repeat-y left top;
+top:13px; 
+}

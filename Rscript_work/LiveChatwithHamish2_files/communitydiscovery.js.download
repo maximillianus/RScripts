@@ -1,0 +1,509 @@
+Type.registerNamespace("NG"),
+function()
+{
+var n=jQuery142;
+NG.CommunitiesOverview = function(t, i)
+{
+var r=this,
+u,
+f;
+r.element = n(t),
+r.CurrentPageIndex = 0,
+r.LastPageIndex = 0,
+r.CurrentSortColumn = "Name",
+r.CurrentSortDirection = "",
+u = window.spWebUrl ? window.spWebUrl : SP.ClientContext.get_current().get_url(),
+u == "/" && (u = ""),
+r.dataUrl = u + "/_vti_bin/NGC/CommunityService.svc",
+r.NumGroups = 0,
+r.groups = [],
+f = window.ngCommunitiesOverviewItemsPerPage || 15,
+i = n.extend({
+xmlControl: t.control, clientID: t.control.get_clientID()
+}, i || {}),
+r.LoadingDiv = n("#" + i.clientID + "_loading"),
+r.PagingControl = n("#" + i.clientID + "_pagingControl"),
+this.Render = function()
+{
+i.xmlControl.set_OnRender(r.OnControlRender),
+n(r.LoadingDiv).hide(),
+r.GetData(!0)
+},
+r.OnControlRender = function()
+{
+NG.Localize(r.element),
+n(i.xmlControl._xmlDoc).find("GroupOverview").each(function()
+{
+r.groups.push(NG.ParseGroupOverviewFromXnode(this))
+}),
+r.SetupPaging(),
+r.WireEvents()
+},
+r.WireEvents = function()
+{
+n(r.element).find("th").each(function()
+{
+n(this).attr("sortable") == "true" && (n(this).addClass("sortable"), n(this).bind("click", r.OnSort))
+}),
+n.each(r.groups, function()
+{
+var t=this,
+i=n("a.ngStatusLink", r.element).filter("[groupId=" + t.Id + "]");
+t.LockUserFollow ? i.remove() : NG.BindCommunityJoinLeaveLink(i, t)
+})
+},
+r.OnSort = function(t)
+{
+var i=n(t.target).attr("column");
+r.CurrentSortColumn == i ? r.CurrentSortDirection = r.CurrentSortDirection == "asc" ? "desc" : "asc" : (r.CurrentSortColumn = i, r.CurrentSortDirection = "asc"),
+r.GetData()
+},
+r.SetupPaging = function()
+{
+r.LastPageIndex = Math.ceil(r.NumGroups / f) - 1,
+r.NumGroups && r.NumGroups > 0 && (r.NumGroups == r.itemsPerPage || r.LastPageIndex == 0 ? n(r.PagingControl).hide() : NG.UpdatePaging(n(r.PagingControl), r.CurrentPageIndex, r.LastPageIndex, r.OnPage))
+},
+r.OnPage = function(n)
+{
+r.CurrentPageIndex = n.data.pageIndex,
+r.GetData()
+},
+r.GetData = function(t)
+{
+t || new NG.Tooltip(i.xmlControl._element, ngText.Loading + "...", 2500, "top");
+var u={
+MaxItems: f, PageIndex: r.CurrentPageIndex, SortColumn: r.CurrentSortColumn, SortDirection: r.CurrentSortDirection, Columns: ngOverviewColumns, CurrentLetter: ""
+};
+n.ajax({
+url: r.dataUrl + "/Groups/Overview/", dataType: "xml", type: "POST", contentType: "application/json; charset=utf-8", data: JSON.stringify(u), xhr: function()
+{
+return SharePointAjax && SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+}, success: function(n)
+{
+r.LoadData(n)
+}, error: function(t)
+{
+i.xmlControl._element.ngTooltip && i.xmlControl._element.ngTooltip.Remove(),
+n(i.xmlControl.element).html(NG.GetDefaultErrorMessage(t.status))
+}
+})
+},
+r.LoadData = function(t)
+{
+i.xmlControl._element.ngTooltip && i.xmlControl._element.ngTooltip.Remove(),
+t && (r.NumGroups = parseInt(n(t).find("TotalGroups").text()), i.xmlControl.set_Xml(t))
+}
+},
+NG.RecentCommunitiesControl = function(t, i)
+{
+var u=this,
+r=t.control;
+return i = n.extend({
+xmlControl: r, dataUrl: r.xmlUrl, actionUrl: NG.StripQueryParams(r.xmlUrl)
+}, i || {}), this.Render = function()
+{
+NG.Localize(n(t));
+var i=r._xmlDoc;
+n(i).find("SocialGroup").each(function()
+{
+var i=NG.ParseCommunityFromXnode(this),
+r=n("a.ngStatusLink", t).filter("[groupId=" + i.Id + "]");
+i.LockUserFollow ? r.remove() : NG.BindCommunityJoinLeaveLink(r, i)
+})
+}, this
+},
+NG.RecommendedCommunityControl = function(t, i)
+{
+var r=this;
+return r.element = n(t), i = n.extend({
+xmlControl: r.element.get(0).control, dataUrl: r.element.get(0).control.xmlUrl, actionUrl: NG.StripQueryParams(r.element.get(0).control.xmlUrl)
+}, i || {}), this.Render = function()
+{
+NG.Localize(r.element);
+var t=i.xmlControl._xmlDoc;
+n(t).find("SocialGroup").each(function()
+{
+var t=NG.ParseCommunityFromXnode(this),
+u=t.Id,
+f={group: t},
+e=n("#ngJoinLink_" + u, r.element);
+t.LockUserFollow ? e.remove() : e.bind("click", f, function(t)
+{
+NG.JoinLeaveCommunity(t, "Join", function()
+{
+new NG.Tooltip(t.target, String.format("<nobr>" + ngText.FollowingCommunityConfirmation + "<\/nobr>", "<wbr />" + n.htmlEncode(t.data.group.Name)), 2500, "top"),
+i.xmlControl.Reload()
+}),
+n("a", r.element).unbind()
+}),
+n("#ngIgnoreLink_" + u, r.element).bind("click", f, function(t)
+{
+NG.JoinLeaveCommunity(t, "Recommended/Ignore", function()
+{
+i.xmlControl.Reload(),
+new NG.Tooltip(t.target, ngText.IgnoredCommunityRecommendation, 2500, "top")
+}),
+n("a", r.element).unbind()
+})
+}),
+i.xmlControl.lastModXml = null
+}, this
+},
+NG.RecommendedCommunitiesRender = function(n)
+{
+n.recommendedCommunityControl || (n.recommendedCommunityControl = new NG.RecommendedCommunityControl(n._element)),
+n.recommendedCommunityControl && n.recommendedCommunityControl.Render()
+},
+NG.RecentCommunitiesRender = function(n)
+{
+n.recentCommunitiesControl || (n.recentCommunitiesControl = new NG.RecentCommunitiesControl(n._element)),
+n.recentCommunitiesControl && n.recentCommunitiesControl.Render()
+},
+NG.MyCommunities = function(t, i)
+{
+var r=this;
+return r.element = n(t), i = n.extend({
+selectControl: n("#ngMyCommunityOptions", r.element), button: n("#ngMyCommunityNavButton", r.element), svcUrl: null, noItemsText: ngText.NoCommunityMembership
+}, i || {}), r.selectControl = i.selectControl, r.button = i.button, r.Initialize = function()
+{
+r.button.click(r.NavigateToCommunity),
+r.LoadCommunities()
+}, r.LoadCommunities = function(t)
+{
+if (r.selectControl)
+if (i && i.svcUrl)
+{
+var u=[];
+n.ajax({
+url: i.svcUrl, success: function(i)
+{
+n(i).find("SocialGroup").each(function()
+{
+var t=n(this),
+i=NG.ParseCommunityFromXnode(t);
+u.push(i)
+}),
+r.RenderOptions(u, t)
+}
+})
+}
+else
+n.when(NG.LoadCommunities()).then(function()
+{
+r.RenderOptions(NG.CommunityList, t)
+})
+}, r.RenderOptions = function(t, u)
+{
+var e=n("#ngMyCommunityOptions", r.element),
+c,
+o,
+f,
+s,
+h;
+if (e.data("ngExplicitHide") == !0 && e.show().data("ngExplicitHide", !1), r.button.show(), r.element.find("#ngMyCommNoItems").remove(), n(r.selectControl).empty(), t.length == 0)
+{
+e.hide().data("ngExplicitHide", !0),
+r.button.hide(),
+c = n(String.format("<div id='ngMyCommNoItems'>{0}<\/div>", i.noItemsText)),
+r.element.append(c);
+return
+}
+o = n.grep(t, function(n)
+{
+return n.SocialGroupType == "SharePointWeb"
+}),
+e.empty(),
+option = n("<option />").prop({
+value: "", text: ""
+}),
+option.appendTo(r.selectControl),
+o.length > 0 && (f = n("<optgroup />").prop({label: ngText.Communities}), n(o).each(function(t, i)
+{
+option = n("<option />").prop({value: i.Url}).text(i.Name),
+option.appendTo(f)
+}), f.appendTo(r.selectControl)),
+s = n.grep(t, function(n)
+{
+return n.SocialGroupType == "StandAlone" && NG.StringIsNullOrEmpty(n.ExternalLinkId)
+}),
+s.length > 0 && (f = n("<optgroup />").prop({label: ngText.Spheres}), n(s).each(function(t, i)
+{
+option = n("<option />").prop({value: i.Url}).text(i.Name),
+option.appendTo(f)
+}), f.appendTo(r.selectControl)),
+h = n.grep(t, function(n)
+{
+return n.SocialGroupType == "StandAlone" && !NG.StringIsNullOrEmpty(n.ExternalLinkId)
+}),
+h.length > 0 && (f = n("<optgroup />").prop({label: ngText.Glassboards}), n(h).each(function(t, i)
+{
+option = n("<option />").prop({value: i.Url}).text(i.Name),
+option.appendTo(f)
+}), f.appendTo(r.selectControl)),
+!n().chosen || document.all && !document.querySelector ? e.find("option:first").text(ngText.MyCommunitiesDropDownLabel) : (e.attr("data-placeholder", ngText.MyCommunitiesDropDownLabel), e.chosen(), u && e.trigger("chosen:updated"))
+}, r.NavigateToCommunity = function()
+{
+var t=n(r.selectControl).val();
+t && (window.location.href = t)
+}, r.Initialize(), this
+},
+NG.CommunitySearch = function(n)
+{
+var t=this,
+i=jQuery142;
+t.xmlControl = null,
+t.dataUrl = window.spWebUrl + "/_vti_bin/NGC/CommunityService.svc/Groups/Search/?term={0}",
+t.search = "",
+t.Initialize = function()
+{
+var r=i(n).find("#ngCommunitySearchInput"),
+u=i(n).find("#ngCommunitySearchButton");
+NG.InputControl(i(r), i(u), t.LoadCommunitySearchResults)
+},
+t.LoadCommunitySearchResults = function(r)
+{
+var u,
+f,
+e,
+o;
+if (t.search = r.data.input.val(), t.search.trim().length == 0)
+{
+new NG.Tooltip(r.data.input, ngText.BlankSearchTerm, 5e3, "bottom");
+return
+}
+u = encodeURIComponent(t.search),
+f = i("#ngCDSearchCommunityXml", n).get(0),
+f && (t.xmlControl ? t.xmlControl.LoadXml(String.format(t.dataUrl, u)) : (e = {
+xmlUrl: String.format(t.dataUrl, u), xslUrl: ngCommResultsXSLT
+}, o = {render: t.SearchCommunitiesRender}, t.xmlControl = $create(SharePointAjax.XmlControl, e, o, null, f), t.xmlControl.errorHandler = function(n, t)
+{
+var i=t.get_statusCode();
+i == 400 && new NG.Tooltip(r.data.input, ngText.InvalidSearchInput, 5e3, "bottom")
+}))
+},
+t.SearchCommunitiesRender = function(n)
+{
+NG.CommunityResultsRender(n, null, String.format(ngText.SearchNoResults, t.search))
+},
+t.Initialize()
+},
+NG.JoinLeaveCommunity = function(t, i, r)
+{
+n.ajax({
+type: "POST", url: "/_vti_bin/NGC/CommunityService.svc/" + i + "/" + t.data.group.Id + "/", success: function()
+{
+n.get(window.spWebUrl + "/_vti_bin/ngc/communityservice.svc/groups/").done(function(u)
+{
+NG.CommunityList = [];
+var f=n(u).find("SocialGroup");
+f.length > 0 && (f.each(function()
+{
+var r=n(this),
+u=NG.ParseCommunityFromXnode(r),
+f;
+NG.CommunityList.push(u),
+f = n(t.currentTarget);
+switch (i.toLowerCase())
+{
+case"join":
+n(NG.Events).trigger("joinCommunity", t);
+break;
+case"leave":
+n(NG.Events).trigger("leaveCommunity", t)
+}
+}), NG.UpdateMyCommunities()),
+r && r()
+})
+}, error: function(n)
+{
+t && t.target && (n.status == 403 ? new NG.Tooltip(t.target, ngText.UnauthorizedError, 5e3, "bottom") : new NG.Tooltip(t.target, ngText.RequestError, 5e3, "bottom"))
+}
+})
+},
+NG.JoinCommunity = function(t)
+{
+NG.JoinLeaveCommunity(t, "Join", function()
+{
+t.data.group.IsMember = !0,
+new NG.Tooltip(t.target, String.format("<nobr>" + ngText.FollowingCommunityConfirmation + "<\/nobr>", "<wbr />" + n.htmlEncode(t.data.group.Name)), 2500, "top"),
+NG.BindCommunityJoinLeaveLink(t.target, t.data.group)
+})
+},
+NG.LeaveCommunity = function(t)
+{
+NG.JoinLeaveCommunity(t, "Leave", function()
+{
+t.data.group.IsMember = !1,
+new NG.Tooltip(t.target, String.format("<nobr>" + ngText.LeavingCommunityConfirmation + "<\/nobr>", "<wbr />" + n.htmlEncode(t.data.group.Name)), 2500, "top"),
+NG.BindCommunityJoinLeaveLink(t.target, t.data.group)
+})
+},
+NG.BindCommunityJoinLeaveLink = function(t, i, r, u)
+{
+if (i.IsMember)
+n(t).unbind("click").bind("click", {group: i}, u ? u : NG.LeaveCommunity).text(ngText.LeaveVerb);
+else if (i.PrivacyLevel == "Public" || i.PrivacyLevel == 1 || i.IsOwner && (i.SocialGroupType == 1 || i.SocialGroupType == "StandAlone"))
+n(t).unbind("click").bind("click", {group: i}, r ? r : NG.JoinCommunity).text(ngText.FollowVerb);
+else
+{
+var f=n(t);
+f.unbind("click").text(ngText.PrivateVerb).attr({
+href: i.Url, title: String.format(ngText.GoToCommunityTooltip, i.Name), target: "_blank"
+})
+}
+},
+NG.UpdateMyCommunities = function()
+{
+var t=n("#ngMyCommunityHolder").get(0),
+i;
+t && (t.myCommunitiesControl ? t.myCommunitiesControl.LoadCommunities(!0) : (i = SharePointAjax.FindParentControl(t, "AjaxControl"), i && i.myCommunitiesControl.LoadCommunities(!0))),
+t = n("#ngCDMyCommunitiesHolder").get(0),
+t && t.myCommunitiesControl && t.myCommunitiesControl.LoadCommunities(!0)
+},
+NG.PersonalCommunityResultsRender = function(n, t, i)
+{
+NG.CommunityResultsRender(n, t, i, !0)
+},
+NG.CommunityResultsRender = function(t, i, r, u)
+{
+var f=n(t._element);
+NG.Localize(f),
+f.find("#ngShowAll").bind("click", {parent: f}, function(t)
+{
+var i=n(this).find("span:first"),
+r=i.html() == ngText.ShowAllVerb;
+i.html(r ? ngText.ShowLessVerb : ngText.ShowAllVerb),
+r ? n(this).addClass("ngHideLink") : n(this).removeClass("ngHideLink"),
+t.data.parent.find("li.ngCommunityHiddenItem").each(function()
+{
+n(this).toggle()
+})
+}),
+n(t._xmlDoc).find("SocialGroup").length == 0 ? f.find("#ngNoItems").html(r ? r : ngText.NoCommunitiesMessage) : u || n(t._xmlDoc).find("SocialGroup").each(function()
+{
+var t=NG.ParseCommunityFromXnode(this),
+i=n("a.ngStatusLink", f).filter("[groupId=" + t.Id + "]");
+t.LockUserFollow ? i.remove() : NG.BindCommunityJoinLeaveLink(i, t)
+}),
+u && n(".ngActivityAction", f).remove()
+},
+NG.MyCommunitiesInit = function()
+{
+if (window._myCommunitiesTemplate != "undefined" && window._myCommunitiesTemplate != null)
+{
+while (window._myCommunitiesTemplate.length > 0)
+{
+var t=Array.dequeue(window._myCommunitiesTemplate),
+n=$get(t.elementID);
+n && (n.controlType = "AjaxControl", n.myCommunitiesControl = new NG.MyCommunities(n, t.properties.clientProperties))
+}
+window._myCommunitiesTemplate = null
+}
+},
+NG.CommunityDiscoveryControl = function(t)
+{
+var u=n(t).find("#ngCDRecommendedCommunitiesHolder").get(0),
+f,
+e,
+i,
+r,
+o;
+u && (f = {
+xmlUrl: window.spWebUrl + "/_vti_bin/NGC/CommunityService.svc/Recommended/?max=1", xslUrl: ngRecommendCommsXSLT
+}, e = {
+render: NG.RecommendedCommunitiesRender, init: NG.CommonInit
+}, $create(SharePointAjax.XmlControl, f, e, null, u)),
+i = n(t).find("#ngCDMyCommunitiesHolder").get(0),
+i && (i.myCommunitiesControl = new NG.MyCommunities(i)),
+r = n(t).find("#ngCDSearchCommunitiesHolder").get(0),
+r && (o = new NG.CommunitySearch(r))
+},
+NG.CommunitiesOverviewControl = function(t, i)
+{
+var r=n(t).find("#ngCommunitiesOverviewHolder").get(0),
+u,
+f;
+r && (u = {
+xslUrl: communitiesOverviewXSLT, clientID: i
+}, f = {init: NG.CommunitiesOverviewControlInit}, $create(SharePointAjax.XmlControl, u, f, null, r))
+},
+NG.CommunityDiscoveryInit = function()
+{
+var t,
+n,
+i;
+if (window._communityDiscoveryTemplate != "undefined" && window._communityDiscoveryTemplate != null)
+{
+while (window._communityDiscoveryTemplate.length > 0)
+t = Array.dequeue(window._communityDiscoveryTemplate),
+n = $get(t.elementID),
+n && (i = new NG.CommunityDiscoveryControl(n));
+window._communityDiscoveryTemplate = null
+}
+},
+NG.CommunitiesOverviewControlInit = function(n)
+{
+n.communitiesOverviewControl || (n.communitiesOverviewControl = new NG.CommunitiesOverview(n._element, n.clientProperties)),
+n.communitiesOverviewControl && n.communitiesOverviewControl.Render()
+},
+NG.CommunitiesOverviewInit = function()
+{
+var n,
+t,
+i;
+if (window._communityDiscoveryTemplate != "undefined" && window._communitiesOverviewTemplate != null)
+{
+while (window._communitiesOverviewTemplate.length > 0)
+n = window._communitiesOverviewTemplate.shift(),
+t = $get(n.elementID),
+t && (i = new NG.CommunitiesOverviewControl(t, n.properties.clientID));
+window._communitiesOverviewTemplate = null
+}
+},
+NG.CommunityTagDiscoveryInit = function(t)
+{
+NG.CommonInit(t),
+n.ajax({
+dataType: "xml", type: "POST", contentType: "text/plain", data: t.clientProperties.tags, url: t.clientProperties.url, xhr: function()
+{
+return SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+}, success: function(n)
+{
+t.set_Xml(n)
+}, error: function(i)
+{
+n(t._element).html(NG.GetDefaultErrorMessage(i.status))
+}
+})
+},
+NG.CommunityTagDiscoveryRender = function(n)
+{
+NG.CommunityResultsRender(n, null, ngText.NoItemsToDisplay)
+},
+NG.CommunityCategoryDiscoveryInit = function(t)
+{
+NG.CommonInit(t),
+n.ajax({
+dataType: "xml", type: "GET", contentType: "text/plain", url: t.clientProperties.url, xhr: function()
+{
+return SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+}, success: function(n)
+{
+t.set_Xml(n)
+}, error: function(i)
+{
+n(t._element).html(NG.GetDefaultErrorMessage(i.status))
+}
+})
+},
+NG.CommunityCategoryDiscoveryRender = function(n)
+{
+NG.CommunityResultsRender(n, null, ngText.NoItemsToDisplay)
+},
+n(document).ready(function()
+{
+NG.MyCommunitiesInit(),
+NG.CommunityDiscoveryInit(),
+ExecuteOrDelayUntilScriptLoaded(NG.CommunitiesOverviewInit, "SP.js")
+})
+}();

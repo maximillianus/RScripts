@@ -1,0 +1,118 @@
+﻿/// <reference name="MicrosoftAjax.debug.js" />
+/// <reference name="jquery-1.4.2-vsdoc.js"/>
+
+Type.registerNamespace('NG.LP');
+
+(function ($) {
+	var _communityOptionsLoaded = false;
+
+	NG.LP.ActivityStreamExtension = {};
+
+	NG.LP.ActivityStreamExtension.RenderHeaders = function (container) {
+		$("div.ActivityType-NgKnowledgeBase", container).each(function (e) {
+			var element = $(this);
+			if (element.children(".ngKBHeader").length > 0)
+				return;
+
+			var label = NG.CA.COMMON.JavaScriptResource.Get("LearningJsUI").KnowledgeBaseHeader;
+			$('<div class="ngKBHeader"><span>' + label + '</span></div>').prependTo(element);
+		});
+	};
+
+	NG.LP.ActivityStreamExtension.AddKBActions = function (container) {
+		$("div.ngActivityActionDiv", container).each(function (e) {
+			var element = $(this);
+			if (element.children(".ngKBActionItem").length > 0)
+				return;
+			if (element.parents('div.ActivityType-NgKnowledgeBase').length > 0)
+				return;
+
+			var eventId = element.closest('div.ngActivityRow').attr('eventid');
+			var ctxUrl = window.spWebUrl;
+			var url = ctxUrl + "/_layouts/NewsGator.LearningPoint/AddKBPage.aspx?showLocation=1&sourceId=" + eventId;
+
+			var label = NG.CA.COMMON.JavaScriptResource.Get("LearningJsUI").LinkAddtoKnowledgeBase;
+			$('<span class="ngActionItem ngKBActionItem"><a title="' + label + '" href="' + url + '" class="ngActivityAction ngActionbullet" onclick="javascript:NewItem2(event,&quot;' + url + '&quot;);javascript:event.cancelBubble=true;javascript:return false;">' + label + '</a></span>').appendTo(element);
+		});
+	};
+
+	NG.LP.ActivityStreamExtension.AddKBToCommunityFilter = function () {
+		if (_communityOptionsLoaded)
+			return;
+
+		_communityOptionsLoaded = true;
+		if ($('#ngCommunityNewsControlDiv').length == 0)
+			return;
+
+		var selectControl = $('#ngEventShowOptions');
+		if (window.activityFilterMods != null) {
+			var selectOptions = selectControl[0].options;
+			for (var modi in window.activityFilterMods) {
+				var mod = window.activityFilterMods[modi];
+				if (mod.dataUrl.toLowerCase() == '/eventtype/ngknowledgebase/') {
+					selectOptions[selectOptions.length] = new Option(mod.label, window.NGNewsFeedControls[0].options.dataUrl + mod.dataUrl);
+
+					if ($().chosen)
+						$(selectControl).trigger("chosen:updated.chosen");
+
+					return;
+				}
+			}
+		}
+	};
+
+
+	NG.LP.ActivityStreamExtension.CheckAddKBActionsPermissionsCachedRequest = $.ngCreateCache(function (defer, url) {
+		var serviceUrl = window.spWebUrl + '/_vti_bin/NewsGator.LearningPoint/Learning.svc/HasRights/';
+
+		$.ajax({
+			url: serviceUrl,
+			data: 'url=' + url,
+			type: "GET",
+			dataType: "json",
+			context: document.body
+		})
+		.done(function (data) {
+			defer.resolve(data);
+		})
+		.fail(function () {
+			defer.resolve(false);
+		});
+	});
+
+	NG.LP.ActivityStreamExtension.CheckAddKBActionsPermissions = function (container) {
+		if (container.children(".ngKBActionItem").length > 0)
+			return;
+
+		var url = encodeURIComponent(window.location.href);
+		$.when(NG.LP.ActivityStreamExtension.CheckAddKBActionsPermissionsCachedRequest(url)).done(function (result) {
+			if (result) {
+				NG.LP.ActivityStreamExtension.AddKBActions(container);
+			}
+		});
+	};
+
+	NG.LP.ActivityStreamExtension.LoadJsResources = function () {
+		NG.CA.COMMON.JavaScriptResource.Load("LearningJsUI");
+	};
+
+	var activityStreamDataElement = "";
+	var loaded = false;
+
+	$(NG.Events).bind("activityStreamRendered activityStreamAllCommentsRendered", function (event, data) {
+		activityStreamDataElement = data.element;
+		loaded = false;
+
+		NG.LP.ActivityStreamExtension.AddKBToCommunityFilter();
+		ExecuteOrDelayUntilScriptLoaded(NG.LP.ActivityStreamExtension.LoadJsResources, "sp.js");
+	});
+
+	$('body').bind('LearningJsUIloaded', function (event) {
+		if (loaded) return;
+
+		NG.LP.ActivityStreamExtension.RenderHeaders(activityStreamDataElement);
+		NG.LP.ActivityStreamExtension.CheckAddKBActionsPermissions(activityStreamDataElement);
+		loaded = true;
+	});
+
+}(jQuery142));

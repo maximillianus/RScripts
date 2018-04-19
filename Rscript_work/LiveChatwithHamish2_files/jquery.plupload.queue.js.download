@@ -1,0 +1,165 @@
+(function(n)
+{
+function t(n)
+{
+return ngText && ngText[n] || n
+}
+function r(i, r)
+{
+r.contents().each(function(t, i)
+{
+i = n(i),
+i.is(".plupload") || i.remove()
+}),
+r.prepend('<div class="plupload_wrapper plupload_scroll"><div id="' + i + '_container" class="plupload_container"><div class="plupload"><div class="plupload_content"><div class="plupload_filelist_header"><div class="plupload_file_name">' + t("FileUpload_Filename") + '<\/div><div class="plupload_file_action">&nbsp;<\/div><div class="plupload_file_status"><span>' + t("FileUpload_Status") + '<\/span><\/div><div class="plupload_file_size">' + t("FileUpload_Size") + '<\/div><div class="plupload_clearer">&nbsp;<\/div><\/div><ul id="' + i + '_filelist" class="plupload_filelist"><\/ul><div class="plupload_filelist_footer"><div class="plupload_file_name"><div class="plupload_buttons"><a href="javascript:void(0)" class="plupload_button plupload_add" id="' + i + '_browse">' + t("FileUpload_AddFiles") + '<\/a><a href="#" class="plupload_button plupload_start">' + t("FileUpload_StartUpload") + '<\/a><\/div><span class="plupload_upload_status"><\/span><\/div><div class="plupload_file_action"><\/div><div class="plupload_file_status"><span class="plupload_total_status">0%<\/span><\/div><div class="plupload_file_size"><span class="plupload_total_file_size">0 b<\/span><\/div><div class="plupload_progress"><div class="plupload_progress_container"><div class="plupload_progress_bar"><\/div><\/div><\/div><div class="plupload_clearer">&nbsp;<\/div><\/div><\/div><\/div><\/div><input type="hidden" id="' + i + '_count" name="' + i + '_count" value="0" /><\/div>')
+}
+var i={};
+n.fn.pluploadQueue = function(u)
+{
+return u ? (this.each(function()
+{
+function h(t)
+{
+var i,
+r;
+t.status == plupload.DONE && (i = "plupload_done"),
+t.status == plupload.FAILED && (i = "plupload_failed"),
+t.status == plupload.QUEUED && (i = "plupload_delete"),
+t.status == plupload.UPLOADING && (i = "plupload_uploading"),
+r = n("#" + t.id).attr("class", i).find("a").css("display", "block"),
+t.hint && r.attr("title", t.hint)
+}
+function l()
+{
+n("span.plupload_total_status", e).html(f.total.percent + "%"),
+n("div.plupload_progress_bar", e).css("width", f.total.percent + "%"),
+n("span.plupload_upload_status", e).html(String.format(t("FileUpload_FileUploadedCount"), f.total.uploaded, f.files.length))
+}
+function c()
+{
+var u=n("ul.plupload_filelist", e).html(""),
+i=0,
+r;
+n.each(f.files, function(t, e)
+{
+r = "",
+e.status == plupload.DONE && (e.target_name && (r += '<input type="hidden" name="' + o + "_" + i + '_tmpname" value="' + plupload.xmlEncode(e.target_name) + '" />'), r += '<input type="hidden" name="' + o + "_" + i + '_name" value="' + plupload.xmlEncode(e.name) + '" />', r += '<input type="hidden" name="' + o + "_" + i + '_status" value="' + (e.status == plupload.DONE ? "done" : "failed") + '" />', i++, n("#" + o + "_count").val(i)),
+u.append('<li id="' + e.id + '"><div class="plupload_file_name"><span>' + e.name + '<\/span><\/div><div class="plupload_file_action"><a href="#"><\/a><\/div><div class="plupload_file_status">' + e.percent + '%<\/div><div class="plupload_file_size">' + plupload.formatSize(e.size) + '<\/div><div class="plupload_clearer">&nbsp;<\/div>' + r + "<\/li>"),
+h(e),
+n("#" + e.id + ".plupload_delete a").click(function(t)
+{
+n("#" + e.id).remove(),
+f.removeFile(e),
+t.preventDefault()
+})
+}),
+n("span.plupload_total_file_size", e).html(plupload.formatSize(f.total.size)),
+f.total.queued === 0 ? n("span.plupload_add_text", e).html(t("FileUpload_AddFiles")) : n("span.plupload_add_text", e).html(t("FileUpload_QueueCount").replace(/%d/, f.total.queued)),
+n("a.plupload_start", e).toggleClass("plupload_disabled", f.files.length == f.total.uploaded + f.total.failed),
+u[0].scrollTop = u[0].scrollHeight,
+l(),
+!f.files.length && f.features.dragdrop && f.settings.dragdrop && n("#" + o + "_filelist").append('<li class="plupload_droptext">' + t("FileUpload_DragHere") + "<\/li>")
+}
+function a()
+{
+delete i[o],
+f.destroy(),
+e.html(s),
+f = e = s = null
+}
+var f,
+e,
+o,
+s;
+e = n(this),
+o = e.attr("id"),
+o || (o = plupload.guid(), e.attr("id", o)),
+s = e.html(),
+r(o, e),
+u = n.extend({
+dragdrop: !0, browse_button: o + "_browse", container: o
+}, u),
+u.dragdrop && (u.drop_element = o + "_filelist"),
+f = new plupload.Uploader(u),
+i[o] = f,
+f.bind("UploadFile", function(t, i)
+{
+n("#" + i.id).addClass("plupload_current_file")
+}),
+f.bind("Init", function(t, i)
+{
+if (!u.unique_names && u.rename)
+e.on("click", "#" + o + "_filelist div.plupload_file_name span", function(i)
+{
+var r=n(i.target),
+u,
+f,
+e,
+o="";
+u = t.getFile(r.parents("li")[0].id),
+e = u.name,
+f = /^(.+)(\.[^.]+)$/.exec(e),
+f && (e = f[1], o = f[2]),
+r.hide().after('<input type="text" />'),
+r.next().val(e).focus().blur(function()
+{
+r.show().next().remove()
+}).keydown(function(t)
+{
+var i=n(this);
+t.keyCode == 13 && (t.preventDefault(), u.name = i.val() + o, r.html(u.name), i.blur())
+})
+});
+n("#" + o + "_container").attr("title", "Using runtime: " + i.runtime),
+n("a.plupload_start", e).click(function(t)
+{
+n(this).hasClass("plupload_disabled") || f.start(),
+t.preventDefault()
+}),
+n("a.plupload_stop", e).click(function(n)
+{
+n.preventDefault(),
+f.stop()
+}),
+n("a.plupload_start", e).addClass("plupload_disabled")
+}),
+f.bind("Error", function(i, r)
+{
+var u=r.file,
+f;
+u && (f = r.message, r.details && (f += " (" + r.details + ")"), r.code == plupload.FILE_SIZE_ERROR && alert(t("FileUpload_TooLarge") + " " + u.name), r.code == plupload.FILE_EXTENSION_ERROR && alert(t("FileUpload_InvalidExtension") + " " + u.name), u.hint = f, n("#" + u.id).attr("class", "plupload_failed").find("a").css("display", "block").attr("title", f)),
+r.code === plupload.INIT_ERROR && setTimeout(function()
+{
+a()
+}, 1)
+}),
+f.bind("PostInit", function(i)
+{
+i.settings.dragdrop && i.features.dragdrop && n("#" + o + "_filelist").append('<li class="plupload_droptext">' + t("FileUpload_DragHere") + "<\/li>")
+}),
+f.init(),
+f.bind("StateChanged", function()
+{
+f.state === plupload.STARTED ? (n("li.plupload_delete a,div.plupload_buttons", e).hide(), n("span.plupload_upload_status,div.plupload_progress,a.plupload_stop", e).css("display", "block"), n("span.plupload_upload_status", e).html("Uploaded " + f.total.uploaded + "/" + f.files.length + " files"), u.multiple_queues && n("span.plupload_total_status,span.plupload_total_file_size", e).show()) : (c(), n("a.plupload_stop,div.plupload_progress", e).hide(), n("a.plupload_delete", e).css("display", "block"), u.multiple_queues && f.total.uploaded + f.total.failed == f.files.length && (n(".plupload_buttons,.plupload_upload_status", e).css("display", "inline"), n(".plupload_start", e).addClass("plupload_disabled"), n("span.plupload_total_status,span.plupload_total_file_size", e).hide()))
+}),
+f.bind("FilesAdded", c),
+f.bind("FilesRemoved", function()
+{
+var t=n("#" + o + "_filelist").scrollTop();
+c(),
+n("#" + o + "_filelist").scrollTop(t)
+}),
+f.bind("FileUploaded", function(n, t)
+{
+h(t)
+}),
+f.bind("UploadProgress", function(t, i)
+{
+n("#" + i.id + " div.plupload_file_status", e).html(i.percent + "%"),
+h(i),
+l()
+}),
+u.setup && u.setup(f)
+}), this) : i[n(this[0]).attr("id")]
+}
+})(jQuery142);

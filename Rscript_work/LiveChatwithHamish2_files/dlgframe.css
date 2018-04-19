@@ -1,0 +1,43 @@
+.ms-dialog body #s4-bodyContainer{
+min-width:0px !important;
+}
+.ms-dialog .ms-globalbreadcrumb,.ms-globalTitleArea,.ms-bannerContainer,.ms-titleareaframe,.ms-areaseparatorleft,.ms-nav,
+.ms-leftareacell,.ms-pagebottommarginleft,.ms-pagebottommargin,.ms-bodyareapagemargin,.ms-pagebottommarginright,
+.ms-rightareacell,.ms-titlearealeft,.ms-titleareaframe,#onetidPageTitleAreaFrame,.ms-titlearearight,
+.s4-notdlg-wrapper{margin:0px}
+.ms-dialog .s4-notdlg{display:none !important}
+.ms-dialog .s4-ca{
+margin-left:0px !important;
+margin-right:0px !important;
+min-height:0px !important;
+width:100%!important;
+min-width:0px !important;
+}
+.ms-dialog .s4-widecontentarea{
+width:100%!important;
+}
+.ms-dialog .ms-bodyareacell{
+min-height:0px !important;
+padding:8px;
+}
+.ms-dialog body #s4-ribbonrow{
+background-image:none !important;
+}
+.ms-dialog .ms-cui-tts{
+padding-left:8px !important;
+}
+.ms-dialog body #s4-simple-card{
+border-style:none !important;
+margin:0px !important;
+width:auto !important;
+}
+.ms-dialog body #s4-simple-card-top{
+display:none !important;
+}
+.ms-dialog-nr .s4-ca-dlgNoRibbon{
+margin-left:0px !important;
+min-height:0px !important;
+}
+.ms-dialog-nr body #s4-ribbonrow{
+display:none;
+}

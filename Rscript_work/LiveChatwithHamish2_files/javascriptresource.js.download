@@ -1,0 +1,71 @@
+﻿/// <reference name="MicrosoftAjax.debug.js" />
+/// <reference name="jquery-1.4.2-vsdoc.js"/>
+
+Type.registerNamespace('NG.CA.COMMON');
+
+(function ($) {
+    var jsJsonResourceCache = [];
+    var callback = "";
+    var callbackTries = 0;
+
+    NG.CA.COMMON.JavaScriptResource = {};
+
+    NG.CA.COMMON.JavaScriptResource.Get = function (resource) {
+    	var resourceName = NG.CA.COMMON.GetResourceCacheKey(resource);
+        if (jsJsonResourceCache[resourceName]) {
+            return jsJsonResourceCache[resourceName];
+        }
+        
+        NG.CA.COMMON.JavaScriptResource.Load(resource);
+        return jsJsonResourceCache[resourceName];
+    };
+
+	NG.CA.COMMON.GetResourceCacheKey = function(resource) {
+		var resourceName = resource;
+		if (!resource)
+			resourceName = "NewsGatorCAJs";
+		return resourceName;
+	};
+    
+    NG.CA.COMMON.JavaScriptResource.Load = function (resource) {
+    	var resourceName = NG.CA.COMMON.GetResourceCacheKey(resource);
+        if (jsJsonResourceCache[resourceName]) {
+            NG.CA.COMMON.JavaScriptResource.Trigger(resourceName);
+        	return;
+        }
+    	
+    	var resourceParameter = "";
+    	if(resource)
+    		resourceParameter = "resource=" + resource + "&";
+    	
+        $.ajax({
+            type: 'GET',
+            url: window.spWebUrl + "/_layouts/NewsGator.CA.Common.SharePoint/GetJsResources.ashx",
+            data: resourceParameter + "culture=" + SP.Res.lcid,
+            datatype: "json",
+            async: false,
+            success: function(data) {
+                jsJsonResourceCache[resourceName] = jQuery142.parseJSON(data);
+                NG.CA.COMMON.JavaScriptResource.Trigger(resourceName);
+            }
+        });
+    };
+    
+    NG.CA.COMMON.JavaScriptResource.Trigger = function (resourceName) {
+        try {
+            callbackTries++;
+            $('body').trigger(resourceName + 'loaded'); 
+        }
+        catch (e) {
+            // The first time the page is called after an IISReset the trigger event will throw 
+            // a "TypeError: container.children is not a function".  So we try again.
+            if (callbackTries <= 10) {
+                setTimeout(function () {
+                    NG.CA.COMMON.JavaScriptResource.Trigger(callback);
+                }, 500);
+            }
+        }
+
+    };
+   
+}(jQuery142));

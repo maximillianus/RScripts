@@ -1,0 +1,65 @@
+(function(n)
+{
+function t(t, i, r)
+{
+return this.each(function()
+{
+var u,
+f,
+e,
+o,
+s,
+h,
+c;
+try
+{
+if (u = n(this), f = "getAttribute" in this ? this.getAttribute(i) : u.attr(i), !f || !f.length)
+return;
+if (r || (r = ngText), e = [], o = u.attr("arg") || u.attr("arg0"), o)
+for (e.push(o), s = 1; ; s++)
+if (h = u.attr("arg" + s), h != null)
+e.push(h);
+else
+break;
+c = e.length > 0 ? String.format.apply(String, n.merge([r[f]], e)) : r[f],
+c && t(this, c)
+}
+catch(l)
+{
+Sys.Debug.trace("Localtext failed." + l)
+}
+})
+}
+function i(n, t)
+{
+n.innerHTML = t
+}
+function r(n, t)
+{
+n.value = t
+}
+function u(n, t)
+{
+n.title = t
+}
+function f(t, i)
+{
+n(t).attr("alt", i)
+}
+n.fn.localtext = function(n)
+{
+return t.apply(this, [i, "text", n]), this
+},
+n.fn.localtextvalue = function(n)
+{
+return t.apply(this, [r, "text", n]), this
+},
+n.fn.localtitle = function(n)
+{
+return t.apply(this, [u, "title", n]), this
+},
+n.fn.localalt = function(n)
+{
+return t.apply(this, [f, "alt", n]), this
+}
+})(jQuery142);

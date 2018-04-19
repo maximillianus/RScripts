@@ -1,0 +1,209 @@
+/* _lcid="1033" _version="14.0.4759"
+    _LocalBinding */
+IMG { border:none; -ms-interpolation-mode:bicubic; }
+.ms-vb-icon
+{
+  background-color:white;
+}
+.ms-bodyareaframe, .ms-viewareaframe
+{
+	padding:3px 4px;
+}
+.ms-pagetitleareaframe TABLE
+{
+  height:auto; 
+}
+.ms-pagetitleareaframe TABLE, TD.ms-titleareaframe, DIV.ms-titleareaframe, .ms-pagetitleareaframe,
+  .ms-mwspagetitleareaframe, .ms-consoletitleareaframe, .ms-titlearealeft, .ms-titlearearight,
+  .ms-nav, .ms-pagemargin, TD.ms-rightareacell DIV.ms-pagemargin, .ms-bodyareapagemargin,
+  .ms-pagebottommargin, .ms-pagebottommarginleft, .ms-pagebottommarginright, .ms-quicklaunch,
+  .ms-quicklaunchheader, .ms-quicklaunchouter, .ms-quickLaunch table td,
+  .ms-quicklaunch table.ms-navheader td, .ms-navheader2 td, .ms-quicklaunch span.ms-navheader,
+  .ms-navSubMenu1, .ms-navSubMenu2, .ms-bodyareaframe, .ms-viewareaframe
+{
+  background-image:none; background-color:transparent; border:none;
+}
+.ms-main
+{ 
+  width:790px; 
+  margin-left:auto; margin-right:auto; 
+}
+body #s4-leftpanel
+{
+  min-height:0px;
+}
+.s4-widecontentarea a:hover
+{
+   text-decoration: underline; 
+}
+.s4-ca 
+{    
+  min-height: 0px;
+  float:left;
+  margin-left: 0px;
+  width:980px;
+}
+div.ms-pageinformation
+{
+  max-width: 30%; 
+}
+.s4-sn 
+{
+  padding: 0px 0px 5px 24px;
+  height: 22px;
+  border-bottom: 1px solid #91cdf2;
+  background-color: #f8fcff;
+}
+.s4-sn li.static > a {     
+    padding: 5px 12px;
+    color: #3b4f65;    
+    font-size: 1.3em; 
+    min-height: 17px; 
+}
+.s4-sn li.static > a:hover {
+    color: #44aff6;
+}
+.s4-sn li.static > a.selected {
+    border: 1px solid #91cdf2;
+    border-bottom: white;
+    color: #003759;
+    background-color: white;
+    padding-bottom: 6px;
+    padding-top: 4px;
+}
+.ms-profilepageheader
+{
+    border-right: 1px solid #91cdf2;
+    background-color: #f8fcff;
+}
+.ms-profilepagecontent
+{
+   padding: 24px;
+}
+body #ProfileViewer_ValueAboutMe p
+{
+  margin: 0;
+}
+.ms-WPTitle {
+    color:#003759;
+    font-size:1.3em; 
+}
+.ms-WPTitle nobr {
+    white-space: normal;
+}
+.s4-wpActive .ms-WPHeader {
+    /* [ReplaceColor(themeColor: "Accent1",themeTint:"0.86")] */ background-color: #008de9;
+    background-position: left bottom;
+}
+.ms-sectionheader {
+  font-family:verdana; 
+  font-size:1.3em; 
+  font-weight: normal; 
+}
+.ms-PartSpacingVertical 
+{
+    margin: 0px;
+}
+.s4-wpcell-plain > table {
+    padding-top: 16px;
+    padding-bottom: 8px;
+}
+.ms-vb, .ms-descriptiontext
+{
+  font-family: verdana! important; 
+}
+.ms-WPBorder
+{
+  border: none;
+}
+.ms-profilepicture {
+   text-align: center;
+   word-wrap: normal;
+}
+.ms-profilepicture img {
+  vertical-align: middle;
+  height: auto;
+  border: 1px solid #C5C7C9;
+  background-color: #ffffff;
+  padding: 2px; 
+}
+.socialcomment-image div {
+  border: none! important;
+}
+.ms-largethumbnailimage
+{
+   width: 148px;
+   line-height: 148px;   
+}
+.ms-largethumbnailimage img
+{
+   max-width: 148px;   
+}
+.ms-smallthumbnailimage
+{
+   width: 36px;
+   line-height: 36px;
+}
+.ms-smallthumbnailimage img
+{
+   max-width: 36px;
+}
+.ms-mediumthumbnailimage
+{
+   width: 100px;
+   line-height: 100px;
+}
+.ms-mediumthumbnailimage img
+{
+   max-width: 100px;
+}
+.ms-profileimage {
+  border: 1px solid #C5C7C9!important;
+  background-color: #ffffff;
+  padding: 2px;   
+}
+.ms-name
+{
+  font-size:1.8em; 
+}
+.ms-contactcardpicture {
+   margin-right: 8px;
+   margin-top: 6px;
+   margin-bottom: 6px;
+}
+.ms-contactcardtext1 {
+   /* [ReplaceColor(themeColor: "Hyperlink")] */
+   color: #0072BC;
+   font-family:verdana; 
+}
+.ms-contactcardtext2, .ms-contactcardtext2 a {
+   color:#B10069;
+   font-family:verdana; 
+}
+.ms-contactcardtext3 {
+   font-family:verdana; 
+}
+.ms-my-addColleague
+{
+  font-weight:normal; 
+}
+.ms-my-addColleague .ms-iconCell
+{
+  color:#21b55a;
+}
+.ms-disabledlink a:link, .ms-disabledlink a:hover, .ms-disabledlink a:visited
+{
+  color: #676767;
+  cursor: default;
+  text-decoration: none; 
+}
+.ms-suggestion
+{
+  border: 1px solid #C5C7C9;
+  background-color: white;
+  padding: 5px 10px;
+}
+.ms-suggestion td
+{
+  width: 30%;
+}

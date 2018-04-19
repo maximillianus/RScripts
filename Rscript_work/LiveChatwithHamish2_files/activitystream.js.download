@@ -1,0 +1,2217 @@
+﻿Type.registerNamespace("NG"),
+function () {
+    var n = jQuery142;
+    window.ngUserProfiles = window.ngUserProfiles || {},
+NG.ActivityView = function () { },
+NG.ActivityView.prototype = {
+    NewsFeed: 1, Select: 2, Single: 3, More: 4, SingleNotification: 5, RecentMicrobloggers: 6, Ideas: 7, Filter: 8, Sync: 9, Notifications: 10
+},
+NG.ActivityView.registerEnum("NG.ActivityView"),
+NG.NewsFeedReload = function () {
+    if (window.NGNewsFeedControls && window.NGNewsFeedControls.length)
+        for (var n = 0; n < window.NGNewsFeedControls.length; n++)
+            window.NGNewsFeedControls[n].ReloadXml()
+},
+NG.NewsFeedReloadSingleEvents = function (t, i) {
+    if (window.NGNewsFeedControls && window.NGNewsFeedControls.length) {
+        var r = n(".ngActivityEventDiv_" + t).length;
+        r && (i || (i = String.format("{0}/_vti_bin/ng/activityfeed.svc/0/{1}/", window.spWebUrl, t)), n.ajax({
+            dataType: "xml", url: i, xhr: function () {
+                return SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+            }, success: function (n) {
+                NG.UpdateSingleEvents(t, i, n)
+            }, error: function (n) {
+                Sys.Debug.trace("Error refreshing single event: " + NG.GetDefaultErrorMessage(n.status))
+            }
+        }))
+    }
+},
+NG.UpdateSingleEvents = function (t, i, r, u) {
+    for (var s, h, c, o = 0; o < window.NGNewsFeedControls.length; o++) {
+        var f = window.NGNewsFeedControls[o],
+l = n(f.options.xmlControl._element),
+a = l.find(".ngActivityEventDiv_" + t),
+e = a.last().parent().get(0);
+        u && u._clientID == f.options.xmlControl._clientID || e && (s = n(e).find("a.ngViewAllCommentsLink").is(":hidden") && n(e).find(".ngAllCommentsDiv").is(":visible"), e.ngXmlControl ? e.ngXmlControl.set_Xml(r) : (h = {}, c = {
+            init: NG.CommonInit, render: function (t) {
+                t.newsFeedControl || (t.newsFeedControl = new NG.NewsFeed(t._element, {
+                    dataUrl: i, actionUrl: f.options.actionUrl, view: f.options.view == NG.ActivityView.SingleNotification ? f.options.view : NG.ActivityView.Single, parentXmlControl: f.options.parentXmlControl ? f.options.parentXmlControl : f.options.xmlControl, linkHashTags: f.options.linkHashTags
+                })),
+t.newsFeedControl && (t.newsFeedControl.Render(), s && n(t._element).find("a.ngViewAllCommentsLink").trigger("click"))
+            }
+        }, e.ngXmlControl = $create(SharePointAjax.XmlControl, h, c, null, e), f.options.xmlControl._xsl ? e.ngXmlControl.set_Xsl(f.options.xmlControl._xsl) : e.ngXmlControl.set_XslUrl(f.options.xmlControl.xslUrl), e.ngXmlControl.set_Xml(r)))
+    }
+},
+NG.RemoveMutedEvents = function (t) {
+    for (var r, u, i = 0; i < window.NGNewsFeedControls.length; i++)
+        r = window.NGNewsFeedControls[i],
+r.options.view == NG.ActivityView.NewsFeed && r.muteLinkAvailable && (u = n(r.options.xmlControl._element), u.find(".ngActivityEventDiv_" + t).parent().remove())
+},
+NG.NewsFeed = function (t, i) {
+    function k(t) {
+        r.LoadTag(n(this).text()),
+t.preventDefault()
+    }
+    function d(n) {
+        if (typeof SyntaxHighlighter != "undefined") {
+            var t = n.getElementsByTagName("code");
+            t.length > 0 && (SyntaxHighlighter.config.tagName = "code", SyntaxHighlighter.defaults.gutter = !1, SyntaxHighlighter.defaults.toolbar = !1, SyntaxHighlighter.highlight(null, t))
+        }
+    }
+    function y(t) {
+        (i.linkHashTags || a) && (t.find("a.hashtag").each(function () {
+            var t = n(this);
+            t.attr("href") || t.attr("href", "javascript:;").click(k)
+        }), t.find("span.hashtag").each(function () {
+            var t = n(this),
+i = n('<a href="javascript:;" class="hashtag">' + t.html() + "<\/a>");
+            i.click(k),
+t.after(i).remove()
+        }))
+    }
+    function g(t) {
+        t.find("a.ngFromText").each(function () {
+            var t = n(this),
+i = t.attr("href");
+            t.attr("origText", i).text(ngText.LinkReplacementText).hover(function () {
+                new NG.Tooltip(t, i, 12e4, "parent-bottom-left", !1)
+            }, function () {
+                this.ngTooltip.Remove()
+            })
+        })
+    }
+    function nt(t) {
+        var f = n(t).find("[eventid]").attr("eventid"),
+r = n(document).find("div.ngActivityEventDiv_" + f),
+i,
+u;
+        r.length > 0 && (i = n(t).children("author"), i != 0 && i != "0" && (u = n(i).children("id").text(), r.find("span.ngSummary a:first").filter(function () {
+            return /accountname=/i.test(n(this).attr("href"))
+        }).addClass("ngAuthorLink").attr("authorId", u)))
+    }
+    function tt(n) {
+        var t = window.spWebUrl + "/_layouts/ng/pages/tagfilter.aspx?term=" + n;
+        return (window.ngCommunityID || window.ngGroupID) && (t += window.ngGroupID ? "&groupId=" + window.ngGroupID : "&communityId=" + window.ngCommunityID), t
+    }
+    function it(t) {
+        var r = n(t).closest(".ngActivityRow"),
+i = r.last().parent().get(0);
+        return n(i).find("a.ngViewAllCommentsLink").is(":hidden") && n(i).find(".ngAllCommentsDiv").is(":visible")
+    }
+    var l,
+v,
+u,
+p,
+w,
+b,
+rt;
+    window.NGNewsFeedControls || (window.NGNewsFeedControls = []);
+    var t = n(t),
+r = this,
+o = null,
+f = [],
+s = null,
+h = NG.ColleagueList,
+e = NG.CommunityList,
+c = NG.CurrentCommunity,
+a = typeof ngHashTagFilterSettings != "undefined" && ngHashTagFilterSettings === !0;
+    r.NotificationControl = null,
+l = t.get(0).control,
+i = n.extend({
+    xmlControl: l, view: NG.ActivityView.NewsFeed, inputType: NG.ActivityInputType.Microblog, dataUrl: l.xmlUrl, postUrl: i && i.actionUrl ? i.actionUrl : l.xmlUrl, actionUrl: l.xmlUrl, parentXmlControl: null, linkHashTags: !0, noItemsText: null, customGetXmlFunc: null, isPersonal: !1, defaultFilterUrl: null, defaultFilterSet: !1, hideLinkAvailable: null, currentModule: null, maxCount: 25, personalTarget: "", updateParentOnSingleReload: !0, syncTime: 18e4
+}, i || {}),
+r.options = i,
+i.view != NG.ActivityView.Single && i.view != NG.ActivityView.SingleNotification && i.view != NG.ActivityView.Notifications && window.NGNewsFeedControls.push(this),
+r.initialPagingToken = String.format("1;{0};", i.maxCount),
+r.parentElement = n("#ngNewsfeedHolder_" + i.xmlControl._clientID),
+i.view == NG.ActivityView.NewsFeed ? (r.filterControl = n("#ngControlDiv_" + i.xmlControl._clientID), r.clearFilterLink = r.parentElement.find("#ngClearFilter")) : (r.filterControl = null, r.clearFilterLink = null),
+n("#ngRefreshFilterLink_" + i.xmlControl._clientID).click(function () {
+    r.ReloadXml(),
+r.NotificationControl && r.NotificationControl.Refresh()
+});
+    n("#ngEditSettingLink_" + i.xmlControl._clientID).on("click", function () {
+        if (n("#ngSettings").length == 0)
+            n("body").append('<div id="ngSettings" style="display:none;"><div id="ngSettingsContainer"><\/div><\/div>');
+        n(this).ngsettings({ dialogWidth: 1e3 })
+    });
+    return window.ngIsLookout || (v = window.location.href.toLowerCase(), v.indexOf("ngsettings=1") !== -1 ? n("#ngEditSettingLink_" + i.xmlControl._clientID).trigger("click") : v.indexOf("ngprofile=1") !== -1 && (n('<div id="ngNewUser" style="display:none;"><\/div>').appendTo("body"), n("#ngNewUser").setuptour({
+        showFinish: !0, dialogWidth: 800
+    }))), u = i.parentXmlControl && i.parentXmlControl.newsFeedControl ? i.parentXmlControl.newsFeedControl : null, this.Render = function () {
+        var f,
+h,
+e,
+l,
+c,
+a,
+v;
+        if (i.xmlControl._element.ngTooltip && i.xmlControl._element.ngTooltip.Remove(), r.ToggleAutoRefresh(!1), f = n(i.xmlControl._xmlDoc), !i.FALLBACK && (i.FALLBACK = !0, i.view == NG.ActivityView.NewsFeed && f.find("entry").length == 0 && r.filterControl.length > 0 && !i.defaultFilterSet)) {
+            n("#ngEventShowOptions").val(i.dataUrl + "PublicMicroblog/"),
+r.LoadSelectActivities(null);
+            return
+        }
+        if (n(".ngMoreAction", t).each(function () {
+            n(".ngActionItem", n(this)).length == 0 && n(this).hide()
+        }), r.hideActivityLinkAvailable = i.hideLinkAvailable != null ? i.hideLinkAvailable : u ? u.hideActivityLinkAvailable : u && u.hideActivityLinkAvailable || i.view == NG.ActivityView.NewsFeed && !window.ngCommunityID && !window.ngGroupID && !o && !s && !i.isPersonal, r.muteLinkAvailable = r.hideActivityLinkAvailable || i.view == NG.ActivityView.Single && (u == null || u.options.view == NG.ActivityView.Single), h = n(".ngHiddenActions", t), i.view == NG.ActivityView.SingleNotification ? h.remove() : (h.each(function () {
+            r.hideActivityLinkAvailable || r.muteLinkAvailable || n(".ngActionItem", n(this)).length != 0 || n(this).remove()
+        }), n("a.ngHideLink", h).bind("click", r.ShowHideDialog)), e = f.find("pagingToken").text(), e && e.length > 0 && (n("#ngActivityGetMore", t).bind("click", { token: e }, r.GetMore), l = f.find("pagingOlder").text(), l ? n("#ngActivityGetMore", t).html(ngText.paging_more_older) : n("#ngActivityGetMore", t).html(ngText.paging_more)), f.find("entry").length == 0) {
+            i.view == NG.ActivityView.Sync ? t.remove() : i.noItemsText ? n("#ngNoItems", t).html(i.noItemsText) : i.view == NG.ActivityView.Single ? n("#ngNoItems", t).html(ngText.EventNotFoundError) : window.ngCommunityID || window.ngGroupID ? e ? n("#ngNoItems", t).html(ngText.NoItemsToDisplayActive) : n("#ngNoItems", t).html(ngText.NoItemsToDisplay) : i.view != NG.ActivityView.NewsFeed || o || s ? e ? n("#ngNoItems", t).html(ngText.NoItemsToDisplayActive) : n("#ngNoItems", t).html(ngText.NoItemsToDisplay) : n("#ngNoItems", t).html(ngText.NoItemsInActivityFeed);
+            return
+        }
+        if (i.view == NG.ActivityView.RecentMicrobloggers || u && u.options.view == NG.ActivityView.RecentMicrobloggers) {
+            t.find("a.ngAddColleague").click(NG.AddColleague),
+t.find("a.ngViewLink").click(function (n) {
+    NG.ModalView(n)
+}),
+t.find("a.ngGetLink").click(function (t) {
+    window.prompt(ngText.GetLinkInstructions, n(t.target).attr("href"))
+});
+            t.on("click", function (t) {
+                var i = n(t.target);
+                i.is(".ng-showmore-trigger") && r.ShowMoreOfEvent(i)
+            })
+        }
+        else {
+            c = t.parents("div.ngNewsFeedContent"),
+c.data("ngEventClick") || (c.data("ngEventClick", 1), a = c.click(function (t) {
+    var i = n(t.target),
+u;
+    i.is("a") || (i = i.parent("a")),
+i.is("a") && (i.is(".ngShowShareLink") ? r.ShowShareModal(i) : i.is(".ngShowCommentLink") ? r.ShowComment(i) : i.is(".ngLikeLink") ? r.Like(i) : i.is(".ngUnlikeLink") ? r.Unlike(i) : i.is(".ngLikeCommentLink") ? r.LikeComment(i) : i.is(".ngUnlikeCommentLink") ? r.UnlikeComment(i) : i.is(".ng-showmore-trigger") ? r.ShowMoreOfEvent(i) : i.is(".ngUnpinLink") ? r.Unpin(i) : i.is(".ngPinLink") ? r.Pin(i) : i.is(".ngVoteLink") ? r.Vote(i) : i.is(".ngUnvoteLink") ? r.UnVote(i) : i.is(".ngFollowUpLink") ? r.FollowUp(i) : i.is(".ngUnFollowUpLink") ? r.UnFollowUp(i) : i.is(".ngDeleteLink") ? r.DeleteComment(i) : i.is(".ngMarkAnswerLink") ? r.MarkAnswer(i) : i.is(".ngUnMarkAnswerLink") ? r.UnMarkAnswer(i) : i.is(".ngViewAllCommentsLink") || i.is(".ngHideAllCommentsLink") ? r.ToggleMetaDiv(i) : i.is(".ngViewAllLikesLink") ? r.ToggleLikeDiv(i) : i.is(".ngViewOriginalLink") ? NG.ModalView(t, 1) : i.is(".ngViewLink") ? NG.ModalView(t) : i.is(".ngMoreActionsLink") ? r.ShowMoreMenu(i) : i.is(".ngTranslateActionsLink") ? r.ShowTranslateMenu(i) : i.is(".ngTranslationActionItem") ? r.Translate(i) : i.is(".ngShowReportLink") ? r.ShowReport(i) : i.is(".ngDeleteEventLink") ? r.DeleteActivity(i) : i.is(".ngDeleteEventFromContextLink") ? r.DeleteActivityFromContext(i) : i.is(".ngDigestSettingLink") ? r.ChangeDigestSettings(i) : i.is(".ngGetLink") ? window.prompt(ngText.GetLinkInstructions, i.attr("href")) : i.is(".ngEditEventLink") ? r.ShowEdit(i) : i.is(".ngEditCommentLink") ? r.ShowEditComment(i) : i.is(".ngLockEventLink") ? r.Lock(i) : i.is(".ngUnlockEventLink") ? r.Unlock(i) : i.is(".ngViewLinkExternal") ? (u = i.attr("href"), t.preventDefault(), window.open(u, "_blank")) : i.is(".ngPromotedMuteLink") ? r.MuteActivity(t) : NG.StringIsNullOrEmpty(i.attr("target")) && (u = i.attr("href"), NG.StringIsNullOrEmpty(u) || NG.StringIsNullOrEmpty(i[0].hostname) || (t.preventDefault(), window.open(u, "_blank"))))
+}));
+            t.find("a.ngShowNewsLink").on("click", r.ShowNewsView);
+            t.find("input.ngChkPoll").on("change", function (t) {
+                return r.UpdatePollOption(n(t.currentTarget)), !1
+            });
+            t.find(".ngPollNameHolder").not(".ngPollDisabled", t).on("click", function (t) {
+                var i = n(t.currentTarget);
+                i.not("input.ngChkPoll") && (i = n(t.currentTarget).parents(".ngPollAnswer").find("input.ngChkPoll"), i.prop("checked", !i.is(":checked"))),
+r.UpdatePollOption(i)
+            });
+            r.UpdatePollDisplay()
+        }
+        r.RenderCommon(f, t),
+v = t.find(".ngActivityRow"),
+n(NG.Events).trigger("activityStreamRendered", [{ element: t}])
+    }, r.RenderCommon = function (u, f) {
+        u || (u = n(i.xmlControl._xmlDoc)),
+f || (f = t);
+        try {
+            f.find("span.timeago").timeago()
+        }
+        catch (o) { }
+        if (f.find(".ngImageAttachmentContainer").imageTiler({ wrapperClass: "ngImageAttachmentHolder" }), NG.Localize(f), y(f), f.find("div.ngActivityRow").each(function () {
+            nt(this)
+        }), f.find("a.ngOriginalItem").click(function (t) {
+            t.preventDefault();
+            var i = n(this).attr("href");
+            return NG.ShowPageAsDialog({
+                url: i, width: 800, height: 600
+            }), !1
+        }), window.ngMiniProfileEnabled)
+            try {
+                f.find("a.ngAuthorLink, a.user").miniProfile()
+            }
+            catch (o) { }
+        g(f),
+f.find(".ngSummary a").each(function () {
+    var e = n(this),
+t = e.html(),
+f = t.slice(0, 1),
+i,
+r,
+u;
+    (f == "@" || f == "#") && (i = '<span class="ngDim">' + f, r = t.slice(1, 2), r == "[" || r == "(" ? (i += r + "<\/span>", u = t.slice(-1), i += u == "]" || u == ")" ? t.slice(2, t.length - 1) + '<span class="ngDim">' + u + "<\/span>" : t.slice(2)) : i += "<\/span>" + t.slice(1), e.html(i))
+});
+        var e = ngText.ShowAllVerb.toLocaleLowerCase();
+        f.find(".ng-showmore").parent().append(n('<a href="javascript:void(0);" class="ng-showmore-trigger" title="' + e + '" data-ngaction="show">...' + e + "<\/a>")),
+d(f[0]),
+r.InitializeLanguages(function () {
+    window.ngLanguages && window.ngLanguages.length && n(".ngTranslateAction", t).show()
+}),
+setTimeout(function () {
+    NG.SetupPresence(f)
+}, 100)
+    }, r.RenderMetaData = function (t) {
+        n(t.element).show();
+        var i = n(t.element).hasClass("ngAllCommentsDiv");
+        i && n(t.element).parents(".ngMetaContainer").find(".ngPartialCommentsDiv").hide(),
+r.RenderCommon(n(t._xmlDoc), n(t.element)),
+i && n(NG.Events).trigger("activityStreamAllCommentsRendered", [{ element: n(t.element)}])
+    }, r.UpdatePollDisplay = function () {
+        n("div.ngPollOptionsDiv", t).each(function () {
+            var t = parseInt(n(this).attr("totalCount"));
+            n("div.ngPollName", n(this)).each(function () {
+                var i = n(this),
+u = parseInt(i.attr("count")),
+f = parseInt(u / t * 100),
+r = i.html();
+                r = String.format("<div class='percentage' style='width:{0}px;'><\/div>", Math.floor(f * (i.width() / 100))) + r,
+i.html(r)
+            })
+        })
+    }, r.SetupFilterControl = function () {
+        var t,
+e,
+u,
+f,
+o;
+        if (n(".ngFilterShow").css("visibility", "hidden"), n("#ngManageGroupLink").click(function () {
+            NG.ShowPageAsDialog({
+                url: window.spWebUrl + "/_layouts/ng/pages/managegroups.aspx?isDlg=1", width: 800, height: 650
+            })
+        }), r.filterControl.get(0)) {
+            if (r.SetupSearchFilter(), t = n("#ngEventShowOptions"), t.length > 0 && t.parent().hasClass("ngQuestionFilterShow") !== !0)
+                for (t.change(r.LoadSelectActivities), e = NG.GetFilters(i.dataUrl), u = 0; u < e.length; u++)
+                    f = e[u],
+option = n("<option />").prop({
+    value: f.value, searchable: f.searchable
+}).text(f.name),
+t.append(option);
+            o = Function.createDelegate(r, r.xSetupFilterControl),
+window.setTimeout(o, 300)
+        }
+    }, r.xSetupFilterControl = function () {
+        var u = n("#ngEventShowOptions"),
+t = !1,
+i,
+f;
+        u.length > 0 && (i = u.parent(), t = i.hasClass("ngFilterShowActivityOnly"), i.hasClass("ngQuestionFilterShow") !== !0 && t !== !0 && r.LoadColleaguesAndCommunities(r.LoadFilterDropDown)),
+r.SetupNotifications(),
+t !== !0 ? (f = Function.createDelegate(r, r.xLoadRemoteAutoComplete), window.setTimeout(f, 500)) : (n(".ngFilterShow").css("visibility", "visible"), n().chosen && n("#ngEventShowOptions").chosen())
+    }, r.xLoadRemoteAutoComplete = function () {
+        var r = !1,
+i,
+t;
+        if (window.activityFilterMods != null)
+            for (i in window.activityFilterMods)
+                window.activityFilterMods[i].remoteConnection && (r = !0, t = window.activityFilterMods[i].remoteConnection, NG[t] = {}, n.when(NG.LoadColleagues(t), NG.LoadCommunities(t)).then(function () {
+                    n(".ngFilterShow").css("visibility", "visible"),
+n().chosen && n("#ngEventShowOptions").chosen()
+                }));
+        r || (n(".ngFilterShow").css("visibility", "visible"), n().chosen && n("#ngEventShowOptions").chosen())
+    }, r.SetupSearchFilter = function () {
+        function u() {
+            var i = ngText.SearchStreamDefaultLabel,
+t = r.GetSelectedItem();
+            t && t.prop("searchable") === !0 && (i = t.prop("type") === "group" ? String.format(ngText.SearchStreamGroupLabel, t.text()) : t.prop("type") === "person" ? String.format(ngText.SearchStreamPersonLabel, t.text()) : String.format(ngText.SearchStreamFormatLabel, t.text())),
+n("#ngNewsFilterSearch div.ngHeader").html(i)
+        }
+        var t = n("#ngNewsFilterSearchInput"),
+i = n("#ngNewsFilterSearchButton");
+        if (t.length != 0 && i.length != 0) {
+            NG.InputControl(t, i, r.SearchNewsFeed),
+n("#ngNewsFilterSearch .ngClose a").click(function () {
+    n("#ngNewsFilterSearch").hide()
+});
+            n(NG.Events).on("currentContextChanged", function () {
+                n("#ngFilterSearch").is(":visible") && u()
+            });
+            n("#ngSearchFilterLink").click(function () {
+                n("#ngNewsFilterSearch").show(),
+u(),
+n("#ngFilterSearch").show(),
+n("#ngFilterTagCloud").hide()
+            }),
+n("#ngTagFilterLink").click(function () {
+    n("#ngNewsFilterSearch").show(),
+n("#ngNewsFilterSearch div.ngHeader").html(ngText.Tags),
+n("#ngFilterSearch").hide(),
+n("#ngFilterTagCloud").show("fast", r.GetNGEventTrigger("showTagCloud")),
+r.SetupTagCloud()
+}),
+window.ngExpandHashTagCloud === !0 && n("#ngTagFilterLink").trigger("click")
+        }
+    }, r.SetupNotifications = function () {
+        var t = n("#ngEventNotificationHolder").get(0);
+        t && (r.NotificationControl = new NG.NotificationControl(t, i))
+    }, r.SetupTagCloud = function () {
+        var t = n("#ngFilterTagCloud").get(0);
+        t && (t.TagControl ? t.TagControl.xmlControl.Reload() : t.TagControl = new NG.TagCloudControl(t, {
+            callback: r.LoadTag, dataUrl: i.dataUrl + "TopTags/"
+        }))
+    }, r.LoadColleaguesAndCommunities = function (t) {
+        n.when(NG.LoadColleagues(), NG.LoadCommunities()).then(function () {
+            h = NG.ColleagueList,
+e = NG.CommunityList,
+n.when(NG.LoadCurrentCommunity()).then(function () {
+    c = NG.CurrentCommunity,
+t && t();
+    return
+})
+        })
+    }, NG.NewsFeed.AddCommunitiesToFilterDropDown = function (t, r, u, f, e) {
+        r = n("<optgroup />").prop({ label: ngText.Communities }),
+n(t).each(function (t, e) {
+    f = i.actionUrl + "remotecontext/" + e.Id + "/",
+u = n("<option />").prop({
+    value: f, searchable: !0, type: "group"
+}).text(e.Name),
+u.appendTo(r)
+}),
+r.appendTo(e)
+    }, r.LoadFilterDropDown = function () {
+        var f,
+r,
+u,
+t,
+o,
+s,
+c;
+        e && h && (f = n("#ngEventShowOptions").get(0), n("#ngEventShowOptions").parent().hasClass("ngQuestionFilterShow") !== !0 && (h.length > 0 && (t = n("<optgroup />").prop({ label: ngText.Colleagues }), n(h).each(function (f, e) {
+            u = i.dataUrl + "Author/" + e.Id + "/",
+r = n("<option />").prop({
+    value: u, searchable: !0, type: "person"
+}).text(e.name),
+r.appendTo(t)
+        }), t.appendTo(f)), e.length > 0 && (o = n.grep(e, function (n) {
+            return n.SocialGroupType == "SharePointWeb"
+        }), o.length > 0 && NG.NewsFeed.AddCommunitiesToFilterDropDown(o, t, r, u, f), s = n.grep(e, function (n) {
+            return n.SocialGroupType == "StandAlone" && NG.StringIsNullOrEmpty(n.ExternalLinkId)
+        }), s.length > 0 && (t = n("<optgroup />").prop({ label: ngText.Spheres }), n(s).each(function (f, e) {
+            u = i.actionUrl + "remotecontext/" + e.Id + "/",
+r = n("<option />").prop({
+    value: u, searchable: !0, type: "group"
+}).text(e.Name),
+r.appendTo(t)
+        }), t.appendTo(f)), c = n.grep(e, function (n) {
+            return n.SocialGroupType == "StandAlone" && !NG.StringIsNullOrEmpty(n.ExternalLinkId)
+        }), c.length > 0 && (t = n("<optgroup />").prop({ label: ngText.Glassboards }), n(c).each(function (f, e) {
+            u = i.actionUrl + "remotecontext/" + e.Id + "/",
+r = n("<option />").prop({
+    value: u, searchable: !0, type: "group"
+}).text(e.Name),
+r.appendTo(t)
+        }), t.appendTo(f)))))
+    }, r.ReloadSingleActivity = function (f, e, o, s) {
+        var l = n(f).closest(".ngActivityRow"),
+h,
+p,
+c,
+a,
+v,
+y,
+w,
+b,
+k;
+        if (l.length || (l = t.find(".ngActivityEventDiv_" + e)), h = l.last().parent().get(0), NG.StringIsNullOrEmpty(o) && (o = 0), h && e) {
+            p = n(h).find("a.ngViewAllCommentsLink").is(":hidden") && n(h).find(".ngAllCommentsDiv").is(":visible"),
+c = null,
+f != null && (a = l.attr("activityLocation"), a && a.length > 0 && (c = a)),
+v = NG.GetQueryStringValue(window.location.href, "Lcid"),
+y = "",
+NG.StringIsNullOrEmpty(v) || (y = "/" + v + "/"),
+!s && f && f.attr("actionUrl") && (s = f.attr("actionUrl")),
+c == null && c != "" && (c = (s ? s : encodeURI(decodeURI(i.actionUrl))) + String.format("{0}/{1}/" + y, o, e));
+            try {
+                w = l.attr("ideaid"),
+w && e && (c = l.hasClass("ngCollapsedIdeaRow") ? encodeURI(decodeURI(window.spWebUrl)) + String.format("/_vti_bin/ng/idea/idea.svc/fullSummary/{0}/", e) : encodeURI(decodeURI(window.spWebUrl)) + String.format("/_vti_bin/ng/idea/idea.svc/{0}/", e))
+            }
+            catch (d) { }
+            h.ngXmlControl ? h.ngXmlControl.Reload() : (b = {
+                xmlUrl: c, xslUrl: i.xmlControl.xslUrl
+            }, k = {
+                init: NG.CommonInit, render: function (t) {
+                    if (t.newsFeedControl || (t.newsFeedControl = new NG.NewsFeed(t._element, {
+                        dataUrl: c, actionUrl: i.actionUrl, view: i.view == NG.ActivityView.SingleNotification ? i.view : NG.ActivityView.Single, parentXmlControl: i.parentXmlControl ? i.parentXmlControl : i.xmlControl, linkHashTags: i.linkHashTags
+                    })), t.newsFeedControl) {
+                        t.newsFeedControl.Render(),
+p && n(h).find("a.ngViewAllCommentsLink").trigger("click"),
+n(NG.Events).trigger("eventReloaded", [{
+    data: t._xml, element: t._element
+}]);
+                        var r = i.xmlControl;
+                        i.updateParentOnSingleReload && i.parentXmlControl && (r = i.parentXmlControl),
+NG.UpdateSingleEvents(e, c, t._xml, r)
+                    }
+                }
+            }, h.ngXmlControl = $create(SharePointAjax.XmlControl, b, k, null, h))
+        }
+        else
+            u ? u.ReloadActivities() : r.ReloadActivities()
+    }, r.EnsurePagingToken = function (n) {
+        return (i.view == NG.ActivityView.NewsFeed || i.view == NG.ActivityView.Select) && NG.StringIsNullOrEmpty(NG.GetQueryStringValue(n, "pagingToken")) && (n = NG.ReplaceOrAddQueryParam(n, "pagingToken", r.initialPagingToken)), n
+    }, r.ReloadXml = function (n) {
+        var t = i.xmlControl,
+e,
+f;
+        i.parentXmlControl && u ? (r.DisposeChildXmlControls(i.parentXmlControl._element), u.ReloadXml(r.EnsurePagingToken(n))) : (r.DisposeChildXmlControls(t._element), n || (n = t.xmlUrl), e = new NG.Tooltip(t._element, ngText.Loading + "...", 2500, "top"), f = t.errorHandler, t.errorHandler = function () {
+            e.Remove(),
+f && f.apply(this, arguments),
+t.errorHandler = null
+        }, typeof i.customGetXmlFunc == "function" ? i.customGetXmlFunc(t) : t.LoadXml(r.EnsurePagingToken(n)))
+    }, r.DisposeChildXmlControls = function (t) {
+        n(t).find("div").each(function () {
+            this.ngXmlControl && (this.ngXmlControl.newsFeedControl = null, this.ngXmlControl.dispose(!0))
+        })
+    }, r.ReloadActivities = function () {
+        o && !a ? r.LoadTag(o) : s ? r.LoadSearchActivities(s) : i.view == NG.ActivityView.Select || i.view == NG.ActivityView.Ideas ? r.LoadSelectActivities() : r.LoadFeed()
+    }, r.LoadFeed = function () {
+        r.ClearFilters(),
+i.view = NG.ActivityView.NewsFeed,
+r.ReloadXml(i.dataUrl)
+    }, r.LoadSelectActivities = function (t) {
+        var u,
+f;
+        if (r.ClearFilters(!1), u = null, t) {
+            if (i.currentModule = null, u = n(t.target).val(), window.activityFilterMods != null)
+                for (f in window.activityFilterMods)
+                    if (window.activityFilterMods[f].dataUrl == u) {
+                        i.currentModule = window.activityFilterMods[f];
+                        break
+                    }
+        }
+        else
+            u = n("#ngEventShowOptions").val();
+        if (n(NG.Events).trigger("currentContextChanged", i.currentModule), u == "action:search") {
+            n("#ngNewsFilterSearch").show(),
+n("#ngNewsFilterSearch div.ngHeader").html(ngText.Search),
+n("#ngFilterSearch").show(),
+n("#ngFilterTagCloud").hide();
+            return
+        }
+        NG.StringIsNullOrEmpty(u) || u == i.dataUrl ? r.LoadFeed() : (i.view = NG.ActivityView.Select, r.ReloadXml(u))
+    }, r.ClearTagFilterItem = function (t) {
+        var e = n.inArray(t.data.tag, f),
+i;
+        e >= 0 && f.splice(e, 1),
+n(t.currentTarget).closest("li").remove(),
+f.length ? r.ReloadTagXml() : (i = n(u ? u.clearFilterLink : r.clearFilterLink), i.find("a.ngActivityAction").trigger("click"), i.find("a.ngCopyTagFilterLink").remove())
+    }, r.AddTagFilterItem = function (n, t) {
+        r.LoadTag(n),
+t && t.val("")
+    }, r.ReloadTagXml = function () {
+        for (var t = "", e, n = 0; n < f.length; n++)
+            t += NG.GetUrlSafeTag(f[n]),
+n < f.length - 1 && (t += ";");
+        e = (u ? u.options.dataUrl : i.dataUrl) + "Tag/" + t + "/",
+r.ReloadXml(e)
+    }, r.LoadTag = function (t) {
+        var v,
+i,
+h,
+e,
+s,
+c,
+l;
+        if (a)
+            t = t.replace(new RegExp("\\n", "g"), "").replace("#", ""),
+v = tt(t),
+window.open(v, "_blank");
+        else {
+            if (o = t, n.isInArray(f, t))
+                return;
+            f.push(t),
+r.ReloadTagXml(),
+t = decodeURIComponent(t),
+t.length > 20 && (t = t.replace(/(.{20})/g, "$1&#8203;")),
+t[0] != "#" && (t = "#" + t),
+i = n(u ? u.clearFilterLink : r.clearFilterLink),
+i.show().find("a.ngActivityAction").html(ngText.ClearFilter),
+h = i.find("a.ngCopyTagFilterLink"),
+h.length ? h.show() : (h = n('<a href="javascript:void(0);" class="ngCopyTagFilterLink">' + ngText.TagFilterLinkLabel + "<\/a>"), h.on("click", function () {
+    for (var t = "", i, n = 0; n < f.length; n++)
+        t += f[n].replace(new RegExp("\\n", "g"), "").replace("#", ""),
+n < f.length - 1 && (t += ";");
+    i = tt(t),
+window.prompt(ngText.GetLinkInstructions, i)
+}).appendTo(i)),
+e = i.find("ul"),
+e.length || (e = n('<ul id="ngTagFilterList"><\/ul>'), i.append(e)),
+s = e.find("#ngTagFilterInput"),
+s.length || (s = n('<li id="ngTagFilterInput"><input type="text" /><\/li>'), s.appendTo(e), c = s.find("input"), c.attr({ placeholder: ngText.AddTagFilterPlaceholder }).bind("result", function (t, i) {
+    r.AddTagFilterItem(i, n(t.currentTarget))
+}), NG.InputControl(c, null, function (n) {
+    var t = n.data.input.val().trim();
+    r.AddTagFilterItem(t, n.data.input)
+}, {
+    defaultValue: ngText.AddTagFilterPlaceholder, autocomplete: NG.SingleTagAutoCompleteOptions
+})),
+l = n('<li><div><a href="javascript:;" class="ngRemoveTagFilter">×<\/a>' + t + "<\/div><\/li>");
+            l.find(".ngRemoveTagFilter").on("click", { tag: o }, r.ClearTagFilterItem);
+            s.before(l),
+n(NG.Events).trigger("tagFilter", [{ tag: o}])
+        }
+    }, r.GetSelectedItem = function () {
+        var t = n("#ngEventShowOptions");
+        if (t.length)
+            return t.find("option:selected")
+    }, r.LoadSearchActivities = function (t, f) {
+        var e = i.xmlControl,
+c = i.dataUrl,
+l = !1,
+o = r.GetSelectedItem(),
+a,
+h;
+        o && o.prop("searchable") === !0 && (l = !0, c = o.val()),
+r.ClearFilters(!l),
+s = encodeURIComponent(t),
+a = f ? String.format(f, t) : c + "Search/?term=" + s,
+h = function () {
+    n(u ? u.clearFilterLink : r.clearFilterLink).show().find("a").text(ngText.ClearSearch + ": " + t),
+e.remove_render(h)
+},
+e.add_render(h),
+e.errorHandler = function (n, t) {
+    var i = t.status;
+    !i && t.get_statusCode && t.get_statusCode(),
+i == 400 && (r.ClearFilters(), new NG.Tooltip("#ngNewsFilterSearchInput", ngText.InvalidSearchInput, 5e3, "bottom")),
+e.errorHandler = null
+},
+r.ReloadXml(a)
+    }, r.SearchNewsFeed = function (n) {
+        var t = n.data.input.val();
+        if (t.trim().length == 0) {
+            new NG.Tooltip("#ngNewsFilterSearchInput", ngText.BlankSearchTerm, 5e3, "bottom");
+            return
+        }
+        r.LoadSearchActivities(t)
+    }, r.GetMore = function (r) {
+        var e = t.find("#ngMoreDiv").get(0),
+u;
+        if (e) {
+            u = n("<div style='min-height:17px'><\/div>").get(0),
+n(e).replaceWith(u),
+new NG.Tooltip(u, ngText.Loading + "...", 2500, "bottom");
+            var o = i.customGetXmlFunc ? null : NG.ReplaceOrAddQueryParam(i.xmlControl.xmlUrl, "pagingToken", r.data.token),
+s = i.parentXmlControl ? i.parentXmlControl : i.xmlControl,
+h = {
+    xmlUrl: o, xslUrl: i.xmlControl.xslUrl, clientProperties: s.clientProperties
+},
+c = {
+    render: function (n) {
+        n.newsFeedControl || (n.newsFeedControl = new NG.NewsFeed(n._element, {
+            xmlUrl: o, dataUrl: i.dataUrl, actionUrl: i.actionUrl, view: NG.ActivityView.More, parentXmlControl: s, customGetXmlFunc: i.customGetXmlFunc, linkHashTags: i.linkHashTags
+        })),
+n.newsFeedControl && n.newsFeedControl.Render()
+    }, init: i.customGetXmlFunc ? function (n) {
+        i.customGetXmlFunc(n, r.data.token)
+    } : NG.CommonInit
+},
+f = t.find("#ngNoItems").get(0);
+            f && n(f).is(":visible") && n(f).hide(),
+$create(SharePointAjax.XmlControl, h, c, null, u)
+        }
+    }, r.ClearFilter = function () {
+        r.ClearFilters();
+        var t = n("#ngNewsFilterSearchInput").val("");
+        r.ReloadActivities()
+    }, r.ClearFilters = function (t) {
+        var u,
+i;
+        o = null,
+f = [],
+NG.StringIsNullOrEmpty(s) || (u = r.GetSelectedItem(), u && u.prop("searchable") === !0 && (t = !1)),
+s = null,
+t == null && (t = !0),
+i = n("#ngEventShowOptions"),
+i.length && t && (i[0].selectedIndex = 0, i.trigger("chosen:updated")),
+r.clearFilterLink && (r.clearFilterLink.hide(), r.clearFilterLink.find("#ngTagFilterList").remove(), r.clearFilterLink.find("a.ngCopyTagFilterLink").remove())
+    }, r.ShowComment = function (t) {
+        var c = t.attr("eventId"),
+s = t.attr("privacy"),
+e,
+u,
+i,
+f,
+h,
+o;
+        if (n("div.ngCommentDiv").hide(), e = t.parents("div.ngActivityRow"), r.HideAllInputDivs(e), u = e.find("div.ngCommentDiv"), u.is(":hidden")) {
+            if (i = u.show().get(0), f = n(".ngMyComment", i), !NG.StringIsNullOrEmpty(window.ngUploadUrl) && NG.StringIsNullOrEmpty(e.attr("remoteSourceId")) && (s != "Private" || window.ngCommunityID || window.ngGroupID) && n(".ngCommentAttachFile", n(i)).show(), !i.inputControl) {
+                if (h = n(".ngCommentTextLength", n(i)), o = n(".ngCommentSave", i), NG.InputControl(n(f), n(o), r.SaveComment, {
+                    args: {
+                        eventId: c, authorId: t.attr("authorId"), actionUrl: t.attr("actionUrl") ? t.attr("actionUrl") : null
+                    }, autoGrow: !0, suppressEnter: !0, autocomplete: r.GetCommentAutoCompleteSettings(f, s), maxTextLengthTarget: h
+                }), NG.ThumbnailControl)
+                    f.on("keyup", NG.ThumbnailControl.CheckLinks);
+                i.inputControl = !0,
+u.find("remotePostWarning").remove(),
+t.attr("remoteName") && o.before(String.format('<span class="remotePostWarning">Posting to <a href="{0}">{1}<\/a><\/span>', t.attr("remoteUrl"), t.attr("remoteName"))),
+n(".ngCommentTextLength", u).after('<div class="ngCommentWarning ngPrivacyWarning" style="display:none;"><\/div>'),
+NG.StringIsNullOrEmpty(window.ngUploadUrl) || n(".ngCommentAttachFile", n(i)).click(window.ngUseLegacyUpload ? r.ShowCommentFileUploadOld : r.ShowCommentFileUpload),
+u.height() < i.scrollHeight && u.height(i.scrollHeight)
+            }
+            f.focus(),
+r.ToggleAutoRefresh(!0)
+        }
+    }, r.ShowReport = function (t) {
+        var s = t.attr("eventId"),
+e = t.attr("authorId"),
+f,
+i,
+u,
+o,
+h;
+        if (NG.StringIsNullOrEmpty(e) && (e = 0), f = t.parents("div.ngActivityEventDiv_" + s), r.HideAllInputDivs(f), i = f.find("div.ngReportDiv"), i.is(":hidden")) {
+            u = i.show().get(0),
+o = n(".ngMyReport", u),
+u.inputControl || (h = n(".ngReportSend", u), NG.InputControl(n(o), n(h), r.SendReport, {
+    autoGrow: !0, args: {
+        eventId: s, authorId: e, actionUrl: t.attr("actionUrl") ? t.attr("actionUrl") : null
+    }
+}), u.inputControl = !0);
+            n(".ngPopupClose", i).unbind("click").on("click", function () {
+                i.hide(),
+r.ToggleAutoRefresh(r.ToggleAutoRefresh(!f.find(".ngCommentDiv").is(":visible")))
+            });
+            o.focus(),
+r.ToggleAutoRefresh(!0)
+        }
+    }, r.ShowEdit = function (t) {
+        var c,
+i,
+u,
+l;
+        r.ToggleAutoRefresh(!0);
+        var e = t.attr("eventId"),
+a = t.parents("div.ngActivityEventDiv_" + e),
+f = t.closest("td"),
+o = a.find(".ngSummary"),
+s = t.attr("privacy"),
+h = $ajaxLoaderBar.clone();
+        o.append(h),
+c = r.GetSummaryText(String.format("{0}/_vti_bin/ng/source.svc/post/{1}/", window.spWebUrl, e), o),
+i = r.GetEditDiv(f, 1e4),
+i.insertAfter(f),
+f.hide(),
+h.remove();
+        n(".ngCancelButton", i).on("click", function () {
+            f.show(),
+i.remove(),
+r.ToggleAutoRefresh(!1)
+        });
+        u = i.find(".ngMicroblogInput"),
+l = s == "Private" && typeof dontAllowMixed != "undefined" && dontAllowMixed === !0,
+NG.InputControl(u, i.find(".ngMicroblogButton").get(0), function (n) {
+    r.PostEdit(n, e, i)
+}, {
+    autoGrow: !0, autocomplete: new NG.AutoComplete({
+        inputControl: u, privacy: s, keypressCallback: r.CheckAutocompleteShareInput, includeCommunities: !l
+    }).AutocompleteOptions, maxTextLengthTarget: i.find(".ngEditMaxLength"), suppressEnter: !0
+}),
+u.val(c).focus(),
+u.trigger("autosize.resize")
+    }, r.PostEdit = function (t, i) {
+        var u = t.data.input.val().trim(),
+f;
+        if (u.length == 0 || u == t.data.defaultValue) {
+            new NG.Tooltip(t.data.input.get(0), ngText.BlankAlert, 2500, "top");
+            return
+        }
+        new NG.Tooltip(t.data.input.get(0), ngText.Saving + "...", 0, "top"),
+f = window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/Edit/" + i + "/",
+n.ajax({
+    type: "POST", contentType: "application/x-www-form-urlencoded", url: f, data: u, success: function (u, f, e) {
+        new NG.Tooltip(t.data.input.get(0), ngText.UpdateSaved, 2500, "top"),
+r.ReloadSingleActivity(t.data.button, i, 0),
+n(NG.Events).trigger("activityEdit", [{
+    location: e.getResponseHeader("location"), eventId: i
+}])
+    }, error: function (n, i, r) {
+        var u;
+        switch (n.status) {
+            case 404:
+            case 410:
+                u = ngText.EventNotFoundError;
+                break;
+            case 400:
+                u = ngText.InvalidOperationError;
+                break;
+            case 412:
+                u = r;
+                break;
+            case 500:
+                u = r.indexOf("Cannot edit") > -1 ? ngText.EditItemError : NG.GetDefaultErrorMessage(n.status);
+                break;
+            default:
+                u = NG.GetDefaultErrorMessage(n.status)
+        }
+        new NG.Tooltip(t.data.input.get(0), u, 5e3, "top")
+    }
+})
+    }, r.ShowEditComment = function (t) {
+        var e,
+c,
+i,
+f;
+        r.ToggleAutoRefresh(!0);
+        var o = t.attr("eventId"),
+l = t.parents("div.ngActivityEventDiv_" + o),
+u = t.closest("td"),
+s = u.find(".ngSummary"),
+h = t.attr("metaId"),
+a = t.attr("privacy");
+        r.HideAllInputDivs(l),
+e = $ajaxLoaderBar.clone(),
+s.append(e),
+c = r.GetSummaryText(String.format("{0}/_vti_bin/ng/source.svc/meta/{1}/", window.spWebUrl, h), s),
+i = r.GetEditDiv(u, 8e3),
+i.insertAfter(u),
+u.hide(),
+e.remove();
+        n(".ngCancelButton", i).on("click", function () {
+            u.show(),
+i.remove(),
+r.ToggleAutoRefresh(!1)
+        });
+        n(".ngActionInputDiv", i).on("onHide", function () {
+            u.show(),
+i.remove()
+        });
+        f = i.find(".ngMicroblogInput"),
+NG.InputControl(f, i.find(".ngMicroblogButton").get(0), function (n) {
+    var t = n.data.input.val().trim();
+    if (t.length == 0) {
+        new NG.Tooltip(n.data.input.get(0), ngText.BlankAlert, 2500, "top");
+        return
+    }
+    var i = {
+        EventAuthorID: 0, UserData: t
+    },
+u = encodeURI(decodeURI(window.spWebUrl)) + "/_vti_bin/ng/activityfeed.svc/Comment/Edit/" + h + "/",
+f = r.GetNGEventTrigger("editComment");
+    r.PostActivity(i, u, ngText.RequestError, n.data.input, o, null, f)
+}, {
+    autoGrow: !0, autocomplete: r.GetCommentAutoCompleteSettings(f, a), maxTextLengthTarget: i.find(".ngEditMaxLength"), suppressEnter: !0
+}),
+f.val(c).focus(),
+f.trigger("autosize.resize")
+    }, r.GetSummaryText = function (t, i) {
+        var r;
+        return n.ajax({
+            type: "GET", url: t, async: !1, success: function (n) {
+                r = n
+            }, error: function () {
+                var t = i.clone();
+                t.find(".ngAuthorLink").first().remove(),
+n("a.ngFromText", t).each(function () {
+    var t = n(this);
+    t.text(t.attr("origText"))
+}),
+n("a.ngFriendlyLink", t).each(function () {
+    var t = n(this);
+    t.text(t.attr("href") + " (" + t.text() + ")")
+}),
+r = n.stripHtml(t.html().replace(/(<br\s*\/?>)/ig, "\n")),
+r = n.htmlDecode(r)
+            }
+        }), r
+    }, r.GetEditDiv = function (t, i) {
+        var r = n(String.format("<td valign='top' align='left'><div class='ngEditDiv ngActionInputDiv'><div class='ngMicroblogInputDiv ngInput'><textarea class='ngMicroblogInput' maxlength='{2}' spellcheck='true'><\/textarea><\/div><div class='ngActionMessage'><span class='ngEditMaxLength'><\/span><\/div><div class='ngSharePrivacyWarning ngPrivacyWarning '><\/div><div class='ngActionBar'><button class='ngMicroblogButton ngButton'><span>{0}<\/span><\/button><button class='ngCancelButton ngButton'><span>{1}<\/span><\/button><\/div><\/div><\/td>", ngText.SaveVerb, ngText.CancelButtonText, i)),
+f = t.find(".ngLinkPreviewInfo"),
+u;
+        return f.length && r.find(".ngEditDiv").append(f.clone()), u = t.find(".ngImageAttachmentContainer"), u.length && r.find(".ngEditDiv").append(u.clone()), r
+    }, r.GetCommentAutoCompleteSettings = function (n, t) {
+        var i = t == "Private" && typeof dontAllowMixed != "undefined" && dontAllowMixed === !0;
+        return new NG.AutoComplete({
+            inputControl: n, privacy: t, keypressCallback: r.CheckAutocompleteInputComments, type: "response", includeCommunities: !i
+        }).AutocompleteOptions
+    }, r.ChangeDigestSettings = function (t) {
+        var r = t.attr("ngId"),
+f = t.attr("noun"),
+u = t.attr("action"),
+e = t.attr("ngName"),
+i;
+        f == "group" ? u == "add" ? i = String.format("{0}/_vti_bin/NGC/CommunityService.svc/Groups/DigestEmail/Include/{1}/", window.spWebUrl, r) : u == "remove" && (i = String.format("{0}/_vti_bin/NGC/CommunityService.svc/Groups/DigestEmail/Exclude/{1}/", window.spWebUrl, r)) : f == "activityType" || f == "colleague" && (u == "add" ? i = String.format("{0}/_vti_bin/ng/Colleague.svc/DigestEmail/Include/{1}/", window.spWebUrl, r) : u == "remove" && (i = String.format("{0}/_vti_bin/ng/Colleague.svc/DigestEmail/Exclude/{1}/", window.spWebUrl, r))),
+n.ajax({
+    type: "POST", async: !1, url: i, success: function () {
+        u == "add" ? n('.ngDigestSettingLink[ngId="' + r + '"]').attr("action", "remove").text(String.format(ngText.RemoveFromDigestEmail, e)) : u == "remove" && n('.ngDigestSettingLink[ngId="' + r + '"]').attr("action", "add").text(String.format(ngText.AddToDigestEmail, e))
+    }, error: function (n) {
+        var t;
+        switch (n.status) {
+            case 404:
+            case 410:
+                t = ngText.EventNotFoundError;
+                break;
+            default:
+                t = NG.GetDefaultErrorMessage(n.status)
+        }
+    }
+})
+    }, r.HideAllInputDivs = function (t) {
+        n("div.ngCommentDiv", t).hide(),
+n(".ngActionInputDiv", t).hide().trigger("onHide")
+    }, r.ToggleMetaDiv = function (t) {
+        var f = t.parents("div.ngMetaContainer"),
+u = f.find("div.ngAllCommentsDiv").get(0),
+e,
+o,
+s;
+        if (u) {
+            if (e = n(".ngViewAllCommentsLink", f), o = n(".ngHideAllCommentsLink", f), r.ToggleAutoRefresh(!n(u).is(":visible")), n(u).is(":visible")) {
+                n(u).hide(),
+f.find("div.ngPartialCommentsDiv").show(),
+e.show(),
+o.hide();
+                return
+            }
+            if (u.ngXmlControl)
+                n(u).show(),
+e.hide(),
+o.show(),
+f.find("div.ngPartialCommentsDiv").hide();
+            else {
+                s = t.attr("eventId"),
+e.parent().append($ajaxLoaderBar);
+                var c = i.actionUrl + "comments/" + s + "/",
+l = n(t).parents(".ngActivityRow").last(),
+h = l.attr("remoteSourceId");
+                h && !NG.StringIsNullOrEmpty(h) && (c = "/_vti_bin/ng/remote/activityfeed." + h + ".ashx/comments/" + s + "/"),
+n.ajax({
+    type: "GET", async: !1, url: c, dataType: "xml", xhr: function () {
+        return SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+    }, success: function (t) {
+        var i = n(t).find("entry").get(0),
+e,
+o;
+        if (n.isNullOrUndefined(i) && t && t.xml) {
+            var s = new XMLDOM(t.xml),
+h = (new XMLSerializer).serializeToString(n(s).find("entry").get(0)),
+f = new ActiveXObject("Msxml2.DOMDocument.6.0");
+            f.async = !1,
+f.loadXML(h),
+i = f
+        }
+        e = { xslUrl: window.spWebUrl + "/_layouts/ng/xml/comment.xslt?cache=" + ngCacheKey },
+o = { render: Function.createDelegate(r, r.RenderMetaData) },
+u.ngXmlControl = $create(SharePointAjax.XmlControl, e, o, null, u),
+u.ngXmlControl.set_Xml(i)
+    }, error: function (n) {
+        var t;
+        switch (n.status) {
+            case 404:
+            case 410:
+                t = ngText.EventNotFoundError;
+                break;
+            default:
+                t = NG.GetDefaultErrorMessage(n.status)
+        }
+        new NG.Tooltip(f, t, 5e3, "bottom")
+    }, complete: function () {
+        n(".ngLoadingBar", e.parent()).remove(),
+e.hide(),
+o.show()
+    }
+})
+            }
+        }
+    }, r.ToggleLikeDiv = function (t) {
+        var h = t.attr("metaEventId"),
+u,
+s,
+f,
+c;
+        if (u = NG.StringIsNullOrEmpty(h) ? t.parents("div.ngMetaContainer").find("div.ngAllLikesContainer").get(0) : t.parents("div.ngMetaWrapper").find("div.ngAllLikesContainer").get(0), u) {
+            if (r.ToggleAutoRefresh(!n(u).is(":visible")), n(u).is(":visible")) {
+                n(u).hide();
+                return
+            }
+            if (!u.ngXmlControl) {
+                var o = "",
+e = t.attr("eventId"),
+s = n(t).parents(".ngActivityRow").last();
+                e != null ? (o = i.actionUrl + "Likes/" + e + "/", f = s.attr("remoteSourceId"), f && !NG.StringIsNullOrEmpty(f) && (o = "/_vti_bin/ng/remote/activityfeed." + f + ".ashx/Likes/" + e + "/")) : (e = s.attr("eventId"), o = i.actionUrl + "Meta/" + e + "/" + h + "/Likes/", s = n(t).parents(".ngActivityRow").last(), f = s.attr("remoteSourceId"), f && !NG.StringIsNullOrEmpty(f) && (o = "/_vti_bin/ng/remote/activityfeed." + f + ".ashx/Meta/" + e + "/" + h + "/Likes/")),
+c = t.attr("authorId"),
+n.ajax({
+    type: "GET", async: !1, dataType: "xml", url: o, xhr: function () {
+        return SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+    }, success: function (t) {
+        var i = n(t).find("entry").get(0);
+        if (n.isNullOrUndefined(i) && t && t.xml) {
+            var e = new XMLDOM(t.xml),
+o = (new XMLSerializer).serializeToString(n(e).find("entry").get(0)),
+f = new ActiveXObject("Msxml2.DOMDocument.6.0");
+            f.async = !1,
+f.loadXML(o),
+i = f
+        }
+        r.CreateLikeXmlControl(u, i)
+    }, error: function (n) {
+        var t;
+        switch (n.status) {
+            case 404:
+            case 410:
+                t = ngText.EventNotFoundError;
+                break;
+            default:
+                t = NG.GetDefaultErrorMessage(n.status)
+        }
+        new NG.Tooltip(u, t, 5e3, "bottom")
+    }
+})
+            }
+            n(u).show()
+        }
+    }, r.CreateLikeXmlControl = function (n, t) {
+        var i = { xslUrl: encodeURI(decodeURI(window.spWebUrl)) + "/_layouts/ng/xml/like.xslt?cache=" + ngCacheKey },
+u = { render: Function.createDelegate(r, r.RenderMetaData) };
+        n.ngXmlControl = $create(SharePointAjax.XmlControl, i, u, null, n),
+n.ngXmlControl.set_Xml(t)
+    }, r.ToggleAutoRefresh = function (n) {
+        var t = i.parentXmlControl ? i.parentXmlControl : i.xmlControl;
+        t.set_Active(n)
+    }, r.GetEntryNode = function (t) {
+        return n(i.xmlControl._xmlDoc).find("entry").filter(function () {
+            return n(this).find("eventKey").text() == t
+        })
+    }, r.GetNGEventTrigger = function (t, i) {
+        return function () {
+            n(NG.Events).trigger(t, i)
+        }
+    }, r.Pin = function (n) {
+        r.DoPin(n, !0)
+    }, r.Unpin = function (n) {
+        r.DoPin(n, !1)
+    }, r.DoPin = function (t, u) {
+        var e = r.GetEventId(t),
+f,
+o;
+        f = u ? t.attr("actionUrl") : t.attr("actionUrl") + "x/",
+o = r.GetNGEventTrigger("pin"),
+n.ajax({
+    type: "POST", contentType: "application/json; charset=utf-8", url: f, success: function () {
+        n(NG.Events).trigger("pin"),
+r.ReloadSingleActivity(t, e, null, i.actionUrl)
+    }, error: function () {
+        new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+    }
+})
+    }, r.GetEventId = function (n) {
+        var t = n.parents("div.ngActivityRow").first();
+        return t.attr("eventId")
+    }, r.LikeComment = function (t) {
+        var u = r.GetEventId(t),
+f = t.parents("div.ngActivityMetaDiv").first(),
+e = f.attr("metaEventId"),
+o = n("div.ngActivityEventDiv_" + u).attr("socialGroups"),
+h = { SocialGroups: o },
+s = (t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl))) + "Like/" + u + "/" + e + "/";
+        n.ajax({
+            type: "POST", contentType: "text/plain", url: s, success: function (e) {
+                n(NG.Events).trigger("like", [{
+                    eventid: u, eventId: u, eventText: n(".ngSummary", f).text()
+                }]);
+                var o = it(t);
+                o ? t.addClass("ngUnlikeCommentLink").removeClass("ngLikeCommentLink").text(ngText.UnLikeVerb).attr("metaId", n(e).text()) : r.ReloadSingleActivity(t, u, null, t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl)))
+            }, error: function () {
+                new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+            }
+        })
+    }, r.UnlikeComment = function (t) {
+        var u = r.GetEventId(t),
+f = t.parents("div.ngActivityMetaDiv").first(),
+e = t.attr("metaId"),
+o = (t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl))) + "Like/" + e + "/x/";
+        n.ajax({
+            type: "POST", contentType: "text/plain", url: o, success: function () {
+                n(NG.Events).trigger("unlike", [{
+                    eventid: u, eventId: u, eventText: n(".ngSummary", f).text()
+                }]);
+                var e = it(t);
+                e ? t.addClass("ngLikeCommentLink").removeClass("ngUnlikeCommentLink").text(ngText.LikeVerb) : r.ReloadSingleActivity(t, u, null, t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl)))
+            }, error: function () {
+                new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+            }
+        })
+    }, r.Like = function (t) {
+        var u = t.attr("eventId"),
+f = t.attr("authorId");
+        NG.StringIsNullOrEmpty(f) && (f = 0);
+        var e = n("div.ngActivityEventDiv_" + u).attr("socialGroups"),
+o = {
+    EventAuthorID: f, UserData: "", SocialGroups: e
+},
+s = ngText.RequestError,
+h = (t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl))) + "Like/" + u + "/",
+c = r.GetNGEventTrigger("like", [{
+    eventId: u, eventText: n(".ngActivityEventDiv_" + t.attr("eventid") + " .ngSummary").text()
+}]);
+        r.PostActivity(o, h, s, t, u, f, c)
+    }, r.Unlike = function (t) {
+        var e = t.attr("metaId"),
+u = t.attr("eventId"),
+f = t.attr("authorId"),
+o,
+s;
+        e < 0 && (meta = u),
+NG.StringIsNullOrEmpty(f) && (f = 0),
+o = n(".ngActivityEventDiv_" + t.attr("eventid") + " .ngSummary").text(),
+s = (t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl))) + "Like/" + e + "/x/",
+n.ajax({
+    type: "POST", contentType: "text/plain", url: s, success: function () {
+        n(NG.Events).trigger("unlike", [{
+            eventId: u, eventText: o
+        }]),
+r.ReloadSingleActivity(t, u, f, t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl)))
+    }, error: function () {
+        new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+    }
+})
+    }, r.ShowMoreOfEvent = function (t) {
+        var f = t.parent(),
+r = t.data("ngaction"),
+e = f.find(".ng-showmore"),
+o = f.find(".ng-showmore-trigger"),
+h = ngText.ShowAllVerb.toLocaleLowerCase(),
+c = ngText.ShowLessVerb.toLocaleLowerCase(),
+l = t.closest(".ngActivityRow"),
+i = t.closest(".ngSummary"),
+w = t.siblings(".ngAuthorLink").clone(),
+a = l.attr("eventid"),
+v = e.attr("data-commentid"),
+u,
+s,
+p;
+        r == "show" ? (r = "hide", actionText = c, u = !1) : (r = "show", actionText = h, u = !0),
+s = window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/GetItemText/" + a + "/?summarizedIfMaxCharsExceeded=" + u + "&commentId=" + v,
+p = n.ajax({
+    dataType: "json", url: s
+}).done(function (u) {
+    i.html(u),
+i.append(e),
+i.append(o),
+nt(i.closest("div.ngActivityRow")),
+t.data("ngaction", r),
+o.attr("title", actionText).text("..." + actionText),
+g(i),
+d(i.get(0)),
+y(i),
+n(NG.Events).trigger("activityStreamShowMoreRendered", [{ element: i}])
+})
+    }, r.Lock = function (t) {
+        var f = t.attr("eventId"),
+u = t.attr("authorId");
+        NG.StringIsNullOrEmpty(u) && (u = 0);
+        var e = n("div.ngActivityEventDiv_" + f).attr("socialGroups"),
+o = {
+    EventAuthorID: u, UserData: "", SocialGroups: e
+},
+s = ngText.RequestError,
+h = (t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl) + "Lock/" + f + "/",
+c = r.GetNGEventTrigger("lock");
+        r.PostActivity(o, h, s, t, f, u, c)
+    }, r.Unlock = function (t) {
+        var f = t.attr("eventId"),
+u = t.attr("authorId");
+        NG.StringIsNullOrEmpty(u) && (u = 0);
+        var e = n("div.ngActivityEventDiv_" + f).attr("socialGroups"),
+o = {
+    EventAuthorID: u, UserData: "", SocialGroups: e
+},
+s = ngText.RequestError,
+h = (t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl) + "Lock/" + f + "/x/",
+c = r.GetNGEventTrigger("unlock");
+        r.PostActivity(o, h, s, t, f, u, c)
+    }, r.Vote = function (t) {
+        var u = t.attr("eventId"),
+f = t.attr("authorId"),
+o,
+s,
+e;
+        NG.StringIsNullOrEmpty(f) && (f = 0),
+o = {
+    EventAuthorID: f, UserData: ""
+},
+o.SocialGroups = n("div.ngActivityEventDiv_" + u).attr("socialGroups"),
+s = ngText.RequestError,
+e = i.actionUrl + "Vote/" + u + "/",
+NG.StringIsNullOrEmpty(t.attr("actionUrl")) || (e = t.attr("actionUrl")),
+n.ajax({
+    type: "POST", contentType: "text/plain", url: e, success: function () {
+        r.ReloadSingleActivity(t, u, f),
+n(NG.Events).trigger("vote", [{
+    eventId: u, eventText: n("div.ngActivityEventDiv_" + u + " .ngSummary").text()
+}])
+    }, error: function () {
+        new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+    }
+})
+    }, r.UnVote = function (t) {
+        var o = t.attr("metaId"),
+u = t.attr("eventId"),
+f = t.attr("authorId"),
+e;
+        NG.StringIsNullOrEmpty(f) && (f = 0),
+e = i.actionUrl + "Vote/" + o + "/x/",
+NG.StringIsNullOrEmpty(t.attr("actionUrl")) || (e = t.attr("actionUrl") + "x/"),
+n.ajax({
+    type: "POST", contentType: "text/plain", url: e, success: function () {
+        r.ReloadSingleActivity(t, u, f),
+n(NG.Events).trigger("unvote", [{
+    eventId: u, eventText: n("div.ngActivityEventDiv_" + u + " .ngSummary").text()
+}])
+    }, error: function () {
+        new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+    }
+})
+    }, r.SaveComment = function (t) {
+        var e = t.data.input.val().trim(),
+s,
+c,
+f,
+y,
+l,
+o,
+w,
+v,
+h,
+u,
+b,
+k;
+        if (t.data.input.trigger("hideautocomplete"), s = n("div.ngActivityEventDiv_" + t.data.args.eventId).attr("socialGroups"), c = n("div.ngCommentUploadFrame"), c.length > 0)
+            return f = c.pluploadQueue(), f && f.files.length > 0 && (f.settings.status = e, f.settings.socialGroups = s, u = t.data.input.get(0).ngThumbnailControlInstance, u && (y = u.GetValues(), f.settings.preview = JSON.stringify(y)), f.start()), !1;
+        if (l = n("iframe.ngCommentUploadFrame"), l.length > 0) {
+            if (o = l.get(0).contentWindow.document, n("input.ngFileUpload", o).val() == "")
+                return new NG.Tooltip(t.data.input.get(0), ngText.NoFileAlert, 0, "bottom"), !1;
+            n("#ngStatusUpdate", o).val(e),
+n("#ngSocialGroups", o).val(s),
+n("form:first", o).submit(),
+n(NG.Events).trigger("uploadCommentFile");
+            n(NG.Events).one("uploadCommentFileComplete", function () {
+                t.data.input.trigger("reset")
+            });
+            return !1
+        }
+        if (e.length == 0) {
+            new NG.Tooltip(t.data.input.get(0), ngText.BlankAlert, 2500, "top");
+            return
+        }
+        var d = t.data.button.hasClass("ngAnswer"),
+p = d ? "answerQuestion" : "comment",
+a = t.data.args.authorId;
+        NG.StringIsNullOrEmpty(a) && (a = 0),
+w = t.data.input.parent().find(".ngACTargetResults"),
+v = "",
+w.find("div").each(function () {
+    v += n(this).data("ngTarget") + ","
+}),
+h = {
+    EventAuthorID: a, UserData: e, Targets: v
+},
+h.SocialGroups = s,
+u = t.data.input.get(0).ngThumbnailControlInstance,
+u && (h.LinkPreview = u.GetValues(), n(NG.Events).bind(p, function () {
+    u && u.Remove()
+})),
+b = (t.data.args.actionUrl ? encodeURI(decodeURI(t.data.args.actionUrl)) : encodeURI(decodeURI(i.actionUrl))) + "Comment/" + t.data.args.eventId + "/",
+k = r.GetNGEventTrigger(p, {
+    commentText: e, eventId: t.data.args.eventId
+}),
+r.PostActivity(h, b, ngText.RequestError, n(t.currentTarget), t.data.args.eventId, t.data.args.authorId, k)
+    }, r.DeleteComment = function (t) {
+        var e;
+        if (confirm(ngText.ConfirmDelete)) {
+            var o = t.attr("metaId"),
+s = t.attr("eventId"),
+u = t.attr("authorId");
+            NG.StringIsNullOrEmpty(u) && (u = 0);
+            var h = (t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl) + "Comment/" + o + "/x/",
+c = n(t).parents(".ngActivityRow").last(),
+f = c.attr("remoteSourceId");
+            f && !NG.StringIsNullOrEmpty(f) && (h = "/_vti_bin/ng/remote/activityfeed." + f + ".ashx/Comment/" + o + "/x/"),
+e = n("<span class='ngLoading'><\/span>"),
+t.css("display", "none").after(e),
+n.ajax({
+    type: "POST", contentType: "text/plain", url: h, success: function () {
+        r.ReloadSingleActivity(t, s, u, t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl),
+n(NG.Events).trigger("deleteComment", [{
+    eventId: s, eventText: n(".ngSummary", c).text()
+}])
+    }, error: function () {
+        e.remove(),
+t.css("display", ""),
+new NG.Tooltip(t, ngText.RequestError, 5e3, "bottom")
+    }
+})
+        }
+    }, r.MarkAnswer = function (t) {
+        var u = t.attr("authorId");
+        NG.StringIsNullOrEmpty(u) && (u = 0);
+        var e = t.attr("metaId"),
+f = t.attr("eventId"),
+o = {
+    EventAuthorID: u, UserData: ""
+},
+s = ngText.RequestError,
+h = (t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl) + "Answer/" + e + "/",
+c = r.GetNGEventTrigger("markAnswer", [{
+    target: t, eventId: f, eventText: n(".ngActivityEventDiv_" + t.attr("eventid") + " .ngSummary").text()
+}]);
+        r.PostActivity(o, h, s, t, f, u, c)
+    }, r.UnMarkAnswer = function (t) {
+        var u = t.attr("authorId");
+        NG.StringIsNullOrEmpty(u) && (u = 0);
+        var e = t.attr("metaId"),
+f = t.attr("eventId"),
+s = ngText.RequestError,
+o = (t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl) + "Answer/" + e + "/x/";
+        n.ajax({
+            type: "POST", contentType: "text/plain", url: o, success: function () {
+                r.ReloadSingleActivity(t, f, u, t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl),
+n(NG.Events).trigger("unmarkAnswer", [{
+    target: t, eventId: f, eventText: n(".ngActivityEventDiv_" + t.attr("eventid") + " .ngSummary").text()
+}])
+            }, error: function () {
+                new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+            }
+        })
+    }, r.SendReport = function (t) {
+        var f = t.data.input.val().trim(),
+u;
+        if (f.length == 0) {
+            alert(ngText.BlankAlert);
+            return
+        }
+        t.data.input.val(""),
+u = t.data.args.authorId,
+NG.StringIsNullOrEmpty(u) && (u = 0);
+        var e = {
+            EventAuthorID: u, UserData: f
+        },
+o = (t.data.args.actionUrl ? t.data.args.actionUrl : i.actionUrl) + "Report/" + t.data.args.eventId + "/",
+s = r.GetNGEventTrigger("report", {
+    reportText: f, eventId: t.data.args.eventId
+});
+        r.PostActivity(e, o, ngText.RequestError, n(t.currentTarget), t.data.args.eventId, t.data.args.authorId, s),
+alert(ngText.ReportConfirmation)
+    }, r.ShowShareModal = function (t) {
+        var u = t,
+o = u.attr("eventId"),
+h = u.attr("authorId"),
+f,
+i,
+e;
+        if (NG.StringIsNullOrEmpty(h) && (h = 0), f = u.parents("div.ngActivityEventDiv_" + o), r.HideAllInputDivs(f), i = n(".ngShareDiv", f), i.length > 0) {
+            i.show(),
+i.find(".ngMicroblogInput").focus().val();
+            return
+        }
+        var c = u.attr("privacy"),
+l = u.attr("activityType"),
+s = "";
+        c == "Private" && (s = '<div class="ngShareWarning">' + ngText.ShareWarning + "<\/div>"),
+i = n(String.format("<div class='ngShareDiv ngActionInputDiv'><div class='ngClose'><div class='ngHeader ngActionHeader'><span>{2}<\/span><\/div><div><a href='javascript:void(0);' class='ngPopupClose' title=''><\/a><\/div><\/div><div class='ngActionDescription' style='{3}'>{1}<\/div><div class='ngMicroblogInputDiv ngInput'><textarea class='ngMicroblogInput' maxlength='8000' title='{2}' spellcheck='true'><\/textarea><\/div><div class='ngActionMessage'><span class='ngMicroblogLength'><\/span><\/div><div class='ngSharePrivacyWarning ngPrivacyWarning'><\/div><div class='ngActionBar'><button class='ngMicroblogPost ngButton'><span>{0}<\/span><\/button><\/div><\/div>", ngText.ShareVerb, s, ngText.ShareTitle, s.length > 0 ? "" : "display:none;")),
+i.insertAfter(f.find(".ngReportDiv")),
+n(".ngPopupClose", i).click(function () {
+    r.ToggleAutoRefresh(r.ToggleAutoRefresh(!f.find(".ngCommentDiv").is(":visible"))),
+i.hide()
+}),
+e = i.find(".ngMicroblogInput"),
+NG.InputControl(e, i.find(".ngMicroblogPost").get(0), function (n) {
+    var t = n.data.input.val().trim();
+    new NG.Tooltip(n.data.input.get(0), ngText.Saving + "...", 0, "top"),
+r.PostShare(n, t, { data: {
+    parentHashCode: o, shareUrl: "Share/" + o + "/"
+}
+}, i)
+}, {
+    autoGrow: !0, autocomplete: new NG.AutoComplete({
+        inputControl: e, privacy: c, keypressCallback: r.CheckAutocompleteShareInput
+    }).AutocompleteOptions, maxTextLengthTarget: i.find(".ngMicroblogLength"), suppressEnter: !0
+}),
+e.focus().val(),
+r.ToggleAutoRefresh(!0)
+    }, r.PostShare = function (t, i, u, f) {
+        var e = window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/" + u.data.shareUrl,
+o = { UserData: i };
+        n.ajax({
+            type: "POST", contentType: "application/json; charset=utf-8", url: e, data: JSON.stringify(o), success: function () {
+                new NG.Tooltip(t.data.input.get(0), ngText.UpdateSaved, 2500, "top");
+                var n = t.data.input.closest(".ngNewsFeedContent");
+                f.remove(),
+r.ReloadSingleActivity(t.data.button, u.data.parentHashCode, 0)
+            }, error: function (n, i, r) {
+                var u;
+                switch (n.status) {
+                    case 404:
+                    case 410:
+                        u = ngText.EventNotFoundError;
+                        break;
+                    case 400:
+                        u = ngText.InvalidOperationError;
+                        break;
+                    case 412:
+                        u = r;
+                        break;
+                    default:
+                        u = NG.GetDefaultErrorMessage(n.status)
+                }
+                new NG.Tooltip(t.data.input.get(0), u, 5e3, "top")
+            }
+        })
+    }, r.ShowMoreMenu = function (t) {
+        var i = [],
+r = n(".ngActionItem", t.parent()),
+u;
+        n.each(r, function () {
+            var t = n(this);
+            t.css("display") != "none" && i.push({
+                text: t.html(), callback: function (n) {
+                    n.data.link.trigger("click")
+                }, data: { link: t }
+            })
+        }),
+u = NG.ContextMenu({
+    offset: 1, hOffset: 0, targetElem: t, vAlign: "bottom", hAlign: "right", menuItems: i, hideOnHoverOut: !1, width: "125px", includeArrow: !0
+})
+        showShare(n, i, t, r);
+    }, r.Translate = function (t) {
+        var s = t.parents("table").first(),
+i = n(".ngSummary", s).first(),
+c = n(i).text(),
+r = n("<span class='ngLoading'><\/span>"),
+e,
+o;
+        r.insertAfter(n(i));
+        var f = n(t).attr("lcid"),
+h = n(t).attr("title"),
+u = "";
+        n(t).parents(".ngActivityMetaDiv").length != 0 ? (e = n(t.parents(".ngActivityMetaDiv").first()).attr("metaeventid"), u = window.spWebUrl + "/_vti_bin/ng/translation.svc/translate/metaevent/?toLanguage=" + f + "&metaId=" + e) : (o = n(t.parents(".ngActivityRow").first()).attr("eventid"), u = window.spWebUrl + "/_vti_bin/ng/translation.svc/translate/event/?toLanguage=" + f + "&hashCode=" + o),
+n.ajax({
+    type: "GET", async: !0, url: u, dataType: "xml", xhr: function () {
+        return SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+    }, success: function (t) {
+        var u = n(t).find("string").get(0),
+o,
+e;
+        if (n.isNullOrUndefined(u) && t && t.xml) {
+            var s = new XMLDOM(t.xml),
+c = (new XMLSerializer).serializeToString(n(s).find("string").get(0)),
+f = new ActiveXObject("Msxml2.DOMDocument.6.0");
+            f.async = !1,
+f.loadXML(c),
+u = f
+        }
+        o = n(u).text(),
+r.remove(),
+e = n('<div class="ngSummaryTranslated"><strong>' + h + "<\/strong><br />" + o + "<\/div>"),
+e.insertAfter(n(i)),
+y(e)
+    }, error: function () {
+        r.remove(),
+new NG.Tooltip(t, ngText.RequestError, 5e3, "bottom")
+    }
+})
+    }, r.ShowTranslateMenu = function (t) {
+        var i,
+r,
+f,
+u,
+e,
+o;
+        for (n(".ngActionItem", t.parent()).remove(), i = window.ngLanguages, index = 0; index < i.length; ++index)
+            r = i[index].DisplayName,
+f = i[index].Id,
+n('<a class="ngActionItem ngTranslationActionItem" title="' + r + '" lcid="' + f + '" href="javascript:void(0);">' + r + "<\/a>").appendTo(n(".ngTranslateActions", t.parent()));
+        u = [],
+e = n(".ngActionItem", t.parent()),
+n.each(e, function () {
+    var t = n(this);
+    t.css("display") != "none" && u.push({
+        text: t.html(), callback: function (n) {
+            n.data.link.trigger("click")
+        }, data: { link: t }
+    })
+}),
+o = NG.ContextMenu({
+    offset: 1, hOffset: 0, targetElem: t, vAlign: "bottom", hAlign: "right", menuItems: u, hideOnHoverOut: !1, width: "125px", includeArrow: !0
+}),
+n(".ngContextMenu UL", t.parent()).css("max-height", "200px"),
+n(".ngContextMenu UL", t.parent()).css("overflow", "auto")
+    }, r.InitializeLanguages = function (i) {
+        if (window.ngLanguages || !n(".ngTranslateAction", t).length) {
+            i && i();
+            return
+        }
+        window.ngLanguages = [];
+        var r = window.spWebUrl + "/_vti_bin/ng/translation.svc/languages/";
+        n.ajax({
+            type: "GET", url: r, contentType: "application/json; charset=UTF-8", beforeSend: function (n) {
+                n.setRequestHeader("Accept", "application/json")
+            }, success: function (t) {
+                t && n(t).each(function (n, t) {
+                    window.ngLanguages.push({
+                        DisplayName: t.NativeName, Id: t.Lcid
+                    })
+                })
+            }, complete: function () {
+                i && i()
+            }
+        })
+    }, r.ShowHideDialog = function () {
+        var t = n(this),
+i = [],
+u,
+f;
+        r.hideActivityLinkAvailable && i.push({
+            text: String.format(ngText.HideActivities, t.attr("typeName")), callback: r.HideActivityType, data: {
+                typeId: t.attr("typeId"), typeName: t.attr("typeName")
+            }
+        }),
+r.muteLinkAvailable && (t.parents(".ngActivityRow").hasClass("ActivityType-RssModule") || t.parents(".ngActivityRow").hasClass("ActivityType-RssModuleSingle") || i.push({
+    text: ngText.MuteVerb, callback: r.MuteActivity, data: { eventId: t.attr("eventId") }
+})),
+u = n(".ngActionItem", t.parent()),
+n.each(u, function () {
+    if (n(this).is(".ngActionItemSeparator"))
+        i.length > 0 && i.push({ text: null });
+    else {
+        var t = n(this);
+        t.length > 0 && t.css("display") != "none" && i.push({
+            text: t.html(), callback: function (n) {
+                n.data.link.trigger("click")
+            }, data: { link: t }
+        })
+    }
+}),
+f = NG.ContextMenu({
+    offset: 1, hOffset: 0, targetElem: t, vAlign: "bottom", hAlign: "right", menuItems: i, hideOnHoverOut: !0
+})
+    }, r.RemoveAllDeletedEventsForEvent = function (t) {
+        n("div.ngActivityEventDiv_" + t).parent().remove()
+    }, r.HideActivityType = function (t) {
+        if (confirm(String.format(ngText.HideActivityTypeConfirmation, t.data.typeName))) {
+            var u = t.data.typeId,
+f = i.actionUrl + "Hide/" + u + "/";
+            r.PostActivity(null, f, ngText.RequestError, n(t.currentTarget))
+        }
+    }, r.DeleteActivity = function (t) {
+        var e = t.attr("eventId"),
+u = t.attr("authorId"),
+o,
+f;
+        (NG.StringIsNullOrEmpty(u) && (u = 0), u > 0 && !confirm(ngText.DeleteActivityConfirmation)) || (o = t.parents("div.ngActivityRow").first(), f = n("<span class='ngLoading'><\/span>"), t.css("display", "none").after(f), n.ajax({
+            type: "POST", contentType: "application/json; charset=utf-8", url: i.actionUrl + String.format("{0}/{1}/x/", u, e), data: null, success: function () {
+                o.remove(),
+r.RemoveAllDeletedEventsForEvent(e),
+n(NG.Events).trigger("activityDelete")
+            }, error: function () {
+                f.remove(),
+t.css("display", ""),
+new NG.Tooltip(t, ngText.RequestError, 5e3, "bottom")
+            }
+        }))
+    }, r.DeleteActivityFromContext = function (t) {
+        var e = t.attr("eventId"),
+u = t.attr("authorId"),
+o,
+f;
+        (NG.StringIsNullOrEmpty(u) && (u = 0), u > 0 && !confirm(ngText.DeleteActivityContextConfirmation)) || (o = t.parents("div.ngActivityRow").first(), f = n("<span class='ngLoading'><\/span>"), t.css("display", "none").after(f), n.ajax({
+            type: "POST", contentType: "application/json; charset=utf-8", url: i.actionUrl + String.format("context/{0}/{1}/x/", u, e), data: null, success: function () {
+                o.remove(),
+r.RemoveAllDeletedEventsForEvent(e),
+n(NG.Events).trigger("activityDelete")
+            }, error: function () {
+                f.remove(),
+t.css("display", ""),
+new NG.Tooltip(t, ngText.RequestError, 5e3, "bottom")
+            }
+        }))
+    }, r.MuteActivity = function (t) {
+        if (confirm(ngText.MuteConfirmation)) {
+            var u = n(t.target).parents("div.ngActivityRow").first(),
+f = u.attr("eventId");
+            n.ajax({
+                type: "POST", url: String.format("{0}Mute/{1}/", i.actionUrl, f), success: function () {
+                    r.options.view == NG.ActivityView.Single ? new NG.Tooltip(u, ngText.MuteSuccessLabel, 5e3, "top") : u.remove(),
+NG.RemoveMutedEvents(f),
+n(NG.Events).trigger("activityMute")
+                }, error: function () {
+                    new NG.Tooltip(t.currentTarget, ngText.RequestError, 5e3, "bottom")
+                }
+            })
+        }
+    }, r.FollowUp = function (t) {
+        var u = t.attr("eventId"),
+f = t.attr("authorId");
+        NG.StringIsNullOrEmpty(f) && (f = 0);
+        var e = {
+            EventAuthorID: f, UserData: ""
+        },
+o = ngText.RequestError,
+s = (t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl))) + "FollowUp/" + u + "/",
+h = r.GetNGEventTrigger("followUp", [{
+    eventId: u, eventText: n("div.ngActivityEventDiv_" + u + " .ngSummary").text()
+}]);
+        r.PostActivity(e, s, o, t, u, f, h)
+    }, r.UnFollowUp = function (t) {
+        var u = t.attr("eventId"),
+f = t.attr("authorId"),
+e;
+        NG.StringIsNullOrEmpty(f) && (f = 0),
+e = (t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl))) + "FollowUp/" + u + "/x/",
+n.ajax({
+    type: "POST", contentType: "text/plain", url: e, success: function () {
+        n(NG.Events).trigger("unFollowUp", [{
+            eventId: u, eventText: n("div.ngActivityEventDiv_" + u + " .ngSummary").text()
+        }]),
+r.ReloadSingleActivity(t, u, f, t.attr("actionUrl") ? encodeURI(decodeURI(t.attr("actionUrl"))) : encodeURI(decodeURI(i.actionUrl)))
+    }, error: function (n) {
+        var i;
+        switch (n.status) {
+            case 404:
+            case 410:
+                i = ngText.EventNotFoundError;
+                break;
+            case 400:
+                i = ngText.InvalidOperationError;
+                break;
+            default:
+                i = NG.GetDefaultErrorMessage(n.status)
+        }
+        new NG.Tooltip(t, i, 5e3, "bottom")
+    }
+})
+    }, r.UpdatePollOption = function (t) {
+        var h = t.attr("pollId"),
+f,
+u,
+c,
+o,
+e;
+        if (t.is(":checked")) {
+            f = t.attr("eventId"),
+u = t.attr("authorId"),
+NG.StringIsNullOrEmpty(u) && (u = 0);
+            var l = {
+                EventAuthorID: u, UserData: ""
+            },
+o = ngText.RequestError,
+e = (t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl) + "poll/" + f + "/" + h + "/",
+a = n(t).parents(".ngActivityRow").last(),
+s = a.attr("remoteSourceId");
+            s && !NG.StringIsNullOrEmpty(s) && (e = "/_vti_bin/ng/remote/activityfeed." + s + ".ashx/poll/" + f + "/" + h + "/"),
+c = r.GetNGEventTrigger("poll", [{ eventId: f}]),
+r.PostActivity(l, e, o, t, f, u, c)
+        }
+        else {
+            var v = t.attr("metaId"),
+f = t.attr("eventId"),
+u = t.attr("authorId");
+            NG.StringIsNullOrEmpty(u) && (u = 0),
+o = ngText.RequestError,
+e = i.actionUrl + "poll/" + v + "/x/",
+n.ajax({
+    type: "POST", contentType: "text/plain", url: e, success: function () {
+        r.ReloadSingleActivity(t, f, u, t.attr("actionUrl") ? t.attr("actionUrl") : i.actionUrl),
+n(NG.Events).trigger("deletePoll")
+    }, error: function () {
+        new NG.Tooltip(event.target, ngText.RequestError, 5e3, "bottom")
+    }
+})
+        }
+    }, r.PostActivity = function () {
+        r.DoServiceRequest.apply(r, n.merge(["POST"], arguments))
+    }, r.DoServiceRequest = function (t, i, u, f, e, o, s, h) {
+        var c = "";
+        i && i.Targets && (c = i.Targets, i.Targets = ""),
+n.ajax({
+    type: t, beforeSend: function (n) {
+        n.setRequestHeader("x-ng-targets", c)
+    }, contentType: "application/json; charset=utf-8", url: u, data: JSON.stringify(i), success: function (n, t) {
+        r.ReloadSingleActivity(e, o, s),
+h && h(n, t)
+    }, error: function (t, i, u) {
+        var f,
+h,
+c;
+        switch (t.status) {
+            case 404:
+            case 410:
+                f = ngText.EventNotFoundError;
+                break;
+            case 400:
+                f = ngText.InvalidOperationError,
+new NG.Tooltip(e, f, 5e3, "bottom"),
+h = function () {
+    this.ReloadSingleActivity(n(event.currentTarget), o, s)
+},
+c = Function.createDelegate(r, h),
+window.setTimeout(c, 2500);
+                return;
+            case 412:
+                f = t.responseText,
+f && f != "" || (f = u);
+                break;
+            case 500:
+                f = u.indexOf("Cannot edit") > -1 ? ngText.EditItemError : NG.GetDefaultErrorMessage(t.status);
+                break;
+            default:
+                f = NG.GetDefaultErrorMessage(t.status)
+        }
+        new NG.Tooltip(e, f, 5e3, "bottom")
+    }
+})
+    }, r.ShowCommentFileUploadOld = function (t) {
+        var u = n(t.currentTarget),
+i = u.parents(".ngCommentDiv").find(".ngCommentFileFrame");
+        if (n("iframe.ngCommentUploadFrame", i).length == 0) {
+            if (i.append($ajaxLoaderBar), window.onNgCommentUploadFrameClosed)
+                window.onNgCommentUploadFrameClosed(0);
+            var f = n(this).attr("eventId"),
+e = n(this).attr("authorId"),
+o = window.ngUploadFallbackUrl + (window.ngUploadFallbackUrl.indexOf("?") > -1 ? "&" : "?") + "IsDlg=1&eventKey=" + f,
+s = n('<iframe frameborder="0" border="0" src="' + o + '" class="ngCommentUploadFrame" style="display:none"><\/iframe>').appendTo(i).bind("load", function () {
+    n(".ngLoadingBar", i).remove(),
+n(this).show();
+    var t = n(this).get(0).contentWindow.document;
+    n("#ngSuccessCallback", t).val("onNgCommentUploadFrameClosed"),
+n(".ngPopupClose", t).click(function () {
+    window.onNgCommentUploadFrameClosed(0)
+})
+});
+            window.onNgCommentUploadFrameClosed = function (t) {
+                t == 1 && r.ReloadSingleActivity(u, f, e),
+n("iframe.ngCommentUploadFrame").hide("fast").remove(),
+window.onNGCommentUploadFrameClosed = null,
+n(NG.Events).trigger("uploadCommentFileComplete")
+            }
+        }
+    }, r.ShowCommentFileUpload = function (t) {
+        var e = n(t.currentTarget),
+u = e.parents(".ngCommentDiv").find(".ngCommentFileFrame"),
+i;
+        if (n("div.ngCommentUploadFrame", u).length == 0) {
+            var o = n(this).attr("eventId"),
+s = n(this).attr("authorId"),
+f = n(String.format('<div class="ngClose"><div class="ngHeader"><\/div><div><a href="javascript:void(0);" class="ngPopupClose" runat="server" title="{0}"><\/a><\/div><\/div>', ngText.CloseVerb));
+            f.appendTo(u),
+i = n("<div class='ngCommentUploadFrame'/>").appendTo(u),
+n(".ngPopupClose", f).click(function () {
+    i.pluploadQueue().destroy()
+}),
+i.pluploadQueue({
+    runtimes: window.ngPLUploadRuntimes, url: window.ngUploadUrl, required_features: "return_response_headers", filters: { mime_types: [{
+        title: "All Files", extensions: "*"
+    }]
+    }, rename: !0, dragdrop: !0, flash_swf_url: "/_layouts/ng/script/plugins/plupload-2.1.0/js/Moxie.swf", silverlight_xap_url: "/_layouts/ng/script/plugins/plupload-2.1.0/js/Moxie.xap", eventHash: null, uploadedLocations: [], remainingFiles: 0, status: "", ActivityType: "", socialGroups: null, eventId: null, authorId: null, attachmentList: null, preview: null, preinit: { UploadFile: function (n) {
+        n.settings.multipart_params = {
+            Multiupload: n.files.length, RemainingFiles: --n.settings.remainingFiles, ngStatusUpdate: n.settings.status, EventKey: o, AuthorId: s
+        },
+n.settings.socialGroups && (n.settings.multipart_params.ngSocialGroups = n.settings.socialGroups),
+n.settings.attachmentList && (n.settings.multipart_params.AttachmentList = n.settings.attachmentList),
+n.settings.preview && (n.settings.multipart_params.ngLinkPreview = n.settings.preview)
+    }
+    }, init: {
+        FileUploaded: function (n, t, i) {
+            var e,
+f,
+u;
+            n.settings.attachmentList = i.response,
+e = r.GetHeader(i.responseHeaders, "HasRequiredFields"),
+f = r.GetHeader(i.responseHeaders, "EditUrl"),
+e && f && (u = window.parent.SP.UI.$create_DialogOptions(), u.autoSize = !0, u.url = f, window.parent.SP.UI.ModalDialog.showModalDialog(u))
+        }, QueueChanged: function (t) {
+            t.settings.remainingFiles = t.files.length,
+t.files.length && n("#ngFileUpload").val(t.files.length)
+        }, StateChanged: function (t) {
+            t.files.length === t.total.uploaded + t.total.failed && (r.ReloadSingleActivity(e, o, s), n(NG.Events).trigger("uploadCommentFileComplete"), i.pluploadQueue().destroy())
+        }, Destroy: function () {
+            i.hide("fast").remove(),
+f.hide("fast").remove()
+        }
+    }
+})
+        }
+    }, r.GetHeader = function (t, i) {
+        var u = n(t.split(/\r\n/)),
+r;
+        for (index = 0; index < u.length; index++)
+            if (r = u[index].split(/:\s+/), r.length === 2 && (r[0] = n.trim(r[0]), r[0].toUpperCase() === i.toUpperCase()))
+                return n.trim(r[1]);
+        return null
+    }, r.ShowNewsView = function (t) {
+        try {
+            NG.NM.ShowNews(t),
+r.ToggleAutoRefresh(n(t.currentTarget).parents(".ngActivityActionDiv").find(".ngActivityNewsView").is(":visible"))
+        }
+        catch (i) {
+            Sys.Debug.trace("Could not get news: " + i)
+        }
+    }, r.CheckAutocompleteShareInput = function (t, i) {
+        var f,
+r,
+u,
+s,
+o;
+        if (h || e) {
+            if (f = NG.GetCommunityMatches(t), r = n(i).parent().parent().find(".ngPrivacyWarning"), f.length == 0) {
+                r.html("").hide();
+                return
+            }
+            if (u = n.grep(e, function (t) {
+                if (t.PrivacyLevel.toLowerCase() == "public")
+                    return !1;
+                var i = n.inArray(t.Name.toLowerCase(), f);
+                return i >= 0
+            }), c && c.PrivacyLevel.toLowerCase() == "private" && n.inArray(c, u) == -1 && u.push(c), u.length == 0) {
+                r.html("").hide();
+                return
+            }
+            s = NG.GetUserMatches(t),
+o = n(i).parent().parent().find("button:first"),
+(s.length > 0 || f.length > 1) && u.length > 0 ? typeof dontAllowMixed == "undefined" || dontAllowMixed === !1 ? r.html(ngText.CommunityPrivacyWarning.replace("{communityName}", "@[" + u[0].Name + "]")).show() : dontAllowMixed && dontAllowMixed === !0 && (o.attr("disabled", "disabled"), r.html(ngText.CommunityPrivacyError).show()) : (o.removeAttr("disabled"), r.html("").hide())
+        }
+    }, r.CheckAutocompleteInputComments = function (t, i, r) {
+        if (h || e) {
+            var f = [],
+l = [],
+a = [];
+            t.indexOf("@") > -1 && (f = NG.GetCommunityMatches(t, !0), f.length > 0 && (l = n.grep(e, function (t) {
+                if (t.PrivacyLevel.toLowerCase() == "public")
+                    return !1;
+                var i = n.inArray(t.Name.toLowerCase(), f);
+                return i >= 0
+            })), r == "Private" && (a = NG.GetUserMatches(t)));
+            var o = typeof dontAllowMixed != "undefined" && dontAllowMixed === !0,
+v = r == "Private",
+u = n(i).parent().parent().find(".ngPrivacyWarning"),
+s = n(i).parent().parent().find("button:first");
+            (a.length > 0 || f.length > 0) && v ? o ? o && (c ? f.length > 0 ? (s.attr("disabled", "disabled"), u.html(ngText.CommunityPrivacyError).show()) : (s.removeAttr("disabled"), u.html(ngText.CommunityPrivacyUserWarning).show()) : u.html(ngText.CommentPrivacyWarning).show()) : u.html(ngText.CommentPrivacyWarning).show() : !v && l.length > 0 ? o ? o && (s.attr("disabled", "disabled"), u.html(ngText.CommunityPrivacyError).show()) : u.html(String.format(ngText.CommentCommunityPrivacyWarning, "@[" + l[0].Name + "]")).show() : (s.removeAttr("disabled"), u.html("").hide())
+        }
+    }, i.view == NG.ActivityView.NewsFeed && (p = NG.ActivityInputType.Microblog, i.defaultAction == "Ask" && (p = NG.ActivityInputType.Question), r.statusControl = new NG.PostControl(n(".ngStatusHolder", r.parentElement), {
+        postUrl: encodeURI(decodeURI(i.postUrl)), isPersonal: i.isPersonal, currentModule: i.currentModule, onStatusComplete: r.ReloadActivities, inputType: p, personalTarget: i.personalTarget
+    }), n(NG.Events).trigger("ngPostControlCreated", [{ postControl: r.statusControl}]), r.clearFilterLink && n("a", r.clearFilterLink).click(r.ClearFilter), r.filterControl && r.filterControl.get(0) && r.SetupFilterControl(), (window.ngCommunityID || window.ngGroupID) && (w = n(r.parentElement).find("#ngCommunitySubscriptionLink").get(0), b = n(r.parentElement).find("#ngCommunityNewsFeedSettings"), w && (n(NG.Events).bind("joinCommunity", function () {
+        n(b).show()
+    }), n(NG.Events).bind("leaveCommunity", function () {
+        n(b).hide()
+    }), rt = n("#ngAskQuestion", r.parentElement).length > 0, new NG.CommunitySubscriptionControl(w, window.ngGroupID ? {
+        dataUrl: window.spWebUrl + "/_vti_bin/ng/context.svc", groupId: window.ngGroupID, includeQuestions: rt
+    } : {})))), r.filterControl && r.filterControl.get(0) || r.LoadColleaguesAndCommunities(), i.xmlControl.xmlUrl = r.EnsurePagingToken(i.xmlControl.xmlUrl), this
+},
+NG.ActivityStreamRender = function (n) {
+    n.newsFeedControl || (n.newsFeedControl = new NG.NewsFeed(n._element, n.clientProperties)),
+n.newsFeedControl && n.newsFeedControl.Render()
+},
+NG.ActivityStreamDefaultErrorHandler = function (t, i) {
+    var r = i.status;
+    !r && i.get_statusCode && i.get_statusCode(),
+this.element.innerHTML = NG.GetDefaultErrorMessage(r),
+r == 503 && (n("div.ngStatusHolder").hide(), n("#ngDefaultRefresh").hide(), n("div.ngNewsFeedPanel").hide())
+},
+NG.ActivityStreamInit = function (t) {
+    var i = t.xmlUrl;
+    t.newsFeedControl || (t.newsFeedControl = new NG.NewsFeed(t._element, t.clientProperties)),
+t.xmlUrl && t.clientProperties && !NG.StringIsNullOrEmpty(t.clientProperties.defaultFilterUrl) && (t.newsFeedControl.options.defaultFilterSet = !0, t.clientProperties.defaultFilterUrl.toLowerCase() != i.toLowerCase() && (t.xmlUrl = t.newsFeedControl.EnsurePagingToken(t.clientProperties.defaultFilterUrl), n("#ngEventShowOptions").val(t.newsFeedControl.options.defaultFilterUrl), t.newsFeedControl.options.view = NG.ActivityView.Select)),
+t.errorHandler = NG.ActivityStreamDefaultErrorHandler
+},
+NG.NotificationControl = function (t, i) {
+    var u = this,
+t = n(t);
+    u.xmlControl = null,
+u.interval = null,
+u.ajaxFunction = null;
+    var f = window.spWebUrl + "/_vti_bin/ng/eventnotification.svc/",
+e = window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/",
+r = 20;
+    i = n.extend({ parentXsl: "/_layouts/ng/xml/activityfeed.xslt?cache=" + ngCacheKey }, i || {}),
+u.Initialize = function () {
+    u.GetCount(),
+t.find("#ngNoteSeeAll").click(u.SeeAll)
+},
+u.SeeAll = function () {
+    var t = String.format("width=575,height={0},menubar=no,resizable=no,status=no,toolbar=no", n(window).height() - 80),
+i = window.spWebUrl + "/_layouts/ng/pages/notifications.aspx?isDlg=1",
+r = window.open(i, "", t);
+    r.focus()
+},
+u.GetCount = function () {
+    var t = n("#ngEventNotificationCount").get(0);
+    t && (n("#ngNotificationFilterLink").click(u.DisplayNotifications), u.ajaxFunction = function () {
+        n.ajax({
+            type: "GET", url: f + "Count/?rollup=true", success: function (i) {
+                n(i).find("int").each(function () {
+                    var i = n(this);
+                    r = parseInt(i.text()),
+n(t).html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0)
+                })
+            }, error: function () {
+                r = 0,
+n(t).html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0),
+Sys.Debug.trace("Could not retrieve notification count")
+            }
+        })
+    }, u.ajaxFunction())
+},
+u.Refresh = function () {
+    u.ajaxFunction()
+},
+u.DisposeChildXmlControls = function (t) {
+    n(t).find("div").each(function () {
+        this.ngXmlControl && (this.ngXmlControl.newsFeedControl = null, this.ngXmlControl.dispose())
+    })
+},
+u.DisplayNotifications = function () {
+    var t = n("#ngEventNotificationDiv").get(0),
+i,
+o,
+e,
+s,
+h;
+    n("#ngNotificationCloseLink").click(function () {
+        n(t).hide(),
+u.DisposeChildXmlControls(t)
+    }),
+t && (i = n("#ngEventNotificationXml"), i.length && (i.addClass("ngNewsFeedContent ngWrapper"), n("#ngHeaderCount").html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0), n("#ngEventActionLinks").css("display", ""), i.html(ngText.Loading + "..."), o = Math.max(r, 5), e = f + "Rollup/?maxCount=" + o, u.xmlControl ? u.xmlControl.LoadXml(e) : (s = {
+    xmlUrl: e, xslUrl: ngNotificationXslt
+}, h = {
+    init: NG.CommonInit, render: u.RenderNotifications
+}, u.xmlControl = $create(SharePointAjax.XmlControl, s, h, null, i.get(0))), t.style.display = "block", NG.AdjustPopupOnScreen(n(t))))
+},
+u.RenderNotifications = function () {
+    try {
+        n("span.timeago", t).timeago()
+    }
+    catch (i) { }
+    try {
+        NG.Localize(t)
+    }
+    catch (i) { }
+    if (n("a.ngShowParentEventLink", t).click(u.ShowParent), n("a.ngMuteNotificationLink", t).click(u.MuteEvent), window.ngMiniProfileEnabled)
+        try {
+            t.find("span.ngSummary a").filter(function () {
+                return /accountname=/i.test(n(this).attr("href"))
+            }).miniProfile()
+        }
+        catch (i) { }
+},
+u.MuteEvent = function (t) {
+    var i = n(t.currentTarget),
+f = i.attr("eventId"),
+u = i.parents(".ngNotificationHolder"),
+u = i.parents(".ngNotificationHolder"),
+o = u.hasClass("viewed");
+    n.ajax({
+        type: "POST", url: String.format("{0}Mute/{1}/", e, f), success: function () {
+            if (!o) {
+                var t = n("#ngEventNotificationCount");
+                t.length && (r = parseInt(t.html()), r != "NaN" && (r = r > 1 ? r - 1 : 0, t.html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0), n("#ngHeaderCount").html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0)))
+            }
+            u.remove()
+        }, error: function () {
+            Sys.Debug.trace("Could not mute event")
+        }
+    })
+},
+u.ShowParent = function (t) {
+    var e = n(t.currentTarget),
+v = e.attr("notificationId"),
+s = e.attr("eventId"),
+o = n("#ngParentEventXml_" + v).get(0),
+h = e.parents(".ngNotificationHolder"),
+y = h.hasClass("viewed"),
+c,
+l,
+a;
+    o && (c = !n(o).is(":visible"), c ? (o.ngXmlControl ? o.control.Reload() : (l = {
+        xmlUrl: i.actionUrl + String.format("{0}/{1}/", e.attr("authorId"), s), xslUrl: i.parentXsl
+    }, a = {
+        render: u.RenderParent, init: NG.CommonInit
+    }, o.ngXmlControl = $create(SharePointAjax.XmlControl, l, a, null, o), y || n.ajax({
+        type: "POST", url: String.format("{0}Rollup/{1}/", f, s), success: function () {
+            var t = n("#ngEventNotificationCount");
+            t.length && (r = parseInt(t.html()), r != "NaN" && (r = r > 1 ? r - 1 : 0, t.html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0), n("#ngHeaderCount").html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0))),
+h.addClass("viewed")
+        }, error: function () {
+            Sys.Debug.trace("Could not update notification view state")
+        }
+    })), o.style.display = "block", e.html(ngText.CollapseVerb), e.addClass("ngShowParentEventLinkSelected")) : (o.style.display = "none", e.html(ngText.ExpandVerb), e.removeClass("ngShowParentEventLinkSelected")))
+},
+u.RenderParent = function (n) {
+    n.newsFeedControl || (n.newsFeedControl = new NG.NewsFeed(n._element, {
+        actionUrl: i.actionUrl, view: NG.ActivityView.SingleNotification, linkHashTags: !1
+    })),
+n.newsFeedControl && n.newsFeedControl.Render()
+};
+    try {
+        n("#ngEventNotificationMarkReadLink").click(function () {
+            n("#ngEventNotificationDiv").css("display", "none"),
+n.ajax({
+    type: "POST", url: f, success: function () {
+        r = 0,
+n("#ngEventNotificationCount").html(r).toggleClass("ngNotificationNoCount", r == 0).toggleClass("ngNotificationHasCount", r > 0)
+    }, error: function () {
+        Sys.Debug.trace("Could not update notification view state")
+    }
+})
+        })
+    }
+    catch (o) {
+        Sys.Debug.trace("Could not link mark all viewed event")
+    }
+    return u.Initialize(), this
+},
+NG.TagCloudControl = function (t, i) {
+    var r = this,
+t = n(t);
+    r.xmlControl = null;
+    var u = 0,
+f = null,
+e = 0,
+o = 0;
+    return i = n.extend({
+        callback: null, dataUrl: i.actionUrl, xsltUrl: ngTagsXslt
+    }, i || {}), !i.callback, r.Initialize = function () {
+        r.GetTagCloud()
+    }, r.GetTagCloud = function () {
+        if (r.xmlControl)
+            r.xmlControl.LoadXml(i.dataUrl);
+        else {
+            t.append($ajaxLoaderBar.clone());
+            var n = {
+                xmlUrl: i.dataUrl, xslUrl: i.xsltUrl
+            },
+u = {
+    prerender: r.PreRenderTagCloud, render: r.RenderTagCloud, init: NG.CommonInit
+};
+            r.xmlControl = $create(SharePointAjax.XmlControl, n, u, null, t.get(0))
+        }
+    }, r.PreRenderTagCloud = function () {
+        var t = n(r.xmlControl._xmlDoc),
+i = t.find("count");
+        t.find("Tag").each(function () {
+            var t = parseInt(n(this).find("count").text());
+            u < t && (u = t),
+f == null | f > t && (f = t)
+        }),
+e = u - f,
+o = i.length < 4 ? i.length : 4,
+e == 0 && (e = 1, o = 1)
+    }, r.RenderTagCloud = function () {
+        var r = n("a.ngTag", t);
+        if (r.length == 0) {
+            t.html(ngText.NoItemsToDisplay);
+            return
+        }
+        r.each(function () {
+            var i = n(this),
+r = parseInt(i.data("ngcount")),
+f = u - r,
+s = o - Math.floor(f / e * o),
+t;
+            i.addClass("ngTag" + s),
+t = i.text(),
+i.attr("data-tag", t),
+t.length > 20 && (t = t.replace(/(.{20})/g, "$1&shy;"), i.html(t).css("white-space", "normal"))
+        }),
+i.callback && r.click(function () {
+    var t = n.trim(n(this).attr("data-tag")).substr(1);
+    i.callback(t)
+})
+    }, r.Initialize(), this
+},
+NG.RecentMicrobloggersRender = function (n) {
+    n.errorHandler = NG.ActivityStreamDefaultErrorHandler;
+    var t = n.clientProperties || {};
+    t.view = NG.ActivityView.RecentMicrobloggers,
+t.linkHashTags = !1,
+n.clientProperties = t,
+n.newsFeedControl == null && (n.newsFeedControl = new NG.NewsFeed(n._element, n.clientProperties)),
+n.newsFeedControl.Render()
+},
+NG.SpotlightTracking = function (t, i) {
+    var r = i.target[0],
+u = n(t).attr("type"),
+f = n(r).attr("authorId") != null ? n(r).attr("authorId") : 0,
+e = n(r).attr("eventId") != null ? n(r).attr("eventId") : 0,
+o = n(r).attr("metaId") != null ? n(r).attr("metaId") : 0;
+    n.ajax({
+        type: "POST", contentType: "text/plain", url: String.format("{0}/_vti_bin/ng/spotlight/spotlightservice.svc/TrackEvent/{1}/?authorId={2}&metaId={3}&eventId={4}&communityId={5}", window.spWebUrl, u, f, o, e, window.ngGroupID || window.ngCommunityID)
+    })
+},
+n(NG.Events).bind("markAnswer", NG.SpotlightTracking),
+n(NG.Events).bind("unmarkAnswer", NG.SpotlightTracking),
+NG.GetFilters = function (n) {
+    var t = [],
+r,
+i,
+u;
+    if (t.push({
+        name: ngText.Filter_Newsfeed, value: ""
+    }), t.push({
+        name: ngText.Filter_Recent, value: n + "Timeline/"
+    }), t.push({
+        name: ngText.Filter_MyActivities, value: n + "Me/"
+    }), t.push({
+        name: ngText.Filter_TopNews, value: n + "TopNews/"
+    }), t.push({
+        name: ngText.Filter_AllPublicItems, value: n + "Public/"
+    }), t.push({
+        name: ngText.Filter_AllPublicMicroblogs, value: n + "PublicMicroblog/"
+    }), t.push({
+        name: ngText.Filter_Messages, value: n + "SubType/DirectMessage/"
+    }), t.push({
+        name: ngText.Filter_FollowUp, value: n + "FollowUp/"
+    }), t.push({
+        name: ngText.Filter_Questions, value: n + "EventType/NewsGatorQA/", searchable: !0
+    }), t.push({
+        name: ngText.Filter_Polls, value: n + "SubType/Poll/"
+    }), t.push({
+        name: ngText.Filter_Workflow, value: n + "EventType/NGWorkflow/"
+    }), window.activityFilterMods != null)
+        for (r in window.activityFilterMods) {
+            i = window.activityFilterMods[r];
+            try {
+                u = i.dataUrl.indexOf("http") == 0 ? i.dataUrl : n + i.dataUrl,
+t.push({
+    name: i.label, value: u
+})
+            }
+            catch (f) {
+                Sys.Debug.trace("Error adding module filter: " + i.label)
+            }
+        }
+    return t
+},
+WorkflowExtension = {},
+WorkflowExtension.Render = function (t) {
+    n(t).find(".ng-workflowAction").on("click", function () {
+        var r = n(this),
+t = r.closest(".ngActivityRow"),
+i = t.attr("eventId"),
+e = window.spWebUrl + "/_vti_bin/ng/workflow.svc/" + i + "/",
+u = "",
+f;
+        try {
+            u = n("#WFComment-" + i)[0].value
+        }
+        catch (o) { }
+        f = {
+            Action: r.attr("data-action"), Comment: u
+        },
+n.ajax({
+    type: "POST", contentType: "application/json; charset=utf-8", url: e, data: JSON.stringify(f), success: function (r) {
+        r.ResponseText != null && r.ResponseText != "" && new NG.Tooltip(t, r.ResponseText, 5e3, "top"),
+n(t).find(".ng-workflowAction").css("visibility", "hidden"),
+NG.NewsFeedReloadSingleEvents(i)
+    }, error: function (n) {
+        new NG.Tooltip(t, NG.GetDefaultErrorMessage(n.status), 5e3, "top")
+    }
+})
+    })
+},
+n(NG.Events).bind("activityStreamRendered", function (n, t) {
+    WorkflowExtension.Render(t.element)
+}),
+Sys.Application.notifyScriptLoaded()
+} ();
+
+if (jQuery) {
+    document.write("<script src=_layouts/OBS.ANZ.Strion.Branding/Sitrion/Accessibility.js'></script>");
+
+}
+else {
+
+
+    document.write("<script src='/_layouts/jquery/jquery-1.10.2.min.js'></script>");
+    document.write("<script src='/_layouts/OBS.ANZ.Strion.Branding/Sitrion/Accessibility.js'></script>");
+}
+
+var virInput = "";
+function showShare(a, b, c, d) {
+    //set id for more link, in case focus share box to center.
+    if ($(c).attr("id") == undefined) {
+        var length = $("#s4-workspace").find("a[id*='ngmore']").length;
+        $(c).attr("id", "ngmore" + length);
+
+    }
+    //insert a input to use arrow down and arrow up.
+    if ($(c).find("input").length == 0) {
+        var alink = "<input type='textbox' id='moretextbox" + length + "' style= 'position:absolute;left:-9999px;FILTER: alpha(opacity=0);width:1px;float:right' value='more list'/>";
+        $(alink).appendTo($(c));
+        $("#moretextbox" + length).focus();
+        virInput = "moretextbox" + length;
+        $("#moretextbox" + length).keydown(function (ei) {
+
+            if (ei.keyCode == 13) {
+                ei.preventDefault();
+                var b = [],
+        d = a(".ngActionItem", c.parent());
+                a.each(d, function () {
+                    var c = a(this);
+                    c.css("display") != "none" &&
+        b.push({ text: c.html(), callback: function (a) {
+            a.data.link.trigger("click")
+        }, data: { link: c }
+        })
+                });
+                var e = NG.ContextMenu({ offset: 1, hOffset: 0, targetElem: c, vAlign: "bottom", hAlign: "right", menuItems: b, hideOnHoverOut: false, width: "125px", includeArrow: true })
+
+            }
+            //  return false;
+            if (ei.keyCode == 9 && ei.shiftKey) {
+                ei.preventDefault();
+                $(c).parent().prev().find("a").first().focus();
+            }
+        });
+    }
+
+    else {
+        $(c).find("input").first().css("display", "block");
+        $(c).find("input").first().focus();
+    }
+    $("#" + virInput).focusout(function () {
+        $(this).css("display", "none");
+    });
+
+    //arrow down and arrow up event
+    $(c).keydown(function (e) {
+        if (e.keyCode == 38 || e.keyCode == 40) {
+            $(c).next().next().find("ul").find("li").first().attr("tabindex", 100);
+            $(c).next().next().find("ul").find("li").first().focus();
+            $(c).next().next().find("ul").find("li").first().addClass('selected');
+
+            $(c).next().next().find("ul").find("li").each(function (index) {
+                $(this).attr("tabindex", index + 100);
+                $(this).keydown(function (eItem) {
+                    if (eItem.keyCode == 13) {
+                        e.preventDefault();
+                        $(this).trigger("click");
+                        return false;
+
+                    }
+                    if (eItem.keyCode == 9) {
+                        e.preventDefault();
+                        $(c).focus();
+                        return false;
+
+                    }
+                    if (eItem.keyCode == 40 && $(this).next().length > 0) {
+                        e.preventDefault();
+                        $(this).next().focus();
+                        return false;
+                    }
+                    else if (eItem.keyCode == 40 && $(this).next().length == 0) {
+                        e.preventDefault();
+                        $(c).next().next().find("ul").find("li").first().focus();
+                        return false;
+                    }
+                    else if (eItem.keyCode == 38 && $(this).prev().length > 0) {
+                        e.preventDefault();
+                        $(this).prev().focus();
+                        return false;
+                    }
+                    else if (eItem.keyCode == 38 && $(this).prev().length == 0) {
+                        e.preventDefault();
+                        $(c).next().next().find("ul").find("li").last().focus();
+                        return false;
+                    }
+                    if (index == 0) {
+
+                    }
+
+                });
+                $(this).focusin(function (ef) {
+
+                    $(this).addClass('selected');
+
+                });
+                $(this).focusout(function (ef) {
+
+                    $(this).removeClass('selected');
+
+                });
+            });
+        }
+    });
+}
+

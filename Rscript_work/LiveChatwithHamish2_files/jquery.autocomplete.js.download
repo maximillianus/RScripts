@@ -1,0 +1,631 @@
+(function(n)
+{
+n.fn.extend({
+ngautocomplete: function(t, i)
+{
+var r=typeof t == "string",
+u=n.isFunction(t);
+return i = n.extend({}, n.Autocompleter.defaults, {
+url: r ? t : null, data: r || u ? null : t, getFunc: u ? t : null, delay: r ? n.Autocompleter.defaults.delay : 10, max: i && !i.scroll ? 10 : 150
+}, i), i.highlight = i.highlight || function(n)
+{
+return n
+}, i.formatMatch = i.formatMatch || i.formatItem, this.each(function()
+{
+new n.Autocompleter(this, i)
+})
+}, result: function(n)
+{
+return this.bind("result", n)
+}, search: function(n)
+{
+return this.trigger("search", [n])
+}, flushCache: function()
+{
+return this.trigger("flushCache")
+}, setOptions: function(n)
+{
+return this.trigger("setOptions", [n])
+}, unautocomplete: function()
+{
+return this.trigger("unautocomplete")
+}
+}),
+n.Autocompleter = function(t, i)
+{
+function rt(n)
+{
+var t,
+r,
+i;
+n.focus(),
+typeof window.getSelection != "undefined" && typeof document.createRange != "undefined" ? (t = document.createRange(), t.selectNodeContents(n), t.collapse(!1), r = window.getSelection(), r.removeAllRanges(), r.addRange(t)) : typeof document.body.createTextRange != "undefined" && (i = document.body.createTextRange(), i.moveToElementText(n), i.collapse(!1), i.select())
+}
+function tt()
+{
+var a=u.selected(),
+n,
+t,
+y,
+l,
+p,
+w,
+b;
+if (!a)
+return !1;
+if (n = a.result, o = n, t = e, y = h ? r.html() : r[0].value, h)
+{
+var k=/<[\/]?[li,br,div,ul,b,i,u,strong,em,code,span][^>]*>/gmi,
+f=y,
+c=f.match(k);
+function d(n)
+{
+for (var i="", t=0; t < n; t++)
+i += "$";
+return i
+}
+if (c && c.length)
+for (l = 0; l < c.length; l++)
+p = f.indexOf(c[l]),
+w = c[l].length,
+p < t && (t += w, f = f.substring(0, p) + d(w) + f.substring(p + w))
+}
+return i.multiple && (b = t - s.length, n = y.substring(0, b) + n + i.multipleSeparator + y.substring(t)), h ? (r.html(n), rt(r[0])) : r.val(n), e = n.length, v(), r.trigger("result", [a.data, a.value]), !0
+}
+function d(n, t)
+{
+if (w == f.DEL)
+{
+u.hide();
+return
+}
+ut();
+var e=h ? r.html() : r[0].value;
+(t || e != o) && (o = e, s = st(e), s.length >= i.minChars ? (r.addClass(i.loadingClass), i.matchCase || (s = s.toLowerCase()), it(s, at, et, o)) : (g(), u.hide()))
+}
+function ut()
+{
+e = h ? ft() : n(t).selection().start
+}
+function ft()
+{
+var f=0,
+o=document,
+e=window,
+s=r[0],
+n,
+t,
+i,
+h,
+u;
+return typeof e.getSelection != "undefined" ? (n = e.getSelection(), n.rangeCount > 0 && (t = e.getSelection().getRangeAt(0), i = t.cloneRange(), i.selectNodeContents(s), i.setEnd(t.endContainer, t.endOffset), f = i.toString().length)) : (n = o.selection) && n.type !== "Control" && (h = n.createRange(), u = o.body.createTextRange(), u.moveToElementText(s), u.setEndPoint("EndToEnd", h), f = u.text.length), f
+}
+function et(n)
+{
+if (i.formatNoResults)
+{
+var t=i.formatNoResults(n);
+if (t && t.length)
+{
+u.displayNoResults(n),
+u.show();
+return
+}
+}
+v()
+}
+function ot(n, t)
+{
+return t ? n.replace(/\n/g, i.multipleSeparator + "\n" + i.multipleSeparator).replace("&nbsp;", " ").replace(/(<br[^>]*>)+$/gmi, "").replace(/<br[^>]*>/gi, i.multipleSeparator + "\n" + i.multipleSeparator) : n.replace(/\n/g, i.multipleSeparator).replace("&nbsp;", " ").replace(/(<br>\s*)+$/, " ")
+}
+function st(t)
+{
+var u,
+r,
+o,
+f,
+l,
+c,
+a,
+s;
+if (!t)
+return "";
+if (!i.multiple)
+return n.trim(t);
+if (u = e, r = t, h)
+{
+for (r = r.replace(/<[\/]?[br][^>]*>/gmi, "\n").replace(/<[\/]?[li,div,ul,b,i,u,strong,em,code,span,img][^>]*>/gmi, "").trim(), o = 1; o < r.length; o++)
+if (o < u)
+r.charAt(o) == "\n" && (u += 1);
+else
+break;
+r = r.replace(/\n/g, " ")
+}
+else
+{
+var v=r.substring(0, u),
+y=v.length,
+r=ot(v, i.preserveLineBreak);
+r.length > y && (u += r.length - y)
+}
+return f = r.lastIndexOf(i.multipleSeparator, u - 1), i.multiple && f > -1 && (l = ["@", "#"], c = r.substring(f).trim(), n.inArray(c.charAt(0), l) === -1 && (a = [r.substring(0, f).trim().lastIndexOf(i.multipleSeparator), r.lastIndexOf(String.fromCharCode(160))].sort().pop(), c = r.substring(a).trim(), n.inArray(c.charAt(0), l) !== -1 && (f = a))), s = r.substring(f, u), s.indexOf(i.multipleSeparator) === 0 && (s = s.slice(1)), n.trim(s)
+}
+function a(t, r, u)
+{
+var f;
+return t ? i.multiple ? u ? (f = t.replace(/\n/g, i.multipleSeparator + "\n" + i.multipleSeparator), n.map(f.split(i.multipleSeparator), function(i)
+{
+return i == "\n" ? "\n" : n.trim(t).length ? n.trim(i) : null
+})) : (f = t.replace(/\n/g, i.multipleSeparator), n.map(f.split(i.multipleSeparator), function(i)
+{
+return n.trim(t).length ? n.trim(i) : null
+})) : [n.trim(t)] : [""]
+}
+function ht(n)
+{
+var t,
+r;
+if (!i.multiple)
+return n;
+if (t = a(n), t.length == 1)
+return t[0];
+for (t = e >= n.length ? a(n) : a(n.replace(n.substring(e), "")), r = t.length - 1, r = t.length - 1; !t[r].length && r > 0; r--);
+return t[r]
+}
+function ct(u, e)
+{
+i.autoFill && w != f.BACKSPACE && !i.multiple && s.toLowerCase() == u.toLowerCase() && (r.val(r.val() + e.substring(ht(o).length)), n(t).selection(o.length, o.length + e.length))
+}
+function lt()
+{
+clearTimeout(c),
+c = setTimeout(v, 200)
+}
+function v()
+{
+var n=u.visible();
+u.hide(),
+clearTimeout(c),
+g(),
+i.mustMatch && r.search(function(n)
+{
+if (!n)
+if (i.multiple)
+{
+var t=a(r.val()).slice(0, -1);
+r.val(t.join(i.multipleSeparator) + (t.length ? i.multipleSeparator : ""))
+}
+else
+r.val(""),
+r.trigger("result", null)
+})
+}
+function at(n, t)
+{
+t && t.length && l ? (g(), i.sort && i.sort(n, t), u.display(t, n), ct(n, t[0].value), u.show()) : v()
+}
+function it(n, t, r, u)
+{
+var f=n;
+if (i.mungeTerm && (f = i.mungeTerm(n, u), !f || f.length == 0))
+{
+r(n);
+return
+}
+return i.precomplete && i.precomplete(f), vt(f, t, r)
+}
+function vt(r, f, e)
+{
+var o,
+s;
+i.matchCase || (r = r.toLowerCase()),
+o = y.load(r),
+i.resultFilter && o && (o = i.resultFilter(o)),
+o && o.length ? f(r, o) : i.getFunc ? i.getFunc(r, function(n)
+{
+f(r, n)
+}) : typeof i.url == "string" && i.url.length > 0 ? (s = {timestamp: +new Date}, n.each(i.extraParams, function(n, t)
+{
+s[n] = typeof t == "function" ? t() : t
+}), n.ajax({
+mode: "abort", port: "autocomplete" + t.name, dataType: i.dataType, url: i.url, data: n.extend({
+q: r, limit: i.max
+}, s), success: function(n)
+{
+var t=i.parse && i.parse(n) || yt(n);
+y.add(r, t),
+f(r, t)
+}
+})) : (u.emptyList(), e(r))
+}
+function yt(t)
+{
+for (var f=[], e=t.split("\n"), r, u=0; u < e.length; u++)
+r = n.trim(e[u]),
+r && (r = r.split("|"), f[f.length] = {
+data: r, value: r[0], result: i.formatResult && i.formatResult(r, r[0]) || r[0]
+});
+return f
+}
+function g()
+{
+r.removeClass(i.loadingClass)
+}
+var f={
+UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, DEL: 46, TAB: 9, RETURN: 13, ESC: 27, COMMA: 188, PAGEUP: 33, PAGEDOWN: 34, BACKSPACE: 8
+},
+r=n(t).attr("autocomplete", "off").addClass(i.inputClass),
+h=r.is("div"),
+c,
+o="",
+s="",
+y=n.Autocompleter.Cache(i),
+l=0,
+w,
+nt={mouseDownOnSelect: !1},
+u=n.Autocompleter.Select(i, t, tt, nt),
+b,
+k=NG && NG.navigator && NG.navigator.sayswho || {},
+p=!1,
+e;
+k.opera && n(t.form).bind("submit.autocomplete", function()
+{
+if (b)
+return b = !1, !1
+}),
+r.bind((k.opera ? "keypress" : "keydown") + ".autocomplete", function(o)
+{
+if (l = 1, r.val().length >= (NG.MaxAutocompleteLength || 1e4) && u.visible() === !1)
+{
+p === !1 && (p = !0, n(NG.Events).trigger("ng.suggestionsOff", [{
+element: r, off: !0
+}]));
+return
+}
+if (p === !0 && (p = !1, n(NG.Events).trigger("ng.suggestionsOff", [{
+element: r, off: !1
+}])), !o.ctrlKey && !o.altKey)
+{
+var s=w = o.keyCode;
+if (u.visible())
+switch (s)
+{
+case f.UP:
+o.preventDefault(),
+u.prev();
+return;
+case f.DOWN:
+o.preventDefault(),
+u.next();
+return;
+case f.PAGEUP:
+o.preventDefault(),
+u.pageUp();
+return;
+case f.PAGEDOWN:
+o.preventDefault(),
+u.pageDown();
+return
+}
+if ((i.multiple && s == f.COMMA && n.trim(i.multipleSeparator) == "," || s == f.TAB || s == f.RETURN) && tt())
+return o.preventDefault(), b = !0, k.msie && !i.ie_inputPreCleared && n(t).selection(e), !1;
+if (s == f.ESC)
+{
+u.hide();
+return
+}
+s < 46 && s != f.BACKSPACE || (clearTimeout(c), c = setTimeout(d, i.delay))
+}
+}).focus(function()
+{
+l++
+}).blur(function()
+{
+l = 0,
+nt.mouseDownOnSelect || lt()
+}).click(function()
+{
+l++ > 1 && !u.visible() && d(0, !0)
+}).bind("search", function()
+{
+function i(n, i)
+{
+var u,
+f;
+if (i && i.length)
+for (f = 0; f < i.length; f++)
+if (i[f].result.toLowerCase() == n.toLowerCase())
+{
+u = i[f];
+break
+}
+typeof t == "function" ? t(u) : r.trigger("result", u && [u.data, u.value])
+}
+var t=arguments.length > 1 ? arguments[1] : null;
+n.each(a(r.val()), function(n, t)
+{
+it(t, i, i)
+})
+}).bind("flushCache", function()
+{
+y.flush()
+}).bind("setOptions", function()
+{
+n.extend(i, arguments[1]),
+"data" in arguments[1] && (y.populate(), d(null, !0))
+}).bind("hideautocomplete", function()
+{
+v()
+}).bind("unautocomplete", function()
+{
+u.unbind(),
+r.unbind(),
+n(t.form).unbind(".autocomplete")
+}),
+e = 0
+},
+n.Autocompleter.defaultSort = function(n, t)
+{
+n = n.toLowerCase(),
+t.sort(function(t, i)
+{
+if (t == null && i == null)
+return 0;
+if (t == null)
+return 1;
+if (i == null)
+return -1;
+if (t.value == i.value)
+return 0;
+var r=t.value.toLowerCase(),
+u=i.value.toLowerCase(),
+f=r.substr(0, n.length).toLowerCase() === n,
+e=u.substr(0, n.length).toLowerCase() === n;
+return f == e ? r < u ? -1 : 1 : f ? -1 : 1
+})
+},
+n.Autocompleter.defaults = {
+inputClass: "ac_input", resultsClass: "ac_results", loadingClass: "ac_loading", minChars: 1, delay: 400, matchCase: !1, matchSubset: !0, matchContains: !1, cacheLength: 10, max: 100, mustMatch: !1, extraParams: {}, selectFirst: !0, formatItem: function(n)
+{
+return n[0]
+}, formatMatch: null, autoFill: !1, width: 0, multiple: !1, multipleSeparator: ", ", highlight: function(n, t)
+{
+return n.replace(new RegExp("(?![^&;]+;)(?!<[^<>]*)(" + t.replace(/([\^\$\(\)\[\]\{\}\*\.\+\?\|\\])/gi, "\\$1") + ")(?![^<>]*>)(?![^&;]+;)", "gi"), "<strong>$1<\/strong>")
+}, scroll: !0, scrollHeight: 180, sort: n.Autocompleter.defaultSort, precomplete: null, mungeTerm: null, formatNoResults: null, resultFilter: null
+},
+n.Autocompleter.Cache = function(t)
+{
+function u(n, i)
+{
+t.matchCase || (n = n.toLowerCase());
+var r=n.indexOf(i);
+return (t.matchContains == "word" && (r = n.toLowerCase().search("\\b" + i.toLowerCase())), r == -1) ? !1 : r == 0 || t.matchContains
+}
+function f(n, u)
+{
+r > t.cacheLength && o(),
+i[n] || r++,
+i[n] = u
+}
+function e()
+{
+var r,
+h,
+u,
+c,
+i,
+e,
+o,
+s;
+if (!t.data)
+return !1;
+for (r = {}, h = 0, t.url || (t.cacheLength = 1), r[""] = [], u = 0, c = t.data.length; u < c; u++)
+(i = t.data[u], i = typeof i == "string" ? [i] : i, e = t.formatMatch(i, u + 1, t.data.length), e !== !1) && (o = e.charAt(0).toLowerCase(), r[o] || (r[o] = []), s = {
+value: e, data: i, result: t.formatResult && t.formatResult(i) || e
+}, r[o].push(s), h++ < t.max && r[""].push(s));
+n.each(r, function(n, i)
+{
+t.cacheLength++,
+f(n, i)
+})
+}
+function o()
+{
+i = {},
+r = 0
+}
+var i={},
+r=0;
+return setTimeout(e, 25), {
+flush: o, add: f, populate: e, load: function(f)
+{
+var h,
+s,
+o,
+e;
+if (!t.cacheLength || !r)
+return null;
+if (!t.url && t.matchContains)
+{
+e = [];
+for (h in i)
+h.length > 0 && (o = i[h], n.each(o, function(n, t)
+{
+u(t.value, f) && e.push(t)
+}));
+return e
+}
+if (i[f])
+return i[f];
+if (t.matchSubset)
+for (s = f.length - 1; s >= t.minChars; s--)
+if (o = i[f.substr(0, s)], o)
+return e = [], n.each(o, function(n, t)
+{
+u(t.value, f) && (e[e.length] = t)
+}), e;
+return null
+}
+}
+},
+n.Autocompleter.Select = function(t, i, r, u)
+{
+function p()
+{
+y && (h = n("<div/>").hide().addClass(t.resultsClass).css("position", "absolute").appendTo(n(i).offsetParent()), f = n("<ul/>").appendTo(h).mouseover(function(t)
+{
+t.target !== f[0] && v(t).nodeName && v(t).nodeName.toUpperCase() == "LI" && (o = n("li", f).removeClass(s.ACTIVE).index(v(t)), n(v(t)).addClass(s.ACTIVE))
+}).click(function(t)
+{
+return n(v(t)).addClass(s.ACTIVE), r(), i.focus(), !1
+}).mousedown(function()
+{
+u.mouseDownOnSelect = !0
+}).mouseup(function()
+{
+u.mouseDownOnSelect = !1
+}), t.width > 0 && h.css("width", t.width), y = !1)
+}
+function v(n)
+{
+for (var t=n.target; t && t.tagName != "LI"; )
+t = t.parentNode;
+return t ? t : []
+}
+function l(n)
+{
+var r,
+i;
+e.slice(o, o + 1).removeClass(s.ACTIVE),
+b(n),
+r = e.slice(o, o + 1).addClass(s.ACTIVE),
+t.scroll && (i = 0, e.slice(0, o).each(function()
+{
+i += this.offsetHeight
+}), i + r[0].offsetHeight - f.scrollTop() > f[0].clientHeight ? f.scrollTop(i + r[0].offsetHeight - f.innerHeight()) : i < f.scrollTop() && f.scrollTop(i))
+}
+function b(n)
+{
+o += n,
+o < 0 ? o = e.size() - 1 : o >= e.size() && (o = 0)
+}
+function k(n)
+{
+return t.max && t.max < n ? t.max : n
+}
+function d()
+{
+var r,
+i,
+u,
+h;
+for (f.empty(), r = k(c.length), i = 0; i < r; i++)
+c[i] && (u = t.formatItem(c[i].data, i + 1, r, c[i].value, a), u !== !1) && (h = n("<li/>").html(t.highlight(u, a)).addClass(i % 2 == 0 ? "ac_even" : "ac_odd").appendTo(f)[0], n.data(h, "ac_data", c[i]));
+e = f.find("li"),
+t.selectFirst && (e.slice(0, 1).addClass(s.ACTIVE), o = 0),
+n.fn.bgiframe && f.bgiframe()
+}
+function g()
+{
+var i,
+r;
+f.empty(),
+i = t.formatNoResults(a),
+i && (r = n("<li/>").html(i).addClass("ac_even").appendTo(f)[0], n.fn.bgiframe && f.bgiframe())
+}
+var s={ACTIVE: "ac_over"},
+e,
+o=-1,
+c,
+a="",
+y=!0,
+h,
+f,
+w=NG && NG.navigator && NG.navigator.sayswho || {};
+return {
+display: function(n, t)
+{
+p(),
+c = n,
+a = t,
+d()
+}, displayNoResults: function(n)
+{
+p(),
+a = n,
+c = null,
+g()
+}, next: function()
+{
+l(1)
+}, prev: function()
+{
+l(-1)
+}, pageUp: function()
+{
+o != 0 && o - 8 < 0 ? l(-o) : l(-8)
+}, pageDown: function()
+{
+o != e.size() - 1 && o + 8 > e.size() ? l(e.size() - 1 - o) : l(8)
+}, hide: function()
+{
+h && h.hide(),
+e && e.removeClass(s.ACTIVE),
+o = -1
+}, visible: function()
+{
+return h && h.is(":visible")
+}, current: function()
+{
+return this.visible() && (e.filter("." + s.ACTIVE)[0] || t.selectFirst && e[0])
+}, show: function()
+{
+var o=n(i).position(),
+r,
+u;
+h.css({
+width: typeof t.width == "string" || t.width > 0 ? t.width : n(i).width(), top: o.top + i.offsetHeight, left: o.left
+}).show(),
+t.scroll && (f.scrollTop(0), f.css({
+maxHeight: t.scrollHeight, overflow: "auto"
+}), w.msie && typeof document.body.style.maxHeight == "undefined" && (r = 0, e.each(function()
+{
+r += this.offsetHeight
+}), u = r > t.scrollHeight, f.css("height", u ? t.scrollHeight : r), u || e.width(f.width() - parseInt(e.css("padding-left")) - parseInt(e.css("padding-right")))))
+}, selected: function()
+{
+var t=e && e.filter("." + s.ACTIVE).removeClass(s.ACTIVE);
+return t && t.length && n.data(t[0], "ac_data")
+}, emptyList: function()
+{
+f && f.empty()
+}, unbind: function()
+{
+h && h.remove()
+}
+}
+},
+n.fn.selection = function(n, t)
+{
+var i,
+r,
+u,
+f;
+return n !== undefined ? this.each(function()
+{
+if (this.createTextRange)
+{
+var i=this.createTextRange();
+t === undefined || n == t ? (i.move("character", n), i.select()) : (i.collapse(!0), i.moveStart("character", n), i.moveEnd("character", t), i.select())
+}
+else
+this.setSelectionRange ? this.setSelectionRange(n, t) : this.selectionStart && (this.selectionStart = n, this.selectionEnd = t)
+}) : (i = this[0], i.selectionStart !== undefined) ? {
+start: i.selectionStart, end: i.selectionEnd
+} : document.selection && document.selection.createRange ? (r = document.selection.createRange(), r == null) ? {
+start: 0, end: i.value.length, length: 0
+} : (u = i.createTextRange(), f = u.duplicate(), u.moveToBookmark(r.getBookmark()), f.setEndPoint("EndToStart", u), {
+start: f.text.length, end: f.text.length + r.text.length
+}) : void 0
+}
+})(jQuery142);

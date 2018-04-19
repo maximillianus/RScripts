@@ -1,0 +1,111 @@
+Type.registerNamespace("NG"),
+function()
+{
+var n=jQuery142;
+NG.HashTagAssistant = function(t, i)
+{
+var r=this,
+h=n(t),
+u,
+l;
+i = n.extend({
+textbox: n("textarea", h).first(), tagSuggestHolder: n(".ngTagSuggest", h)
+}, i || {}),
+u = n("#ngTagSuggestList", i.tagSuggestHolder),
+u.length === 0 ? u = n("<ul class='ngTagSuggestList' id='ngTagSuggestList'><\/ul>").appendTo(i.tagSuggestHolder) : n(String.format("<li><span>{0}:<\/span><\/li>", ngText.SuggestedTags)).appendTo(u);
+var f=[],
+e=[],
+a="#\\b({0})\\b",
+c="(\\s|^)({0})\\b",
+o=/[@]\[([^\]]+)/g,
+s=/[@]\(([^\)]+)/g;
+return r.SuggestionClick = function(t)
+{
+var e=n(t.target),
+w,
+p,
+r;
+if (e.is("li") || (e = e.parent("li")), e.is("li"))
+{
+var v=e.find("span"),
+l=v.html(),
+y=i.textbox.is("div"),
+h=y ? i.textbox.text() : i.textbox.val(),
+a=v.hasClass("add"),
+b=null;
+if (a)
+{
+b = new RegExp(String.format(c, l), "gim");
+var k="(\\p{Po}|\\s|^)(" + l + ")(\\p{Po}|\\s|$)",
+d=XRegExp(k),
+f=h,
+u=h.match(o);
+if (u != null)
+for (r = 0; r < u.length; r++)
+f = f.replace(u[r], u[r].replace(/\s/g, "{_}"));
+if (u = h.match(s), u != null)
+for (r = 0; r < u.length; r++)
+f = f.replace(u[r], u[r].replace(/\s/g, "{_}"));
+if (f = XRegExp.replace(f, d, "$1#$2$3"), u = f.match(o), u != null)
+for (r = 0; r < u.length; r++)
+f = f.replace(u[r], u[r].replace(/{_}/g, " "));
+if (u = f.match(s), u != null)
+for (r = 0; r < u.length; r++)
+f = f.replace(u[r], u[r].replace(/{_}/g, " "));
+y ? i.textbox.text(f) : i.textbox.val(f)
+}
+else
+w = "(\\p{Po}|\\s|^)#(" + l + ")(\\p{Po}|\\s|$)",
+p = XRegExp(w),
+y ? i.textbox.text(XRegExp.replace(h, p, "$1$2$3")) : i.textbox.val(XRegExp.replace(h, p, "$1$2$3"));
+v.removeClass("add remove").addClass(a ? "remove" : "add").attr("title", a ? ngText.RemoveHashTagTooltip : ngText.AddHashTagTooltip),
+n(NG.Events).trigger(a ? "hashTagSuggestionAdded" : "hashTagSuggestionRemoved", [{tag: l}])
+}
+}, l = '<li><span class="ngHashTagSuggestSpan {1}" title="{2}">{0}<\/span><\/li>', r.AddTagSuggestion = function(t)
+{
+if (n.inArray(t, f) == -1)
+{
+var r=n(String.format(l, t, "add", ngText.AddHashTagTooltip)).appendTo(u);
+i.tagSuggestHolder.show(),
+f.push(t)
+}
+}, r.CheckTags = function(t)
+{
+var u=i.textbox.is("div") ? i.textbox.text() : i.textbox.val(),
+h;
+u.length >= (NG.MaxAutocompleteLength || 1e4) || (r.CheckExisting(u), (t.keyCode < 48 || t.keyCode > 90 && t.keyCode < 97 || t.keyCode > 122) && (NG.StringIsNullOrEmpty(u) || (u = u.replace(o, "").replace(s, "").replace(/\n/g, " "), h = n.grep(u.split(" "), function(n)
+{
+return !NG.StringIsNullOrEmpty(n)
+}), h.length > 0 && n.each(h, function(t, i)
+{
+var u=i,
+o;
+u.startsWith("#") || u.startsWith("@") || (o = XRegExp("[\\p{P}]$"), o.test(u) && (u = XRegExp.replace(u, o, "")), NG.StringIsNullOrEmpty(u) || n.isInArray(f, u)) || (n.isInArray(e, u) ? NG.IsTagInCache(u) && r.AddTagSuggestion(u) : NG.TagAutoCompleteLoad(u, function()
+{
+NG.IsTagInCache(u) && r.AddTagSuggestion(u)
+}), n.isInArray(e, u) || e.push(u))
+}))))
+}, r.CheckExisting = function(t)
+{
+n("span.ngHashTagSuggestSpan", u).each(function()
+{
+var i=n(this),
+r=i.html(),
+u=null,
+e;
+u = i.hasClass("add") ? new RegExp(String.format(c, r), "gim") : new RegExp(String.format(a, r), "gim"),
+e = u.exec(t),
+e === null && (Array.remove(f, r), i.parent("li").remove())
+}),
+u.find("li span.ngHashTagSuggestSpan").length == 0 && i.tagSuggestHolder.hide()
+}, r.ClearAll = function()
+{
+n("span.ngHashTagSuggestSpan", u).parent("li").remove(),
+f = [],
+i.tagSuggestHolder.hide()
+}, i.textbox.keyup(r.CheckTags).keydown(function(n)
+{
+n.keyCode == Sys.UI.Key.tab && r.CheckTags(n)
+}), u.click(r.SuggestionClick), r
+}
+}();

@@ -1,0 +1,206 @@
+/*!
+ * jQuery Stepy - A Wizard Plugin - http://wbotelhos.com/stepy
+ * ------------------------------------------------------------------------------------
+ *
+ * jQuery Stepy is a plugin based on FormToWizard that generates a customizable wizard.
+ * 
+ * Licensed under The MIT License
+ * 
+ * @version        1.0.0
+ * @since          2010.07.03
+ * @author         Washington Botelho
+ * @documentation  wbotelhos.com/stepy
+ * @twitter        twitter.com/wbotelhos
+ * 
+ * Usage with default values:
+ * ------------------------------------------------------------------------------------
+ * $('#step').stepy();
+ *
+ *	<form id="step">
+ *		<fieldset title="Step 1">
+ *			<legend>description one</legend>
+ *			<!-- input fields -->
+ *		</fieldset>
+ *
+ *		<fieldset title="Step 2">
+ *			<legend>description one</legend>
+ *			<!-- input fields -->
+ *		</fieldset>
+ *
+ *		<input type="submit" class="finish" value="Finish!"/>
+ *	</form>
+ *
+ */
+(function(n)
+{
+var t={
+init: function(i)
+{
+return this.each(function()
+{
+var r=n.extend({}, n.fn.stepy.defaults, i),
+u=n(this).data("options", r),
+f=u.attr("id"),
+o,
+c,
+l,
+p,
+v;
+(f === undefined || f == "") && (f = "stepy-" + n("." + u.attr("class")).index(this), u.attr("id", f)),
+o = n("<ul/>", {
+id: f + "-titles", "class": "stepy-titles"
+}),
+r.titleTarget ? n(r.titleTarget).html(o) : o.insertBefore(u),
+r.validate && (jQuery.validator.setDefaults({ignore: r.ignore}), u.append('<div class="stepy-error"/>'));
+var e=u.children("fieldset"),
+s=undefined,
+a=undefined,
+y="",
+h="";
+e.each(function(i)
+{
+s = n(this),
+s.addClass("step").attr("id", f + "-step-" + i).append('<p id="' + f + "-buttons-" + i + '" class="' + f + '-buttons"/>'),
+a = s.children("legend"),
+r.legend || a.hide(),
+y = "",
+r.description && (a.length ? y = "<span>" + a.html() + "<\/span>" : n.error(f + ": the legend element of the step " + (i + 1) + " is required to set the description!")),
+h = s.attr("title"),
+h = h != "" ? "<div>" + h + "<\/div>" : "--",
+o.append('<li id="' + f + "-title-" + i + '">' + h + y + "<\/li>"),
+i == 0 ? e.length > 1 && !r.buttonTarget && t.createButtons.call(u, i) : (r.buttonTarget || t.createButtons.call(u, i), s.hide())
+}),
+c = o.children(),
+c.first().addClass("current-step"),
+l = r.buttonTarget ? r.buttonTarget.children(".finish") : u.children(".finish"),
+r.finishButton && (l.length ? (p = u.is("form"), v = undefined, r.finish && p && (v = u.attr("onsubmit"), u.attr("onsubmit", "return false;")), l.click(function(n)
+{
+if (r.finish && !t.execute.call(u, r.finish, e.length - 1))
+n.preventDefault();
+else if (p)
+{
+v ? u.attr("onsubmit", v) : u.removeAttr("onsubmit");
+var i=l.attr("type") == "submit";
+i || r.validate && !t.validate.call(u, e.length - 1) || u.submit()
+}
+}), r.buttonTarget || l.appendTo(u.find("p:last"))) : n.error(f + ': element with class name "finish" missing!')),
+r.titleClick ? c.click(function()
+{
+var e=c.filter(".current-step").attr("id").split("-"),
+f=parseInt(e[e.length - 1], 10),
+i=n(this).index();
+if (i > f)
+{
+if (r.next && !t.execute.call(u, r.next, i))
+return !1
+}
+else if (i < f && r.back && !t.execute.call(u, r.back, i))
+return !1;
+i != f && t.step.call(u, i + 1)
+}) : c.css("cursor", "default"),
+e.delegate('input[type="text"], input[type="password"]', "keypress", function(t)
+{
+var e=t.keyCode ? t.keyCode : t.which,
+i,
+r,
+u;
+e == 13 && (t.preventDefault(), i = n(this).parent().children("." + f + "-buttons"), i.length && (r = i.children(".button-next"), r.length ? r.click() : (u = i.children(".finish"), u.length && u.click())))
+}),
+e.first().find(":input:visible:enabled").first().select().focus()
+})
+}, createBackButton: function(i)
+{
+var u=this,
+f=this.attr("id"),
+r=this.data("options");
+r.buttonTarget ? n("#newUserSteps-back", r.buttonTarget).length == 0 ? n("<button/>", {
+id: f + "-back", href: "javascript:void(0);", "class": "ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only button-back", html: r.backLabel, "aria-disabled": !1
+}).click(function()
+{
+(!r.back || t.execute.call(u, r.back, i - 1)) && t.step.call(u, i - 0)
+}).appendTo(n(r.buttonTarget)) : n("#newUserSteps-back", r.buttonTarget).show().unbind("click").click(function()
+{
+(!r.back || t.execute.call(u, r.back, i - 1)) && t.step.call(u, i - 0)
+}) : n("<a/>", {
+id: f + "-back-" + i, href: "javascript:void(0);", "class": "button-back", html: r.backLabel
+}).click(function()
+{
+(!r.back || t.execute.call(u, r.back, i - 1)) && t.step.call(u, i - 0)
+}).appendTo(n("#" + f + "-buttons-" + i))
+}, createNextButton: function(i)
+{
+var u=this,
+f=this.attr("id"),
+r=this.data("options");
+r.buttonTarget ? n("#newUserSteps-next", r.buttonTarget).length == 0 ? n("<button/>", {
+id: f + "-next", href: "javascript:void(0);", "class": "ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only button-next", html: r.nextLabel, "aria-disabled": !1
+}).click(function()
+{
+(!r.next || t.execute.call(u, r.next, i + 1)) && t.step.call(u, i + 1 + 1)
+}).prependTo(n(r.buttonTarget)) : n("#newUserSteps-next", r.buttonTarget).show().unbind("click").click(function()
+{
+(!r.next || t.execute.call(u, r.next, i + 1)) && t.step.call(u, i + 1 + 1)
+}) : n("<a/>", {
+id: f + "-next-" + i, href: "javascript:void(0);", "class": "button-next", html: r.nextLabel
+}).click(function()
+{
+(!r.next || t.execute.call(u, r.next, i + 1)) && t.step.call(u, i + 1 + 1)
+}).appendTo(n("#" + f + "-buttons-" + i))
+}, createButtons: function(i)
+{
+var u=this,
+r=this.data("options"),
+f=this.children("fieldset"),
+e;
+r.buttonTarget && (i == 0 ? (f.length > 1 && t.createNextButton.call(u, i), n("#newUserSteps-back", r.buttonTarget).hide()) : (i < f.length - 1 ? t.createNextButton.call(u, i) : n("#newUserSteps-next", r.buttonTarget).hide(), t.createBackButton.call(u, i)), r.finishButton && (e = n(".finish", r.buttonTarget), i == f.length - 1 ? e.show() : e.hide()))
+}, execute: function(n, t)
+{
+var i=n.call(this, t + 1);
+return i || i === undefined
+}, step: function(i)
+{
+var r,
+u,
+e,
+f,
+s,
+o;
+if (i--, r = this.children("fieldset"), i > r.length - 1 && (i = r.length - 1), u = this.data("options"), max = i, u.validate)
+for (e = !0, f = 0; f < i; f++)
+if (e &= t.validate.call(this, f), u.block && !e)
+{
+max = f;
+break
+}
+return r.hide().eq(max).show(), s = n("#" + this.attr("id") + "-titles").children(), s.removeClass("current-step").eq(max).addClass("current-step"), this.is("form") && (o = undefined, o = max == i ? r.eq(max).find(":input:enabled:visible") : r.eq(max).find(".error").select().focus(), o.first().select().focus()), u.select && u.select.call(this, max + 1), u.buttonTarget && t.createButtons.call(this, i), this
+}, validate: function(t)
+{
+if (!this.is("form"))
+return !0;
+var e=this.children("fieldset").eq(t),
+i=!0,
+r=n("#" + this.attr("id") + "-titles").children().eq(t),
+u=this.data("options"),
+f=this.validate();
+return n(e.find(":input:enabled").get().reverse()).each(function()
+{
+var t=f.element(n(this));
+t === undefined && (t = !0),
+i &= t,
+i ? u.errorImage && r.removeClass("error-image") : (u.errorImage && r.addClass("error-image"), f.focusInvalid())
+}), i
+}
+};
+n.fn.stepy = function(i)
+{
+if (t[i])
+return t[i].apply(this, Array.prototype.slice.call(arguments, 1));
+if (typeof i != "object" && i)
+n.error("Method " + i + " does not exist!");
+else
+return t.init.apply(this, arguments)
+},
+n.fn.stepy.defaults = {
+back: undefined, backLabel: "&lt; Back", block: !1, description: !0, errorImage: !1, finish: undefined, finishButton: !0, legend: !0, ignore: "", next: undefined, nextLabel: "Next &gt;", titleClick: !1, titleTarget: undefined, validate: !1, select: undefined, buttonTarget: undefined
+}
+})(jQuery142);

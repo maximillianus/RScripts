@@ -1,0 +1,309 @@
+typeof NG == "undefined" && Type.registerNamespace("NG"),
+typeof NG.KE == "undefined" && Type.registerNamespace("NG.KE"),
+function()
+{
+var n=jQuery142,
+t;
+NG.KE.BadgeControl = function(t, i)
+{
+var e=this,
+r=n(t.element),
+u,
+f;
+if (NG.Localize(r, KEWebUIResources), i = n.extend({
+initialCount: null, renderFunc: null
+}, i || {}), i.communityOnly && !i.EnableSpotlightCommunityRecognition)
+{
+r.text(WebpartTextResources.CommunityBadgingDisabled);
+return
+}
+e.ShowAll = function()
+{
+var u=r.find(".ngAllBadges"),
+f,
+o,
+e,
+s,
+h;
+u.length > 0 && (f = n(this), o = f.html() == KEWebUIResources.ShowAllBadgesVerb, f.html(o ? KEWebUIResources.ShowLessVerb : KEWebUIResources.ShowAllBadgesVerb), o ? (f.addClass("ngHideLink"), u.show(), u.get(0).xmlControl || (u.html(String.format('<div style="margin:3px;" class="SharePointAjaxLoading"><img src="/_layouts/sharepointajaxlibrary/loading.gif" alt="" /><span style="font-size:smaller;">{0}<\/span><\/div>', KEWebUIResources.LoadingText)), e = NG.ReplaceOrAddQueryParam(t.xmlUrl, "start", i.initialCount), e = NG.ReplaceOrAddQueryParam(e, "max", 0), s = {
+xmlUrl: e, xslUrl: t.xslUrl
+}, h = {
+init: NG.CommonInit, render: i.renderFunc
+}, u.get(0).xmlControl = $create(SharePointAjax.XmlControl, s, h, null, u.get(0)))) : (u.hide(), f.removeClass("ngHideLink")))
+},
+i.initialCount && (r.find("div.ngBadgeHolder").each(function(t)
+{
+t > i.initialCount - 1 && n(this).hide()
+}), r.find("div.ngBadgeHolder").length > i.initialCount && (u = r.find(".ngShowDiv"), u.show(), u.find("a.ngShowLink").click(e.ShowAll)), f = r.find(".ngSpotlightDate"), i.kudosMode || f.show(), f.find("span.timeago").timeago())
+},
+NG.KE.CreateProgressBar = function(t)
+{
+n(t).find("div.ngBadgeProgress").each(function()
+{
+var t=n(this),
+i=parseInt(t.attr("precentage"));
+t.attr("title", i + "%").html(String.format("<div class='progress' style='width:{0}px;'><\/div>", Math.floor(i * (t.width() / 100))))
+})
+},
+NG.KE.AvailableBadgeRender = function(t)
+{
+var i=t.clientProperties || {};
+i.renderFunc = NG.KE.AvailableBadgeRender,
+new NG.KE.BadgeControl(t, i),
+window.setTimeout(function()
+{
+n.isReady && NG.KE.CreateProgressBar(t.element)
+}, 50)
+},
+NG.KE.EarnedBadgeRender = function(n)
+{
+var t=n.clientProperties || {};
+t.renderFunc = NG.KE.EarnedBadgeRender,
+new NG.KE.BadgeControl(n, t)
+},
+NG.KE.LeaderBoardControl = function(t, i)
+{
+var r=this,
+e=n(t),
+u,
+f;
+i = n.extend({
+svcUrl: window.spWebUrl + "/_vti_bin/ng/spotlight/spotlightservice.svc/", xslUrl: window.spWebUrl + "/_layouts/ng/spotlight/xml/leaderboard.xslt", count: 10, defaultRuleId: 0
+}, i || {}),
+u = n(".ngKEBadgeOptions", e),
+f = n(".ngLeaderBoardResults", e),
+r.RenderLeaders = function(t)
+{
+var i=n(t.element);
+if (NG.Localize(i, KEWebUIResources), i.find("span.timeago").timeago(), window.ngMiniProfileEnabled)
+try
+{
+n("a.ngUser", i).miniProfile()
+}
+catch(r) {}
+n(".ngCurrentUser", i).length == 0 && n(".ngYourScore", i).show()
+},
+r.GetLeadersForRule = function(n)
+{
+var t,
+u,
+e;
+f.length > 0 && (t = i.communityOnly ? String.format("{0}rules/{1}/leaderboard/?max={2}&communityId={3}", i.svcUrl, n, i.count, i.communityId) : String.format("{0}rules/{1}/leaderboard/?max={2}", i.svcUrl, n, i.count), f.html(String.format('<div style="margin:3px;" class="SharePointAjaxLoading"><img src="/_layouts/sharepointajaxlibrary/loading.gif" alt="" /><span style="font-size:smaller;">{0}<\/span><\/div>', KEWebUIResources.LoadingText)), f.get(0).xmlControl ? f.get(0).xmlControl.LoadXml(t) : (u = {
+xmlUrl: t, xslUrl: i.xslUrl
+}, e = {
+init: NG.CommonInit, render: r.RenderLeaders
+}, f.get(0).xmlControl = $create(SharePointAjax.XmlControl, u, e, null, f.get(0))))
+},
+r.PopulateRules = function()
+{
+var t;
+if (i.communityOnly && !i.EnableSpotlightCommunityRecognition)
+{
+e.text(WebpartTextResources.CommunityBadgingDisabled);
+return
+}
+u.length > 0 && (t = i.communityOnly ? String.format("{0}rules/?communityid={1}", i.svcUrl, i.communityId) : String.format("{0}rules/", i.svcUrl), n.ajax({
+url: t, success: function(t)
+{
+u.change(r.OnRuleOptionChange);
+var f=u[0].options;
+n(t).find("Rule").each(function()
+{
+var t=n(this).find("CurrentCultureName").text(),
+i=n(this).find("RuleId").text();
+f[f.length] = new Option(t, i)
+}),
+u.val(i.defaultRuleId),
+u.val() === null && f.length && (u[0].selectedIndex = 0),
+r.OnRuleOptionChange()
+}, error: function(n)
+{
+e.html(NG.GetDefaultErrorMessage(n.status))
+}
+}))
+},
+r.OnRuleOptionChange = function()
+{
+u[0].options.length ? r.GetLeadersForRule(u.val()) : e.text(i.communityOnly ? KEWebUIResources.NoScoresYetCommunity : KEWebUIResources.NoScoresYet)
+},
+r.PopulateRules()
+},
+UserAutoCompleteLoad = function(t, i)
+{
+n.ajax({
+type: "GET", url: String.format("{0}/TagSuggestions/{1}/", options.svcUrl, FixTag(t)), data: {max: 20}, cacheLength: 500, success: function(t)
+{
+var r=[];
+n(t).find("string").each(function()
+{
+var t=n(this).text();
+r.push({
+data: t, value: t, result: t
+})
+}),
+i(r)
+}, error: function()
+{
+Sys.Debug.trace("Failed to load tag suggestions for tag " + t)
+}
+})
+},
+t = {
+multiple: !1, mustMatch: !1, autoFill: !0, matchContains: !0, selectFirst: !0, formatItem: function(n)
+{
+return n
+}, getFunc: UserAutoCompleteLoad, scroll: !0, max: 20, cacheLength: 500
+},
+NG.KE.GiveKudosControl = function(t, i)
+{
+var r=this,
+u=n(t),
+f,
+e;
+i = n.extend({
+badgeUrl: window.spWebUrl + "/_layouts/NG/spotlight/badge.ashx?maxsize=64&bid=", svcUrl: window.spWebUrl + "/_vti_bin/ng/spotlight/spotlightservice.svc/"
+}, i || {}),
+e = i.accountname,
+r.GetKudosBadges = function()
+{
+url = i.svcUrl + "Badges/Kudos/",
+n.ajax({
+url: url, dataType: "json", contentType: "application/json; charset=utf-8", success: function(n)
+{
+r.RenderMe(n)
+}, error: function()
+{
+u.html(NG.GetDefaultErrorMessage(XMLHttpRequest.status))
+}
+})
+},
+r.UserSelectKeypressCallback = function(t)
+{
+e = t.accountName,
+f.hide();
+var i=n("#kudosTargetContainer");
+i.show(),
+n("#kudosTarget").html(t.name)
+},
+r.RenderMe = function(t)
+{
+var o,
+h,
+s,
+c;
+if (u.find(".SharePointAjaxLoading").hide(), t.length == 0)
+{
+u.append(n(document.createElement("div")).text(KEWebUIResources.KudosWebpartNoBadges));
+return
+}
+if (i.selfKudos)
+{
+u.append(n(document.createElement("div")).text(KEWebUIResources.KudosWebpartNoSelfKudos));
+return
+}
+if (i.profileOwnerDisplayName ? n(document.createElement("h3")).text(String.format(KEWebUIResources.KudosWebpartGiveToTitle, i.profileOwnerDisplayName)).addClass("kudosBadgeEntryHeader").appendTo(u) : n(document.createElement("h3")).text(KEWebUIResources.KudosWebpartGiveKudos).addClass("kudosBadgeEntryHeader").appendTo(u), !i.accountname)
+{
+n('<div class="kudosBadgeChooseText"/>').html(KEWebUIResources.KudosWebpartGiveToUserTitle).appendTo(u),
+o = n('<div class="kudosUserSelectorContainer ngInput"/>'),
+o.appendTo(u),
+f = n('<input type="text"/>'),
+f.appendTo(o),
+n('<div id="kudosTargetContainer" style="display:none;"><a href="javascript:;" class="kudosRemoveTarget">×<\/a>&nbsp;&nbsp;<span id="kudosTarget"><\/span><\/div>').appendTo(o);
+n(".kudosRemoveTarget").on("click", function()
+{
+n("#kudosTargetContainer").hide(),
+f.show().val(""),
+e = null
+});
+NG.InputControl(f, null, n.noop, {autocomplete: new NG.AutoComplete({
+inputControl: f, includeCommunities: !1, includeHashTags: !1, captureTargetResults: !1, multiple: !1, itemSelectedCallback: r.UserSelectKeypressCallback, keypressCallback: n.noop
+}).AutocompleteOptions});
+f.on("keyup", function(t)
+{
+if (t.which !== 13 && t.which !== 9)
+{
+t.preventDefault();
+var r=n(this),
+i=r.val();
+i.length > 0 && i.indexOf("@") !== 0 && r.val("@" + i)
+}
+})
+}
+n(document.createElement("div")).text(KEWebUIResources.KudosWebpartChooseIcon).addClass("kudosBadgeChooseText").appendTo(u),
+r.badgeContainer = n(document.createElement("div")).addClass("kudosBadgeSelectorContainer").appendTo(u),
+n.each(t, function(t, u)
+{
+var f=n(document.createElement("a")).addClass("unselected").attr("href", "javascript:void(0);").attr("badgeId", u.BadgeId).append(n(document.createElement("img")).attr("src", i.badgeUrl + u.BadgeId)).click(function()
+{
+r.badgeContainer.find(".selected").removeClass("selected").addClass("unselected"),
+f.addClass("selected")
+}).appendTo(r.badgeContainer)
+}),
+i.recipientHidesBadges && n(document.createElement("div")).text(String.format(KEWebUIResources.KudosWebpartHideAllBadges, i.profileOwnerDisplayName)).addClass("kudosBadgeChooseText").appendTo(u),
+n(document.createElement("div")).text(KEWebUIResources.KudosWebpartInputDefaultText).addClass("kudosBadgeChooseText").appendTo(u),
+h = n(document.createElement("span")).addClass("ngInput").appendTo(u),
+r.textArea = n(document.createElement("textarea")).appendTo(h).addClass("kudosBadgeTextEntry").attr("maxlength", "1900"),
+s = n(document.createElement("div")).addClass("kudosBadgeSubmitArea").appendTo(u),
+c = n(document.createElement("div")).addClass("ngMainMicroblogTextLength").appendTo(s),
+r.submitButton = n(document.createElement("input")).attr("type", "button").attr("value", KEWebUIResources.KudosWebpartGiveKudos).addClass("ngButton").appendTo(s),
+r.tooltip = n(document.createElement("div")).addClass("ngTooltip").hide().appendTo(s),
+NG.InputControl(r.textArea, r.submitButton, r.GiveKudos, {
+autocomplete: new NG.AutoComplete({inputControl: r.textArea}).AutocompleteOptions, maxTextLengthTarget: c
+})
+},
+r.GiveKudos = function()
+{
+NG.StringIsNullOrEmpty(e) ? r.tooltip.show().text(KEWebUIResources.KudosWebpartAccountBlankError).delay(5e3).fadeOut(1e3) : r.textArea.val() ? r.badgeContainer.find(".selected").length == 0 ? r.tooltip.show().text(KEWebUIResources.KudosWebpartSelectBadgeError).delay(5e3).fadeOut(1e3) : (r.textArea.attr("disabled", "disabled"), r.submitButton.attr("disabled", "disabled"), r.tooltip.show().text(KEWebUIResources.SendingKudosLabel), url = i.svcUrl + "GiveKudos/", n.ajax({
+data: JSON.stringify({
+badgeId: n(r.badgeContainer.find(".selected")[0]).attr("badgeId"), message: r.textArea.val(), accountName: e
+}), type: "POST", url: url, dataType: "json", contentType: "application/json; charset=utf-8", success: function()
+{
+r.tooltip.show().text(KEWebUIResources.KudosWebpartSuccess).delay(1e4).fadeOut(1e3),
+r.badgeContainer.find(".selected").removeClass("selected").addClass("unselected"),
+n(".kudosRemoveTarget").trigger("click"),
+r.textArea.val("").removeAttr("disabled"),
+r.submitButton.removeAttr("disabled"),
+i.accountname && NG.NewsFeedReload(),
+n(NG.Events).trigger("kudosSent")
+}, error: function()
+{
+u.html(NG.GetDefaultErrorMessage(XMLHttpRequest.status))
+}
+}), n.ajax({
+type: "POST", contentType: "text/plain", url: String.format("{0}/_vti_bin/ng/spotlight/spotlightservice.svc/TrackEvent/{1}/?communityId={2}", window.spWebUrl, "sNGKudos", window.ngGroupID || window.ngCommunityID), error: function()
+{
+u.html(NG.GetDefaultErrorMessage(XMLHttpRequest.status))
+}
+})) : r.tooltip.show().text(KEWebUIResources.KudosWebpartEnterTextError).delay(5e3).fadeOut(1e3)
+},
+r.GetKudosBadges()
+},
+NG.KE.GiveKudosInit = function()
+{
+if (window._ngGiveKudosTemplate)
+while (window._ngGiveKudosTemplate.length > 0)
+{
+var n=window._ngGiveKudosTemplate.shift(),
+t=$get(n.elementID);
+t && new NG.KE.GiveKudosControl(t, n.properties.clientProperties)
+}
+},
+NG.KE.LeaderBoardInit = function()
+{
+if (window._leaderBoardTemplate != "undefined" && window._leaderBoardTemplate != null)
+{
+while (window._leaderBoardTemplate.length > 0)
+{
+var n=window._leaderBoardTemplate.shift(),
+t=$get(n.elementID);
+t && new NG.KE.LeaderBoardControl(t, n.properties.clientProperties)
+}
+window._leaderBoardTemplate = null
+}
+},
+n(document).ready(function()
+{
+NG.KE.LeaderBoardInit(),
+NG.KE.GiveKudosInit()
+})
+}();

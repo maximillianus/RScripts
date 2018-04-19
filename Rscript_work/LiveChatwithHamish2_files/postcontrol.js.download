@@ -1,0 +1,996 @@
+Type.registerNamespace("NG"),
+function()
+{
+var n=jQuery142;
+NG.ActivityInputType = function(){},
+NG.ActivityInputType.prototype = {
+Microblog: 1, Question: 2, Custom: 3, DirectMessage: 4
+},
+NG.ActivityInputType.registerEnum("NG.ActivityInputType"),
+NG.InputMaxTextLengthValues = function(){},
+NG.InputMaxTextLengthValues.prototype = {
+Default: 1e4, Ideas: 255
+},
+NG.InputMaxTextLengthValues.registerEnum("NG.InputMaxTextLengthValues"),
+NG.PostControl = function(t, i)
+{
+var r=this == NG ? {} : this,
+f=n(t),
+u,
+s,
+c,
+d,
+g,
+rt,
+ut;
+if (r.options = n.extend({
+postUrl: "/_vti_bin/ng/activityfeed.svc/", isPersonal: !1, currentModule: null, onStatusComplete: function(){}, personalTarget: "", disableSuggestAhead: !1, autocompleteOptions: null, inputType: NG.ActivityInputType.Microblog, useLegacyUpload: window.ngUseLegacyUpload || !1, useUploadFrame: !1
+}, i || {}), u = n(".ngPostInput", f), u.length == 0)
+return null;
+var p,
+h=n(".ngStatusPostButton", f),
+nt=n(".ngStatusPreviewButton", f),
+tt=n(".ngPostAlert", f),
+v=n(".ngPrivateBg", f),
+e=n('.ngInputTo input[type="text"]', f),
+it=NG.ColleagueList,
+w=NG.CommunityList,
+l=NG.CurrentCommunity,
+b,
+y=!0,
+o=n("#ngMainMicroblogTextLength", f),
+ft=/[@]\[([^\]]+)\]/,
+k=!1,
+a=null;
+r.ToBoxOperation = function(t)
+{
+var r=e.closest(".ngInputTo").find(".ngTarget"),
+i="";
+return r.length === 1 ? (i = n(r[0]).data("ngname"), t = i + " " + t) : (n.each(r, function(t, r)
+{
+i += n(r).data("ngname") + " "
+}), t = t + " " + i), t
+},
+r.ClearToBox = function()
+{
+var n=e.closest(".ngInputTo").find(".ngTarget"),
+t;
+n.length && (n.parent().remove(), o.data("extraCount", 0)),
+t = f.find(".ngACTargetResults"),
+t.removeData("ngACTargetToBox")
+},
+r.GetUserMatches = function(t)
+{
+var r=[],
+i=t.data("ngACTargetToBox");
+return !n.isNullOrUndefined(i) && i.length > 0 ? i.split(",").concat(r) : r
+},
+r.ToBoxGetCommunityMatches = function(t)
+{
+var i=[],
+r;
+return t.closest(".ngInputTo").find(".ngTarget").each(function()
+{
+(r = ft.exec(n(this).data("ngname"))) != null && i.push(r[1].toLowerCase())
+}), i
+},
+r.CheckForQuestion = function(t, i)
+{
+function h()
+{
+var t,
+r;
+k ? (f = !1, t = n("#ng-ConfirmPublicPostDialog"), t.length || (t = n(String.format("<div id='ng-ConfirmPublicPostDialog'>{0}<\/div>", ngText.CreatePublicPostWarning)).appendTo("body")), r = {}, r[ngText.YesVerb] = function()
+{
+f = !0,
+n(this).dialog("close")
+}, r[ngText.NoVerb] = function()
+{
+n(this).dialog("close")
+}, t.dialog({
+minHeight: 175, closeOnEscape: !1, modal: !0, dialogClass: "ng-ui-wrapper ng-ui-confirm", title: "", buttons: r, close: function()
+{
+n(this).dialog("destroy"),
+f && i()
+}
+})) : c()
+}
+function c()
+{
+var t,
+r;
+a == null || window.ngCommunityID || window.ngGroupID || !(n("div.ngMultiUploadControl").length || n("iframe.ngUploadFrame").length) ? i() : (f = !1, t = n("#ng-ConfirmPrivateFromPublicSitePostDialog"), t.length || (t = n("<div id='ng-ConfirmPrivateFromPublicSitePostDialog'><\/div>").appendTo("body")), r = {}, r[ngText.YesVerb] = function()
+{
+f = !0,
+n(this).dialog("close")
+}, r[ngText.NoVerb] = function()
+{
+n(this).dialog("close")
+}, t.dialog({
+minHeight: 175, closeOnEscape: !1, modal: !0, dialogClass: "ng-ui-wrapper ng-ui-confirm", title: "", buttons: r, open: function()
+{
+var t=String.format(ngText.PrivatePostPublicContextAttachment, '<a target="_blank" href="' + a.Url + '">' + a.Name + "<\/a>");
+n("#ng-ConfirmPrivateFromPublicSitePostDialog").html(t)
+}, close: function()
+{
+n(this).dialog("destroy"),
+f && (n("div.ngMultiUploadControl").length && n("div.ngMultiUploadControl").pluploadQueue().destroy(), n("iframe.ngUploadFrame").remove(), i())
+}
+}))
+}
+var f,
+e,
+o,
+s;
+if (!i && typeof i != "function")
+{
+Sys.Debug.trace("Must supply a valid callback to check for question switch");
+return
+}
+f = !0,
+r.options.inputType == NG.ActivityInputType.Microblog && t != u.get(0).inputControl.options.defaultValue && (t.indexOf("?") > -1 || t.indexOf("？") > -1) ? (e = t, e = e.replace(/((https?|file|ftp|mms):[\/]{2}[^\s]+?)($|[\.\?!]\s|['\">\\]|\s)(\([^\(]+\))?/gi, ""), e.indexOf("?") > -1 || t.indexOf("？") > -1 ? (o = n("#ng-ConfirmQuestionDialog"), o.length || (o = n(String.format("<div id='ng-ConfirmQuestionDialog'>{0}<\/div>", ngText.ConfirmQuestionIntention)).appendTo("body")), s = {}, s[ngText.YesVerb] = function()
+{
+n("#ngAskQuestion").trigger("click"),
+n(this).dialog("close")
+}, s[ngText.NoVerb] = function()
+{
+n(this).dialog("close")
+}, o.dialog({
+minHeight: 175, closeOnEscape: !1, modal: !0, dialogClass: "ng-ui-wrapper ng-ui-confirm", title: "", buttons: s, close: function()
+{
+n(this).dialog("destroy"),
+h()
+}
+})) : h()) : h()
+},
+r.PreUpdateStatus = function(t)
+{
+typeof p != "undefined" && n(t.data.input).sync();
+var i=t.data.input.val().trim(),
+u=t;
+return r.CheckForQuestion(i, function()
+{
+t.data.button.attr("disabled", "disabled"),
+r.UpdateStatus.call(r, u)
+}), !1
+},
+r.UpdateStatus = function(t)
+{
+function it(n)
+{
+if (window.ngGroupID && window.ngGroupName)
+!NG.StringIsNullOrEmpty(n) && n.indexOf(window.ngGroupName > -1) && (n = n.replace(window.ngGroupName)),
+n = String.format("@[{0}]: ", window.ngGroupName) + n;
+return n
+}
+var s=t.data.input.val().trim(),
+w,
+c,
+k,
+y,
+d,
+l,
+g,
+a,
+v,
+rt,
+o,
+i,
+e,
+ut,
+h,
+p,
+nt,
+ft,
+tt;
+if (t.data.button.focus(), u.trigger("hideautocomplete"), n("#ngPreviewPopup").trigger("ngClosePreview"), typeof enableSuggestAhead != "undefined" && enableSuggestAhead && b && u.trigger("ngSuggestAheadHide"), w = f.find(".ngACTargetResults"), c = "", NG.StringIsNullOrEmpty(r.options.personalTarget) || (c += r.options.personalTarget + ","), w.find("div").each(function()
+{
+c += n(this).data("ngTarget") + ","
+}), k = w.data("ngACTargetToBox"), typeof k != "undefined" && (c += k), y = s != t.data.defaultValue ? r.ToBoxOperation(s) : r.ToBoxOperation(""), d = n("div.ngMultiUploadControl"), d.length > 0)
+{
+if (l = d.pluploadQueue(), l && l.files.length > 0)
+{
+l.settings.status = it(y),
+o = u.get(0).ngThumbnailControlInstance,
+o && (v = o.GetValues(), l.settings.preview = JSON.stringify(v)),
+NG.StringIsNullOrEmpty(c) || (l.settings.targets = c);
+switch (r.options.inputType)
+{
+case NG.ActivityInputType.Microblog:
+l.settings.ActivityType = "Microblogging";
+break;
+case NG.ActivityInputType.Question:
+l.settings.ActivityType = "NewsGatorQA"
+}
+l.start()
+}
+return t.data.button.removeAttr("disabled"), !1
+}
+if (g = n("iframe.ngUploadFrame"), g.length > 0)
+{
+a = g.get(0).contentWindow.document;
+switch (r.options.inputType)
+{
+case NG.ActivityInputType.Microblog:
+n("#ActivityType", a).val("Microblogging");
+break;
+case NG.ActivityInputType.Question:
+n("#ActivityType", a).val("NewsGatorQA")
+}
+if (n("input.ngFileUpload", a).val() == "")
+return n(t.data.input.get(0)).parent().data("tooltipcode", "400"), new NG.Tooltip(t.data.input.get(0), ngText.NoFileAlert, 0, "bottom"), !1;
+n("#ngStatusUpdate", a).val(it(y)),
+o = u.get(0).ngThumbnailControlInstance,
+o && (v = o.GetValues(), n("#ngLinkPreview", a).val(JSON.stringify(v))),
+NG.StringIsNullOrEmpty(c) || n("#ngTargets", a).val(c),
+n(t.data.input.get(0)).parent().removeData("tooltipcode"),
+new NG.Tooltip(t.data.input.get(0), ngText.Saving + "...", 0, "bottom"),
+n("form:first", a).submit(),
+n(NG.Events).trigger("uploadFile");
+n(NG.Events).one("uploadFileComplete", function()
+{
+u.trigger("reset"),
+r.ClearToBox()
+});
+return o && o.Remove(), !1
+}
+if (s.length == 0 || s == t.data.defaultValue)
+return rt = r.options.inputType == NG.ActivityInputType.DirectMessage ? ngText.BlankSendAlert : ngText.BlankAlert, h = t.data.input.get(0), n(h).parent().data("tooltipcode", "400"), new NG.Tooltip(h, rt, 2500, "bottom"), t.data.button.removeAttr("disabled"), !1;
+if (s = y, o = u.get(0).ngThumbnailControlInstance, i = new Sys.Net.WebRequest, NG.StringIsNullOrEmpty(c) || (i.get_headers()["x-ng-targets"] = c), e = r.options.postUrl, ut = r.options.postDirectMessageUrl ? r.options.postDirectMessageUrl : r.options.postUrl, r.options.currentModule && r.options.currentModule.postUrl && (e = r.options.currentModule.postUrl), h = t.data.input.get(0), window.ngRequireCommunityTarget && (r.options.inputType == NG.ActivityInputType.Question || r.options.inputType == NG.ActivityInputType.Microblog || r.options.inputType == NG.ActivityInputType.Custom) && c.length === 0 && NG.GetCommunityMatches(s).length === 0)
+return n(h).parent().data("tooltipcode", "400"), new NG.Tooltip(t.data.input.get(0), ngText.WarnCommunityTargetRequired, 5e3, "bottom"), t.data.button.removeAttr("disabled"), !1;
+if (r.options.inputType == NG.ActivityInputType.Question)
+{
+if (n("#ngAddPollOptionHolder", f).length > 0)
+{
+if (e = e + "askpoll/", p = [], n(".ngPollOptionInput").each(function()
+{
+var t=n(this).val().trim();
+NG.StringIsNullOrEmpty(t) || Array.add(p, t)
+}), p.length < 2)
+return n(h).parent().data("tooltipcode", "400"), new NG.Tooltip(h, ngText.PollOptionLengthError, 5e3, "bottom"), t.data.button.removeAttr("disabled"), !1;
+nt = {
+QuestionText: s, PollOptions: p
+},
+o && (nt.LinkPreview = o.GetValues()),
+n(h).parent().removeData("tooltipcode"),
+tt = new NG.Tooltip(h, ngText.Saving + "...", 45e3, "bottom"),
+i.set_url(e),
+i.set_httpVerb("POST"),
+i.set_userContext({
+target: t.data.input.get(0), text: s
+}),
+i.add_completed(r.OnStatusComplete),
+i.get_headers()["Content-Type"] = "application/json; charset=utf-8",
+i.set_body(JSON.stringify(nt)),
+i.invoke();
+return
+}
+if (o)
+{
+e = e + "AskLinkPreview/",
+r.UpdateLinkPreview(t, i, e, s);
+return
+}
+e = e + "ask/"
+}
+else if (r.options.inputType == NG.ActivityInputType.Custom)
+e = r.customActivity.url;
+else if (r.options.inputType == NG.ActivityInputType.DirectMessage)
+{
+if (s.indexOf("@") < 0 && !r.options.isPersonal)
+return n(h).parent().data("tooltipcode", "400"), new NG.Tooltip(h, ngText.DirectMessageNoTargetError, 5e3, "bottom"), t.data.button.removeAttr("disabled"), !1;
+if (ft = NG.GetCommunityMatches(s), ft.length > 0)
+return n(h).parent().data("tooltipcode", "400"), new NG.Tooltip(t.data.input.get(0), ngText.DirectMessageCommunitiesError, 5e3, "bottom"), t.data.button.removeAttr("disabled"), !1;
+if (o)
+{
+e = e + "DirectMessageLinkPreview/",
+r.UpdateLinkPreview(t, i, e, s);
+return
+}
+e = ut + "directmessage/"
+}
+else if (o)
+{
+e = e + "LinkPreview/",
+r.UpdateLinkPreview(t, i, e, s);
+return
+}
+n(h).parent().removeData("tooltipcode"),
+tt = new NG.Tooltip(t.data.input.get(0), ngText.Saving + "...", 45e3, "bottom"),
+i.set_url(e),
+i.set_httpVerb("POST"),
+i.set_userContext({
+target: t.data.input.get(0), text: s
+}),
+i.add_completed(r.OnStatusComplete),
+i.get_headers()["Content-Type"] = "application/x-www-form-urlencoded",
+i.set_body(s),
+i.invoke()
+},
+r.UpdateLinkPreview = function(t, i, u, f)
+{
+var o=t.data.input.get(0).ngThumbnailControlInstance,
+e=o.GetValues(),
+s;
+e.UpdateText = f,
+i.set_body(JSON.stringify(e)),
+n(t.data.input.get(0)).parent().removeData("tooltipcode"),
+s = new NG.Tooltip(t.data.input.get(0), ngText.Saving + "...", 45e3, "bottom"),
+i.set_url(u),
+i.set_httpVerb("POST"),
+i.set_userContext({
+target: t.data.input.get(0), text: f
+}),
+i.add_completed(r.OnStatusComplete),
+i.get_headers()["Content-Type"] = "application/json; charset=utf-8",
+i.invoke()
+},
+r.OnStatusComplete = function(t)
+{
+var i,
+o,
+e,
+s;
+if (t == null && (t = new Sys.Net.WebRequestExecutor), u[0].inputControl.button.removeAttr("disabled"), i = t.get_webRequest().get_userContext(), t.get_statusCode() == 202)
+{
+o = t.get_statusText(),
+o != "" && new NG.Tooltip(i.target, o, 25e3, "bottom");
+return
+}
+t.get_statusCode() != 201 ? (i.target.value = i.text, e = ngText.MicroblogPostFailed, t.get_statusText().match("too long") ? e = ngText.PostLengthError : t.get_statusText().match("two poll options") ? e = ngText.PollOptionLengthError : (t.get_statusCode() == 412 || t.get_statusCode() == 417) && (e = t.get_responseData(), e && e != "" || (e = t.get_statusText())), n(i.target).parent().data("tooltipcode", "400"), new NG.Tooltip(i.target, e, 15e3, "bottom")) : (r.ClearToBox(), u.focus().blur(), s = u.get(0).ngThumbnailControlInstance, s && s.Remove(), r.HidePostAlert(), i && i.target && new NG.Tooltip(i.target, ngText.UpdateSaved, 2500, "bottom"), u.get(0).inputControl.reset(), r.options.onStatusComplete(), r.options.inputType == NG.ActivityInputType.Question ? (n(NG.Events).trigger("askQuestion", [{eventText: t.get_webRequest().get_body()}]), n("#ngAddPollOptionHolder", f).trigger("close")) : r.options.inputType == NG.ActivityInputType.Custom || (r.options.inputType == NG.ActivityInputType.DirectMessage ? n(NG.Events).trigger("directMessage", [{eventText: t.get_webRequest().get_body()}]) : n(NG.Events).trigger("microblog", [{eventText: t.get_webRequest().get_body()}])), n(NG.Events).trigger("statusUpdateComplete"))
+},
+r.ToggleInputType = function(t)
+{
+var i=n(t.target);
+if (i.is("li") || (i = i.parent().is(".iehelper") ? i.parent().parent("li") : i.parent("li")), i.is("li"))
+{
+i.parents("ul").find("li").removeClass("active"),
+i.addClass("active"),
+u.removeClass("ngPrivateInput"),
+u.get(0).inputControl.changeDefaultValue(i.attr("defaultPrompt")),
+u[0].setAttribute("defaultPrompt", i.attr("defaultPrompt")),
+u[0].setAttribute("title", i.attr("defaultPrompt")),
+u[0].setAttribute("maxLength", NG.InputMaxTextLengthValues.Default),
+h.html(ngText.PostVerb),
+r.addPollLink && r.addPollLink.hide(),
+r.customActivity = null;
+var l=o.data("extraCount"),
+c=o.data("defaultTextLength"),
+e=!1,
+s=n("div.ngPreviewButton");
+y = !0,
+u.get(0).inputControl.options.autocomplete = n.extend(!0, u.get(0).inputControl.options.autocomplete, r.__autocompleteOptions);
+switch (i.get(0).id)
+{
+case"ngAskQuestion":
+r.options.inputType = NG.ActivityInputType.Question,
+!r.options.isPersonal && r.addPollLink && r.addPollLink.show(),
+e = !0,
+v.hide(),
+s.show(),
+u.trigger("keyup");
+break;
+case"ngCustomInput":
+r.options.inputType = NG.ActivityInputType.Custom,
+u[0].setAttribute("maxLength", NG.InputMaxTextLengthValues.Ideas),
+r.customActivity = {url: i.attr("url")},
+e = !0,
+v.hide(),
+s.hide(),
+u.trigger("keyup");
+break;
+case"ngDirectMessage":
+r.options.inputType = NG.ActivityInputType.DirectMessage,
+u.addClass("ngPrivateInput"),
+u.get(0).inputControl.options.autocomplete.includeCommunities = !1,
+h.html(ngText.SendVerb),
+e = !0,
+v.show(),
+s.show(),
+y = !1,
+u.trigger("ngSuggestAheadHide");
+break;
+default:
+r.options.inputType = NG.ActivityInputType.Microblog,
+e = !0,
+v.hide(),
+s.show(),
+u.trigger("keyup")
+}
+e && Math.abs(c) !== u.attr("title").length && (o.data("defaultTextLength", u.attr("title").length), u.trigger("ngupdatemaxlength")),
+r.ToggleUploadLink(),
+r.options.inputType != NG.ActivityInputType.Question && n("#ngAddPollOptionHolder", f).trigger("close")
+}
+},
+r.ToggleUploadLink = function()
+{
+if (window.ngUploadUrl && window.ngUploadUrl.length > 0 && (r.options.inputType == NG.ActivityInputType.Microblog || r.options.inputType == NG.ActivityInputType.Question))
+r.uploadLink.show();
+else
+{
+if (r.uploadLink.hide(), window.onNgUploadFrameClosed)
+window.onNgUploadFrameClosed(0);
+n("div.ngMultiUploadControl").length && n("div.ngMultiUploadControl").pluploadQueue().destroy()
+}
+},
+r.ShowPostAlert = function(n)
+{
+tt.html(n).css("display", "block")
+},
+r.HidePostAlert = function()
+{
+tt.css("display", "none")
+},
+r.CheckAutocompleteInput = function(t, i)
+{
+var f,
+u,
+c,
+o,
+s;
+if (h.removeAttr("disabled"), k = !1, a = null, r.options.inputType != NG.ActivityInputType.DirectMessage && (it || w))
+{
+if (f = NG.GetCommunityMatches(t), f = f.concat(r.ToBoxGetCommunityMatches(e)), f.length == 0)
+{
+r.HidePostAlert();
+return
+}
+if (u = n.grep(w, function(t)
+{
+if (t.PrivacyLevel.toLowerCase() == "public")
+return !1;
+var i=n.inArray(t.Name.toLowerCase(), f);
+return i >= 0
+}), c = l && l.PrivacyLevel.toLowerCase() == "private", c && n.inArray(l, u) == -1 && u.push(l), u.length === 0)
+{
+r.HidePostAlert();
+return
+}
+u.length === 1 && (a = u[0]),
+o = NG.GetUserMatches(t),
+typeof i != "undefined" && (o = o.concat(r.GetUserMatches(n(i).closest(".ngInput").find(".ngACTargetResults")))),
+s = typeof dontAllowMixed != "undefined" && dontAllowMixed === !0,
+s && c ? f.length > 1 ? (h.attr("disabled", "disabled"), r.ShowPostAlert(ngText.CommunityPrivacyError)) : o.length > 0 ? r.ShowPostAlert(ngText.CommunityPrivacyUserWarning) : r.HidePostAlert() : (o.length > 0 || r.options.isPersonal || f.length > 1) && u.length > 0 ? s ? s && (h.attr("disabled", "disabled"), r.ShowPostAlert(ngText.CommunityPrivacyError)) : (r.ShowPostAlert(ngText.CommunityPrivacyWarning.replace("{communityName}", "@[" + u[0].Name + "]")), k = !0) : r.HidePostAlert()
+}
+},
+r.GetHeader = function(t, i)
+{
+var u=n(t.split(/\r\n/)),
+r;
+for (index = 0; index < u.length; index++)
+if (r = u[index].split(/:\s+/), r.length === 2 && (r[0] = n.trim(r[0]), r[0].toUpperCase() === i.toUpperCase()))
+return n.trim(r[1]);
+return null
+},
+r.AddInputToMultipart = function(t, i)
+{
+var r=n("#" + i).val();
+r && (t.settings.multipart_params[i] = r)
+},
+r.ShowFileUploadMulti = function()
+{
+var t,
+e,
+f,
+i;
+n("div.ngMultiUploadControl").length == 0 && (n("iframe.ngLinkSelectorFrame").length > 0 && s.hide("fast").remove(), t = n("div.ngDocLibChoiceDiv"), t && t.length > 0 && t.show("fast"), e = n(".ngInputActionHolder"), f = n(String.format('<div class="ngClose"><div class="ngHeader"><\/div><div><a href="javascript:void(0);" class="ngPopupClose" runat="server" title="{0}"><\/a><\/div><\/div>', ngText.CloseVerb)), f.appendTo(e), i = n("<div class='ngMultiUploadControl'/>").appendTo(e), n(".ngPopupClose", f).click(function()
+{
+i.pluploadQueue().destroy()
+}), i.pluploadQueue({
+runtimes: window.ngPLUploadRuntimes, url: window.ngUploadUrl, chunk_size: "1mb", filters: {mime_types: [{
+title: "All Files", extensions: "*"
+}]}, rename: !0, dragdrop: !0, flash_swf_url: "/_layouts/ng/script/plugins/plupload-2.1.0/js/Moxie.swf", silverlight_xap_url: "/_layouts/ng/script/plugins/plupload-2.1.0/js/Moxie.xap", eventHash: null, remainingFiles: 0, status: "", ActivityType: "", targets: null, preview: null, attachmentList: null, preinit: {UploadFile: function(i)
+{
+var r,
+u;
+i.settings.multipart_params = {
+Multiupload: i.files.length, RemainingFiles: --i.settings.remainingFiles, ngStatusUpdate: i.settings.status, ActivityType: i.settings.ActivityType
+},
+i.settings.targets && (i.settings.multipart_params["x-ng-targets"] = i.settings.targets),
+i.settings.preview && (i.settings.multipart_params.ngLinkPreview = i.settings.preview),
+i.settings.attachmentList && (i.settings.multipart_params.AttachmentList = i.settings.attachmentList),
+i.settings.multipart_params["x-ng-noexception"] = !0,
+t && (r = n("select.DocLibChoice option:selected:first"), r && r.length > 0 && (i.settings.multipart_params.DocLibGuid = r.val()), u = n("select.PicLibChoice option:selected:first"), u && u.length > 0 && (i.settings.multipart_params.PicLibGuid = u.val()))
+}}, init: {
+FileUploaded: function(t, i, u)
+{
+var h=u.response,
+f=null,
+o,
+c,
+s,
+e;
+if (h)
+try
+{
+f = n.parseJSON(h),
+f && !f.error && (f = null)
+}
+catch(l)
+{
+f = null
+}
+u.status !== 201 && (u.status !== 200 || f) ? f && (f.file = i, f.message = plupload.translate(f.message), t.trigger("Error", f)) : (t.settings.attachmentList = u.response, o = r.GetHeader(u.responseHeaders, "location"), o != null && t.settings.uploadedLocations.push(o), c = r.GetHeader(u.responseHeaders, "HasRequiredFields"), s = r.GetHeader(u.responseHeaders, "EditUrl"), c && s && (e = window.parent.SP.UI.$create_DialogOptions(), e.autoSize = !0, e.url = s, window.parent.SP.UI.ModalDialog.showModalDialog(e)))
+}, ChunkUploaded: function(t, i, u)
+{
+var f=r.GetHeader(u.responseHeaders, "location"),
+e;
+if (!f)
+try
+{
+e = n(n.parseJSON(u.response)),
+f = e.last()[0].Uri
+}
+catch(o) {}
+i.ChunkUrl = f,
+t.settings.multipart_params.ChunkUrl = f
+}, QueueChanged: function(t)
+{
+t.settings.remainingFiles = t.files.length,
+t.files.length && n("#ngFileUpload").val(t.files.length)
+}, StateChanged: function(t)
+{
+t.files.length === t.total.uploaded + t.total.failed && (!t.total.failed || t.total.failed <= 0) && (u.trigger("reset"), r.ClearToBox(), n(u).parent().removeData("tooltipcode"), new NG.Tooltip(u, ngText.UpdateSaved + "...", 2500, "bottom"), r.HidePostAlert(), r.options.onStatusComplete(), i.pluploadQueue().destroy(), n(NG.Events).trigger("statusUpdateComplete"), window.onNgUploadFrameClosed = null, window.onNGUploadError = null, u.get(0).inputControl.reset(), n(NG.Events).trigger("uploadFileComplete"))
+}, Destroy: function()
+{
+i.hide("fast").remove(),
+f.hide("fast").remove(),
+t.hide("fast")
+}
+}
+}))
+},
+r.ShowActivityPreview = function()
+{
+var t,
+l,
+o,
+c,
+i,
+a,
+s,
+p;
+if (window.allowModal = !0, t = u.val(), t == u.get(0).inputControl.options.defaultValue)
+return !1;
+n(".ngPostInput", f).hasClass("wysibb-texarea") && (t = n(".ngPostInput", f).bbcode()),
+l = u.parents(".ngStatusHolder"),
+n("#ngPreviewPopup").trigger("ngClosePreview"),
+o = n('<div id="ngPreviewPopup" class="ngPreviewPopup"><\/div>').appendTo(l),
+c = $ajaxLoader.clone(),
+c.appendTo(o),
+i = n("<div class='ngPreviewDiv' />"),
+a = n(String.format('<div class="ngClose"><div class="ngHeader"><\/div><div><a href="javascript:void(0);" class="ngPopupClose" runat="server" title="{0}"><\/a><\/div><\/div>', ngText.CloseVerb)).appendTo(i),
+n(".ngPopupClose", a).click(function()
+{
+n("#ngPreviewPopup").trigger("ngClosePreview")
+});
+n("#ngPreviewPopup").on("ngClosePreview", function()
+{
+n("#ngPreviewPopup").remove(),
+window.allowModal = !1
+});
+var e=n('<div class="ngPreviewActivityRow"/>').appendTo(i),
+w={xslUrl: window.spWebUrl + "/_layouts/ng/xml/activityfeed.xslt?cache=" + window.ngCacheKey},
+v=null,
+y=u.get(0).ngThumbnailControlInstance;
+y && (v = y.GetValues()),
+r.options.inputType == NG.ActivityInputType.Question && n("#ngAddPollOptionHolder", f).length > 0 && (s = [], n(".ngPollOptionInput").each(function()
+{
+var t=n(this).val().trim();
+NG.StringIsNullOrEmpty(t) || s.push(t)
+}));
+var b={
+init: NG.CommonInit, render: function(t)
+{
+function u()
+{
+n(t._element).find(".ngSummary").after(String.format("<div class='ngImageAttachmentContainer'><div class='ngImageAttachmentHolder'><div class='ngPreviewAttachmentHolder'><span>{0}<\/span><\/div><\/div><\/div>", ngText.PreviewAttachmentPlaceholder))
+}
+var i,
+r,
+f;
+typeof NG.NewsFeed != "undefined" ? t.newsFeedControl || (t.newsFeedControl = new NG.NewsFeed(t._element, {
+view: NG.ActivityView.Single, linkHashTags: !1, hideLinkAvailable: !1
+}), t.newsFeedControl && t.newsFeedControl.Render()) : NG.Localize(e),
+i = n("div.ngMultiUploadControl"),
+i.length && (r = i.pluploadQueue(), r && r.files.length && u()),
+f = n("iframe.ngUploadFrame"),
+f.length && u(),
+n(t._element).append('<div class="ngPreviewMask"/>')
+}
+},
+t=t != u.get(0).inputControl.options.defaultValue ? r.ToBoxOperation(t) : r.ToBoxOperation(""),
+h={
+EntryText: t, EventType: r.options.inputType, LinkPreview: v, PollOptions: s
+};
+return (window.ngCommunityID || window.ngGroupID) && (h.ContextId = window.ngCommunityID || window.ngGroupID), window.ngCommunityID && (h.IsFromContext = !0), r.options.personalTarget && (p = parseInt(r.options.personalTarget.split(":")[0], 10), isNaN(p) || (h.TargetId = r.options.personalTarget.split(":")[0])), e.ngXmlControl = $create(SharePointAjax.XmlControl, w, b, null, e.get(0)), n.ajax({
+dataType: "xml", type: "POST", contentType: "application/json; charset=utf-8", data: JSON.stringify(h), url: window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/PreviewActivityEvent/", xhr: function()
+{
+return SharePointAjax && SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+}, success: function(n)
+{
+i.appendTo(o),
+e.ngXmlControl.set_Xml(n)
+}, error: function(t)
+{
+i.appendTo(o),
+n(e).html(NG.GetDefaultErrorMessage(t.status))
+}, complete: function()
+{
+c.remove()
+}
+}), !1
+},
+typeof NG.NewsFeed != "undefined" && (nt.show(), nt.click(r.ShowActivityPreview)),
+r.ShowFileUpload = function()
+{
+var i,
+t;
+n("iframe.ngUploadFrame").length == 0 && (i = window.ngUploadFallbackUrl + (window.ngUploadFallbackUrl.indexOf("?") > -1 ? "&" : "?") + "IsDlg=1", n("iframe.ngLinkSelectorFrame").length > 0 && s.hide("fast").remove(), n("#ngAddPollOptionHolder", f).trigger("close"), t = n(".ngInputActionHolder"), t.append($ajaxLoaderBar), s = n('<iframe frameborder="0" border="0" src="' + i + '" class="ngUploadFrame" style="display:none"><\/iframe>').appendTo(t).bind("load", function()
+{
+n(this).show(),
+n(".ngLoadingBar", t).remove();
+var i=n(this).get(0).contentWindow.document;
+n(".ngPopupClose", i).click(function()
+{
+window.onNgUploadFrameClosed(0)
+})
+}), window.onNgUploadFrameClosed = function(t)
+{
+t == 1 && (n(u).parent().removeData("tooltipcode"), new NG.Tooltip(u, ngText.UpdateSaved + "...", 2500, "bottom"), r.HidePostAlert(), r.options.onStatusComplete(), n(NG.Events).trigger("statusUpdateComplete")),
+s.hide("fast").remove(),
+window.onNgUploadFrameClosed = null,
+window.onNGUploadError = null,
+u.get(0).inputControl.reset(),
+n(NG.Events).trigger("uploadFileComplete")
+}, window.onNGUploadError = function()
+{
+u.get(0).ngTooltip && u.get(0).ngTooltip.Remove()
+})
+},
+r.ShowResourceSelector = function()
+{
+var t="",
+r,
+i;
+t = window.spWebUrl ? window.spWebUrl : SP.ClientContext.get_current().get_url(),
+t == "/" && (t = ""),
+r = t + "/_layouts/NG/Pages/ItemSelector.aspx?IsDlg=1",
+n("iframe.ngLinkSelectorFrame").length == 0 && (n("iframe.ngUploadFrame").length > 0 && s.hide("fast").remove(), n("#ngAddPollOptionHolder", f).trigger("close"), i = n(".ngInputActionHolder"), i.append($ajaxLoaderBar), s = n('<iframe frameborder="0" border="0" style="display:none" class="ngLinkSelectorFrame" src="' + r + '"><\/iframe>').bind("load", function()
+{
+n(this).show(),
+n(".ngLoadingBar", i).remove()
+}).appendTo(i), window.onNgSelectedLinkFrameClosed = function(t, i)
+{
+t == 1 && (u.val() == u.get(0).inputControl.options.defaultValue ? u.val(i) : u.val(u.val() + " " + i + " ")),
+n.fn.selection && u.selection(u.val().length, u.val().length),
+u.focus(),
+s.hide("fast").remove(),
+window.onNgSelectedLinkFrameClosed = null
+})
+},
+r.ShowAddPoll = function()
+{
+n("#ngAddPollOptionHolder", f).length > 0 || (n("iframe.ngLinkSelectorFrame").hide("fast").remove(), n("iframe.ngUploadFrame").hide("fast").remove(), new NG.AddPollOptionsControl(n(".ngInputActionHolder", f)))
+},
+r.LoadColleaguesAndCommunities = function()
+{
+n.when(NG.LoadColleagues(), NG.LoadCommunities()).then(function()
+{
+it = NG.ColleagueList,
+w = NG.CommunityList,
+n.when(NG.LoadCurrentCommunity()).then(function()
+{
+l = NG.CurrentCommunity;
+return
+})
+})
+},
+r.ToBoxKeypressCallback = function(t)
+{
+var s=e.closest(".ngInputTo"),
+a=s.children("ul"),
+l=f.find(".ngACTargetResults"),
+i,
+h,
+c;
+e.val("");
+switch (t.type)
+{
+case"group":
+i = "[" + t.id + "]";
+break;
+default:
+i = t.id
+}
+t.type && t.type == "user" && (h = l.data("ngACTargetToBox"), l.data("ngACTargetToBox", (typeof h != "undefined" ? h + "," : "") + t.profileId + ":@" + t.id)),
+n('<li><a href="javascript:;" class="ngRemoveTarget" title="remove">×<\/a><span class="ngTarget" data-ngprofileid="' + (typeof t.profileId != "undefined" ? t.profileId : "0") + '" data-ngname="@' + i + '">' + t.name + "<\/span><\/li>").appendTo(a),
+c = o.data("extraCount"),
+o.data("extraCount", (c === undefined ? 0 : c) + i.length),
+u.trigger("ngupdatemaxlength"),
+r.CheckAutocompleteInput(s.closest(".ngInput").find(".ngPostInput").val(), s)
+},
+r.WysibbKeypressCallback = function(){},
+r.RegisterSuggestAhead = function(t)
+{
+var i=n(".ngSuggestAhead", f),
+h,
+o,
+c,
+s,
+u,
+l;
+i.length < 1 ? (i = n('<div class="ngSuggestAhead" />'), h = n('<h2 class="ngSuggestAheadDestinationHeading">' + ngText.SuggestAheadDestinationHeading + ":<\/h2>").appendTo(i), o = n('<div class="ngSuggestAheadCommunities" />').appendTo(i), c = n('<h2 class="ngSuggestAheadPostHeading">' + ngText.SuggestAheadPostsHeading + ":<\/h2>").appendTo(i), s = n('<div class="ngSuggestAheadResults" />').appendTo(i), i.children().hide(), i.appendTo(f)) : (i.children().hide(), h = n(".ngSuggestAheadDestinationHeading", i), o = n(".ngSuggestAheadCommunities", i), c = n(".ngSuggestAheadPostHeading", i), s = n(".ngSuggestAheadResults", i)),
+u = !1,
+l = t.is && t.is("div") || !1;
+n(t).on("ngSuggestAheadHide", function(n, t)
+{
+i.hide(),
+t ? ((t.stopRequests || typeof t.stopRequests == "undefined") && (u = !0), (t.emptyResults || typeof t.emptyResults == "undefined") && (s.empty(), o.empty())) : (u = !0, s.empty(), o.empty()),
+h.hide()
+});
+n(t).on("ngSuggestAheadRestore", function()
+{
+u = !1,
+i.slideDown(),
+h.show()
+});
+return n(document).ready(function()
+{
+var it=-1,
+f=!1,
+a="",
+v=!1,
+p=0,
+w=!1,
+b=!1,
+g,
+rt,
+k,
+nt,
+tt,
+d,
+ut=function(r)
+{
+var u="";
+if (f)
+{
+a = r;
+return
+}
+f || a.length !== 0 ? f || (u = a, a = "") : u = r,
+v = !1,
+ft(u, function(r)
+{
+if (r && typeof r.Data != "undefined")
+{
+if (n(t).attr("title") === n(t).val() && (r.Data = null, a = ""), w = r.Data && r.Data.length > 0, b = r.CommunitySuggestions && r.CommunitySuggestions.length > 0, w || b)
+{
+p = 0,
+i.children().show(),
+b ? (g = n("<ul />"), rt = e.closest(".ngInputTo").find(".ngTarget").text(), n.each(r.CommunitySuggestions, function(t, i)
+{
+k = i.replace("@[", "").replace("]", ""),
+nt = n('<li data-ngname="' + k + '" />').html("+" + k),
+g.append(nt),
+nt = null,
+k = null
+}), h.show("fast", function()
+{
+o.empty().append(g),
+cUL = null
+}), rt = null) : (o.empty(), h.hide()),
+w ? (d = n("<ul />"), n.each(r.Data, function(t, i)
+{
+tt = n('<li data-target="' + i.Url + '" />').html(i.Text.replace(/\[wm\]/g, '<span class="ngWM">').replace(/\[\/wm\]/g, "<\/span>")),
+d.append(tt.shrinkAndLink({convertToLink: !1}))
+}), tt = null, c.show("fast", function()
+{
+s.empty().show().append(d),
+d = null
+})) : (c.hide(), s.hide().empty());
+var u=i.closest(".ngexpandable").length > 0;
+if (!y)
+return;
+(!u || u && i.closest(".ngexpandable.expanded").length > 0) && i.show().slideDown()
+}
+else
+p++,
+p === 2 && (n(t).trigger("ngSuggestAheadHide", [{stopRequests: !1}]), p = 0);
+w = null,
+b = null,
+a.length && ut()
+}
+})
+},
+ft;
+n(t).on("keyup", function(n)
+{
+var t=l ? this.innerHTML : this.value,
+i,
+r;
+v || t.length >= (NG.MaxAutocompleteLength || 1e4) || (v = !0, i = t.lastIndexOf(" "), (i !== it || i + 5 > t.length) && (it = i, r = t.match(/\S+/g), n.keyCode !== 8 && r && r.length >= 3 && y && ut(t)), v = !1)
+});
+s.on("click.ng.suggestahead", function(t)
+{
+var r,
+i;
+if (t.preventDefault(), r = n(t.target), i = r.data("target"), typeof i != "undefined")
+{
+var u=screen.width / 2 - 325,
+f=screen.height / 2 - 250,
+e=window.open(i + "?isDlg=1&forceHeight=500", "ngSinglePostWindow", "status=1,location=no,resizable=yes,height=500,width=650,left=" + u + ",top=" + f);
+e.focus()
+}
+});
+o.on("click.ng.suggestahead.communitysuggestions", function(t)
+{
+var u,
+i,
+f;
+t.preventDefault(),
+u = n(t.target),
+i = u.data("ngname"),
+typeof i != "undefined" && (f = {
+id: i, name: i, type: "group"
+}, r.ToBoxKeypressCallback(f), u.remove())
+});
+ft = function(t, i)
+{
+var r=String.format("{0}/_vti_bin/ng/client.svc/", window.spWebUrl);
+if (u)
+{
+u = !1;
+return
+}
+f || (f = !0, n.ajax({
+url: r + "suggestahead/get/?truncateAt=700&accept=json", data: {phrase: t}, success: function(n)
+{
+if (f = !1, u)
+{
+u = !1,
+a = "";
+return
+}
+i && i(n)
+}, error: function()
+{
+f = !1,
+i && i()
+}
+}))
+}
+}), i
+},
+c = u.get(0),
+d = null,
+NG.HashTagAssistant && (d = new NG.HashTagAssistant(n("div.ngStatusHolder", f), {
+textbox: u, tagSuggestHolder: n(".ngTagSuggest", f)
+})),
+g = n('<div class="ngACTargetResults" style="display:none;"/>'),
+f.find(".ngInput").append(g),
+c.inputControl = NG.InputControl(u, h, r.PreUpdateStatus, {
+defaultValue: u.val(), autocomplete: r.options.autocompleteOptions ? r.options.autocompleteOptions : new NG.AutoComplete({
+inputControl: u, keypressCallback: r.CheckAutocompleteInput, type: "post", newsFeedControl: r, resultsHolder: g
+}).AutocompleteOptions, autoGrow: !0, maxTextLengthTarget: o, suppressEnter: !0, tagAssistant: d
+}),
+typeof sit != "undefined" && sit.pc_visualeditor && (rt = {
+buttons: "bold,italic,underline,|,img,link,|,code,quote", enableModeSwitch: !1, onlyBBmode: !0, tabInsert: !1
+}, u.wysibb(rt)),
+r.__autocompleteOptions = n.extend(!0, {}, c.inputControl.options.autocomplete),
+typeof enableSuggestAhead != "undefined" && enableSuggestAhead && !i.disableSuggestAhead && (b = r.RegisterSuggestAhead(c), typeof p != "undefined" && (b = r.RegisterSuggestAhead(p))),
+NG.ThumbnailControl && u.bind("keyup", NG.ThumbnailControl.CheckLinks),
+r.InputFocus = function()
+{
+c.focus()
+};
+e.closest(".ngInputTo").on("click.ng", function(t)
+{
+var i,
+f,
+u,
+s,
+a;
+if (t.preventDefault(), i = n(t.target), !i.hasClass("ngRemoveTarget") && i.parent().children().hasClass("ngRemoveTarget"))
+t.stopPropagation();
+else if (i.hasClass("ngRemoveTarget"))
+{
+var h=o.data("extraCount"),
+c=i.parent().children("span"),
+l=c.data("ngname"),
+v=c.data("ngprofileid") + ":",
+y=v + l;
+o.data("extraCount", (h === undefined ? 0 : h) + l.length),
+f = i.closest(".ngInput").find(".ngACTargetResults"),
+u = f.data("ngACTargetToBox"),
+u = typeof u != "undefined" ? u.split(",") : [],
+s = n.inArray(y, u),
+s > -1 && (u.splice(s, 1), f.data("ngACTargetToBox", u.join(","))),
+a = i.closest(".ngInput").find(".ngPostInput").val(),
+i.parent().remove(),
+r.CheckAutocompleteInput(a, i),
+t.stopPropagation()
+}
+else
+r.CheckAutocompleteInput(i.closest(".ngInput").find(".ngPostInput").val(), i),
+e.keyup().focus()
+});
+e.on("keypress", function(n)
+{
+n.keyCode == 13 && (n.preventDefault(), n.stopPropagation(), c.focus())
+});
+e.on("keyup", function(t)
+{
+t.preventDefault();
+var r=n(this),
+i=r.val();
+i === r.prop("title") && (i = ""),
+i.length > 0 && i.indexOf("@") !== 0 && r.val("@" + i)
+}).on("blur", function()
+{
+n(this).val(ngText.PostControlAddToConversation)
+});
+if (NG.InputControl(e, null, r.InputFocus, {
+defaultValue: ngText.PostControlAddToConversation, autocomplete: new NG.AutoComplete({
+inputControl: e, ie_inputPreCleared: !0, keypressCallback: r.CheckAutocompleteInput, checkInputSource: u, itemSelectedCallback: r.ToBoxKeypressCallback, type: "post", captureTargetResults: !1, includeHashTags: !1
+}).AutocompleteOptions, suppressEnter: !0
+}), r.uploadLink = n(".ngAttachFile a", f), !NG.StringIsNullOrEmpty(window.ngUploadUrl))
+if (r.options.useUploadFrame === !0)
+r.uploadLink.show().click(r.ShowFileUpload);
+else
+{
+n(NG.Events).on("force_html4", function()
+{
+new NG.Tooltip(n(".ngInputActionHolder", f), ngText.MultiUploadSuggestSilverlight, 5e3, "top"),
+r.uploadLink.show().off("click").click(r.ShowFileUpload).click()
+});
+r.uploadLink.show().click(r.options.useLegacyUpload ? r.ShowFileUpload : r.ShowFileUploadMulti)
+}
+return ut = n(".ngItemSelector a", f), n(ut).click(r.ShowResourceSelector), r.options.isPersonal || (r.addPollLink = n(".ngAddPoll a", f), n(r.addPollLink).click(r.ShowAddPoll)), n("#ngInputTypes", f).click(r.ToggleInputType), n("#ngInputActions li.ngAttachIcon a", f).hover(function()
+{
+n("#ngInputActions div.ngAttachLabel").html(n(this).attr("tooltip"))
+}, function()
+{
+n("#ngInputActions div.ngAttachLabel").html("")
+}), n(NG.Events).bind("currentContextChanged", function(t, i)
+{
+if (r.options.currentModule = i, r.options.currentModule != null)
+{
+var u=r.options.currentModule;
+n(".ngPostMessage", f).html(u.postLabel),
+u.postUrl && n(".ngAttachmentUI", f).hide(),
+typeof window.isNgMetro != "undefined" && window.isNgMetro === !0 && n(".ngPostMessage a").attr("style", "color: #FFFFFF !important;")
+}
+else
+n(".ngPostMessage", f).html(""),
+n(".ngAttachmentUI", f).show()
+}), r.LoadColleaguesAndCommunities(), n(NG.Events).trigger("postControlRendered", [{control: r}]), r
+},
+NG.AddPollOptionsControl = function(t)
+{
+var i=n(t),
+r,
+e,
+o,
+u,
+f;
+if (!(n("#ngAddPollOptionHolder", i).length > 0))
+{
+for (r = this, n(String.format("<div id='ngAddPollOptionHolder'><div class='ngClose'><div class='ngHeader'><span id='ngHeaderCount'><\/span>&nbsp;{0}<\/div><div><a id='ngAddPollCloseLink' class='ngPopupClose' href='javascript:void(0);' title='{1}'><\/a><\/div><\/div><\/div>", ngText.AddPollOptions, ngText.CloseVerb)).appendTo(i), e = n("#ngAddPollOptionHolder", i), n("#ngAddPollCloseLink", i).click(function()
+{
+e.trigger("close")
+}), r.CreateAdditionalInput = function()
+{
+if (n(".ngPollOptionInput", i).length < 10)
+n(String.format(o, ngText.PollOption + " " + (n(".ngPollOptionInput", i).length + 1))).appendTo(u).find(".ngPollOptionInput").one("focus", r.CreateAdditionalInput)
+}, o = "<div class='ngAddOptionInputHolder'><input type='text' class='ngPollOptionInput' maxlength='80' title='{0}'/><\/div>", u = n("<div id='ngAddOptions'><\/div>"), f = 0; f < 4; f++)
+n(String.format(o, ngText.PollOption + " " + (f + 1))).appendTo(u);
+e.append(u).bind("close", function()
+{
+n(this).remove()
+});
+n(".ngPollOptionInput", i).last().one("focus", r.CreateAdditionalInput);
+n(".ngPollOptionInput", i).first().get(0).focus()
+}
+}
+}();

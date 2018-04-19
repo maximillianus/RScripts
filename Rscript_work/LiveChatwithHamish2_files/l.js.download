@@ -1,0 +1,117 @@
+(function()
+{
+var y=function(n)
+{
+(window.execScript || function(n)
+{
+window.eval.call(window, n)
+})(n)
+},
+o=function(n, t)
+{
+return n instanceof (t || Array)
+},
+r=document,
+l="getElementsByTagName",
+u="replace",
+s="match",
+f="length",
+a="readyState",
+p="onreadystatechange",
+i=r[l]("script"),
+h=i[i[f] - 1].innerHTML[u](/^\s+|\s+$/g, ""),
+t,
+c,
+e;
+if (typeof ljs != "undefined")
+{
+h && y(h);
+return
+}
+var b=i[i[f] - 1].src[s](/checkLoaded/) ? !0 : !1,
+k=r[l]("head")[0] || r.documentElement,
+w=function(n, t, i)
+{
+var u=r.createElement(n),
+f;
+i && (u[a] ? u[p] = function()
+{
+(u[a] === "loaded" || u[a] === "complete") && (u[p] = null, i())
+} : u.onload = i);
+for (f in t)
+u[f] = t[f];
+k.appendChild(u)
+},
+d=function(n, t)
+{
+var i,
+r;
+if (this.aliases && this.aliases[n])
+return i = this.aliases[n].slice(0), o(i) || (i = [i]), t && i.push(t), this.load.apply(this, i);
+if (o(n))
+{
+for (r = n.length; r--; )
+this.load(n[r]);
+return t && n.push(t), this.load.apply(this, n)
+}
+return n[s](/\.css\b/) ? this.loadcss(n, t) : this.loadjs(n, t)
+},
+n={},
+v={
+aliases: {}, loadjs: function(t, i)
+{
+var r=t[s]("#") ? t[u](/^[^#]+#/, "") : null;
+return (r && (t = t[u](/#.*$/, "")), n[t] === !0) ? (i && i(), this) : n[t] !== undefined ? (i && (n[t] = function(n, t)
+{
+return function()
+{
+n && n(),
+t && t()
+}
+}(n[t], i)), this) : (n[t] = function(i)
+{
+return function()
+{
+n[t] = !0,
+i && i()
+}
+}(i), w("script", {
+type: "text/javascript", src: t, id: r
+}, function()
+{
+n[t]()
+}), this)
+}, loadcss: function(t, i)
+{
+var r=t[s]("#") ? t[u](/^[^#]+#/, "") : null;
+return r && (t = t[u](/#.*$/, "")), n[t] || w("link", {
+type: "text/css", rel: "stylesheet", href: t, id: r
+}, function()
+{
+n[t] = !0
+}), n[t] = !0, i && i(), this
+}, load: function()
+{
+var n=arguments,
+t=n[f];
+return t === 1 && o(n[0], Function) ? (n[0](), this) : (d.call(this, n[0], t <= 1 ? undefined : function()
+{
+v.load.apply(v, [].slice.call(n, 1))
+}), this)
+}, addAliases: function(n)
+{
+for (var t in n)
+this.aliases[t] = o(n[t]) ? n[t].slice(0) : n[t];
+return this
+}
+};
+if (b)
+{
+for (t = 0, c = i[f]; t < c; t++)
+n[i[t].src] = !0;
+for (e = r[l]("link"), t = 0, c = e[f]; t < c; t++)
+(e[t].rel === "stylesheet" || e[t].type === "text/css") && (n[e[t].href] = !0)
+}
+ljs = v,
+h && y(h)
+})();

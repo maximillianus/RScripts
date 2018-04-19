@@ -1,0 +1,159 @@
+var usersFollowingMeTableControl;
+(function()
+{
+var n=jQuery142;
+UsersFollowingMeTableControl = function(t)
+{
+var i=this,
+r;
+this.ClientId = t,
+this.wrapper = n("#" + this.ClientId),
+this.CurrentSortColumn = "PreferredName",
+this.CurrentSortDirection = "asc",
+this.CurrentPageIndex = 0,
+this.LastPageIndex = 0,
+this.MaxItemsPerPage = ngMaxUsersFollowingMeDisplayed,
+this.SearchTerm = "",
+this.RowKey = "UserId",
+r = SP.ClientContext.get_current().get_url(),
+r == "/" && (r = ""),
+this.dataUrl = r + "/_vti_bin/NG/Colleague.svc",
+this.LoadingDiv = this.wrapper.find("#fmLoadingDiv"),
+this.PagingControl = this.wrapper.find("#pagingControl"),
+i.RenderUsersFollowingMeTableControl = function()
+{
+n(i.LoadingDiv).show(),
+i.WireUpControlEvents(),
+i.GetPagedData()
+},
+i.WireUpControlEvents = function()
+{
+i.wrapper.find(".ngSearchButton").click(i.SearchForUserFollowingMeByName),
+i.wrapper.find(".ngClearSearchButton").click(function()
+{
+i.wrapper.find(".txtSearchForUserFollowingMeByName").val(""),
+i.SearchForUserFollowingMeByName()
+});
+i.wrapper.find(".ngRefreshButton").on("click", i.SetMaxUsersPerPage);
+i.wrapper.find("#txtMaxUsersPerPage").attr("value", i.MaxItemsPerPage)
+},
+i.SearchForUserFollowingMeByName = function()
+{
+var n=i.wrapper.find(".txtSearchForUserFollowingMeByName").attr("value");
+return i.wrapper.find(".ngClearSearchButton").css("visibility", n.trim().length == 0 ? "hidden" : "visible"), i.CurrentPageIndex = 0, i.LastPageIndex = 0, i.SearchTerm = n, i.CurrentPageIndex = 0, i.LastPageIdex = 0, i.GetPagedData(), !1
+},
+i.SetMaxUsersPerPage = function()
+{
+var n=parseInt(i.wrapper.find("#txtMaxUsersPerPage").attr("value"));
+return isNaN(n) || n < 1 ? (i.wrapper.find("#txtMaxUsersPerPage").val("1"), n = 1) : n > 100 && (i.wrapper.find("#txtMaxUsersPerPage").val("100"), n = 100), i.CurrentPageIndex = 0, i.LastPageIdex = 0, i.MaxItemsPerPage = n, i.GetPagedData(), !1
+},
+i.GetPagedData = function()
+{
+var r,
+u,
+f,
+e,
+t,
+o;
+r = i.CurrentPageIndex,
+u = i.MaxItemsPerPage,
+f = i.CurrentSortColumn,
+e = i.CurrentSortDirection,
+t = i.SearchTerm,
+o = {
+MaxItems: u, PageIndex: r, RecordId: mySiteOwnerRecordId, SortColumn: f, SortDirection: e, SearchTerm: t
+},
+n.ajax({
+url: i.dataUrl + "/UsersFollowingUser/Paged/", dataType: "json", type: "POST", contentType: "application/json; charset=utf-8", data: JSON.stringify(o), success: function(n)
+{
+i.LoadData(n, t),
+i.SetupPaging(n.NumberOfFollowers)
+}, error: function(n)
+{
+i.wrapper.find(".FM_Container").html(NG.GetDefaultErrorMessage(n.status))
+}
+})
+},
+i.SetupPaging = function(t)
+{
+i.LastPageIndex = Math.ceil(t / i.MaxItemsPerPage) - 1,
+t && t > 0 ? t == i.MaxItemsPerPage || i.LastPageIndex == 0 ? n(i.PagingControl).hide() : NG.UpdatePaging(n(i.PagingControl), i.CurrentPageIndex, i.LastPageIndex, i.OnPage) : n(i.PagingControl).hide()
+},
+i.OnPage = function(n)
+{
+i.LoadOverlay(),
+i.CurrentPageIndex = n.data.pageIndex,
+i.GetPagedData()
+},
+i.LoadOverlay = function()
+{
+var t=n(document.createElement("div")),
+r=n(i.wrapper).get(0).clientWidth,
+u=n(i.wrapper).get(0).clientHeight,
+f;
+t.attr("id", "lightOverlay").addClass("lightOverlay").css({
+width: r, height: u
+}),
+f = i.wrapper.find("#ngUsersFollowingMeTableDiv"),
+n(i.LoadingDiv).addClass("fmLoadingDiv").css({
+left: (r - 100) / 2, top: (u - 20) / 2
+}).show(),
+f.prepend(t)
+},
+i.HideOverlay = function()
+{
+var t=i.wrapper.find("#lightOverlay");
+n(t).remove(),
+n(i.LoadingDiv).removeClass("fmLoadingDiv").css({
+left: "", top: ""
+}).hide()
+},
+i.LoadData = function(t, r)
+{
+var f,
+e,
+o,
+u;
+i.wrapper && (f = n(i.wrapper), f.find("div.row").remove(), e = f.find(".NG_UsersFollowingMeTable"), o = 0, n(t.Followers).each(function(t, r)
+{
+var u=n("<div>").attr("class", "row"),
+f;
+u.attr("key", r[i.RowKey]),
+u.append(n("<span>").attr("class", "ngFollowProfilePic").append(n("<a>").attr("href", r.Uri).append(n("<img>").attr("src", r.PictureUrl)))),
+f = n("<span>").attr("class", "ngPresenceSpan").attr({email: r.WorkEmail}),
+u.append(f),
+setTimeout(function()
+{
+NG.SetupPresence(u)
+}, 100),
+window.ngMiniProfileEnabled ? u.append(n("<a>").attr("href", r.Uri).attr({authorId: r.UserId}).addClass("ngColleagueLink").text(r.Name).miniProfile()) : u.append(n("<span>").text(r.Name)),
+o++,
+e.append(u)
+}), u = f.find(".ngNoSearchResults"), u && r != "" && t.NumberOfFollowers == 0 ? u.html(String.format(ngText.SearchNoResults, r)) : u && u.empty(), i.HideOverlay())
+}
+},
+InitUsersFollowingMeTableControl = function()
+{
+n.each(n(".FM_Container"), function()
+{
+var t=n(this).parent().parent().prop("id");
+usersFollowingMeTableControl = new UsersFollowingMeTableControl(t),
+usersFollowingMeTableControl.RenderUsersFollowingMeTableControl()
+})
+},
+window.SubmitEnter = function(n, t, i)
+{
+var r;
+if (window.event)
+r = window.event.keyCode;
+else if (t)
+r = t.which;
+else
+return !0;
+return r == 13 ? (i(), !1) : !0
+},
+n(document).ready(function()
+{
+ExecuteOrDelayUntilScriptLoaded(InitUsersFollowingMeTableControl, "SP.js")
+})
+})();

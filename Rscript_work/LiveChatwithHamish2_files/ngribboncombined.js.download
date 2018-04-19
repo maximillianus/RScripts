@@ -1,0 +1,1600 @@
+﻿(function(n)
+{
+function u()
+{
+var t=f(this);
+return isNaN(t.datetime) || n(this).text(r(t.datetime)), this
+}
+function f(t)
+{
+var r,
+u;
+if (t = n(t), !t.data("timeago"))
+if (t.data("timeago", {datetime: i.datetime(t)}), r = n.trim(t.text()), r.length > 0)
+t.attr("title", r);
+else
+try
+{
+t.attr("title", t.data("timeago").datetime.localeFormat(""))
+}
+catch(f)
+{
+u = t.data("timeago").datetime,
+t.attr("title", u.toLocaleDateString() + " " + u.toLocaleTimeString())
+}
+return t.data("timeago")
+}
+function r(n)
+{
+return i.inWords(e(n))
+}
+function e(n)
+{
+return (new Date).getTime() - n.getTime()
+}
+function t(t, i)
+{
+var r=n.isFunction(t) ? t(i) : t;
+return r.replace(/%d/i, i)
+}
+n.timeago = function(t)
+{
+return t instanceof Date ? r(t) : typeof t == "string" ? r(n.timeago.parse(t)) : r(n.timeago.datetime(t))
+};
+var i=n.timeago;
+window.ngText = window.ngText || {},
+n.extend(n.timeago, {
+settings: {
+refreshMillis: 6e4, allowFuture: !1, strings: {
+prefixAgo: null, prefixFromNow: null, suffixAgo: ngText.suffixAgo, suffixFromNow: ngText.suffixFromNow, ago: null, fromNow: null, seconds: ngText.timeAgoSeconds, minute: ngText.timeAgoMinute, minutes: ngText.timeAgoMinutes, hour: ngText.timeAgoHour, hours: ngText.timeAgoHours, day: ngText.timeAgoDay, days: ngText.timeAgoDays, month: ngText.timeAgoMonth, months: ngText.timeAgoMonths, year: ngText.timeAgoYear, years: ngText.timeAgoYears
+}
+}, inWords: function(i)
+{
+var r=this.settings.strings,
+s=r.prefixAgo,
+c=r.suffixAgo || r.ago;
+this.settings.allowFuture && (i < 0 && (s = r.prefixFromNow, c = r.suffixFromNow || r.fromNow), i = Math.abs(i));
+var f=i / 1e3,
+e=f / 60,
+o=e / 60,
+u=o / 24,
+h=u / 365,
+l=f < 45 && t(r.seconds, Math.round(f)) || f < 90 && t(r.minute, 1) || e < 45 && t(r.minutes, Math.round(e)) || e < 90 && t(r.hour, 1) || o < 24 && t(r.hours, Math.round(o)) || o < 48 && t(r.day, 1) || u < 30 && t(r.days, Math.floor(u)) || u < 60 && t(r.month, 1) || u < 365 && t(r.months, Math.floor(u / 30)) || h < 2 && t(r.year, 1) || t(r.years, Math.floor(h));
+return n.trim([s, l].join(" "))
+}, parse: function(t)
+{
+var i=n.trim(t);
+return i = i.replace(/-/, "/").replace(/-/, "/"), i = i.replace(/T/, " ").replace(/Z/, " UTC"), i = i.replace(/([\+-]\d\d)\:?(\d\d)/, " $1$2"), new Date(i)
+}, datetime: function(t)
+{
+var r=n(t).get(0).tagName.toLowerCase() == "time",
+u=r ? n(t).attr("datetime") : n(t).attr("title");
+return i.parse(u)
+}
+}),
+n.fn.timeago = function()
+{
+var n=this,
+t;
+return n.each(u), t = i.settings, t.refreshMillis > 0 && setInterval(function()
+{
+n.each(u)
+}, t.refreshMillis), n
+},
+document.createElement("abbr"),
+document.createElement("time")
+})(jQuery142);
+/*!
+	Autosize v1.18.0 - 2013-10-20
+	Automatically adjust textarea height based on user input.
+	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
+	license: http://www.opensource.org/licenses/mit-license.php
+ *
+ * This code has been changed by NewsGator to explicitly reference the jQuery142 variable instead of vanilla jQuery
+ * And has been essentially rewritten for performance reasons
+ */
+(function(n)
+{
+typeof define == "function" && define.amd ? define(["jquery"], n) : n(window.jQuery142 || window.jQuery || window.$)
+})(function(n)
+{
+var u={
+className: "autosizejs", append: "", callback: !1, resizeDelay: 10
+},
+r=["fontFamily", "fontSize", "fontWeight", "fontStyle", "letterSpacing", "textTransform", "wordSpacing", "textIndent"],
+i,
+t=n('<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>').data("autosize", !0)[0];
+t.style.lineHeight = "99px",
+n(t).css("lineHeight") === "99px" && r.push("lineHeight"),
+t.style.lineHeight = "",
+n.fn.autosize = function(f)
+{
+return this.length ? (f = n.extend({}, u, f || {}), t.parentNode !== document.body && n(document.body).append(t), this.each(function()
+{
+function v()
+{
+var r,
+i;
+"getComputedStyle" in window ? (r = window.getComputedStyle(u, null), i = u.getBoundingClientRect().width, n.each(["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"], function(n, t)
+{
+i -= parseInt(r[t], 10)
+}), t.style.width = i + "px") : t.style.width = Math.max(e.width(), 0) + "px"
+}
+function b()
+{
+var o={},
+h,
+c;
+i = u,
+t.className = f.className,
+s = parseInt(e.css("maxHeight"), 10),
+n.each(r, function(n, t)
+{
+o[t] = e.css(t)
+}),
+n(t).css(o),
+v(),
+window.chrome && (h = u.style.width, u.style.width = "0px", c = u.offsetWidth, u.style.width = h)
+}
+function o()
+{
+var n,
+r;
+i !== u ? b() : v(),
+t.value = u.value + f.append,
+t.style.overflowY = u.style.overflowY,
+r = parseInt(u.style.height, 10),
+t.scrollTop = 0,
+t.scrollTop = 9e4,
+n = t.scrollTop,
+s && n > s ? (u.style.overflowY = "scroll", n = s) : (u.style.overflowY = "hidden", n < h && (n = h)),
+n += c,
+r !== n && (u.style.height = n + "px", p && f.callback.call(u, u))
+}
+function y()
+{
+clearTimeout(l),
+l = setTimeout(function()
+{
+var n=e.width();
+n !== a && (a = n, o())
+}, parseInt(f.resizeDelay, 10))
+}
+var u=this,
+e=n(u),
+s,
+h,
+c=0,
+p=n.isFunction(f.callback),
+w={
+height: u.style.height, overflow: u.style.overflow, overflowY: u.style.overflowY, wordWrap: u.style.wordWrap, resize: u.style.resize
+},
+l,
+a=e.width();
+if (!e.data("autosize"))
+{
+if (e.data("autosize", !0), (e.css("box-sizing") === "border-box" || e.css("-moz-box-sizing") === "border-box" || e.css("-webkit-box-sizing") === "border-box") && (c = e.outerHeight() - e.height()), h = Math.max(parseInt(e.css("minHeight"), 10) - c || 0, e.height()), e.css({
+overflow: "hidden", overflowY: "hidden", wordWrap: "break-word", resize: e.css("resize") === "none" || e.css("resize") === "vertical" ? "none" : "horizontal"
+}), "onpropertychange" in u)
+if ("oninput" in u)
+e.on("input.autosize keyup.autosize", o);
+else
+e.on("propertychange.autosize", function()
+{
+event.propertyName === "value" && o()
+});
+else
+e.on("input.autosize", o);
+if (f.resizeDelay !== !1)
+n(window).on("resize.autosize", y);
+e.on("autosize.resize", o);
+e.on("autosize.resizeIncludeStyle", function()
+{
+i = null,
+o()
+});
+e.on("autosize.destroy", function()
+{
+i = null,
+clearTimeout(l),
+n(window).off("resize", y),
+e.off("autosize").off(".autosize").css(w).removeData("autosize")
+});
+o()
+}
+})) : this
+}
+}),
+function(n)
+{
+n.fn.ngsummarize = function(t)
+{
+return t = n.extend({
+maxLength: 250, endString: "..."
+}, t || {}), splitNodes = function(i)
+{
+var u=0,
+r=[],
+f=t.maxLength,
+o=t.endString,
+e=function(t)
+{
+var h=0,
+c,
+i,
+s,
+l;
+if (!(u > f))
+for (h = 0; h < t.length; h++)
+if (i = t[h], i.nodeType === 1)
+c = i.cloneNode(!1),
+r[r.length - 1].appendChild(c),
+r.push(c),
+e(i.childNodes),
+r.pop();
+else if (i.nodeType === 3)
+{
+if (u + i.length < f)
+r[r.length - 1].appendChild(i.cloneNode(!1));
+else
+{
+s = n(i).text(),
+l = Math.min(f - u, s.substring(0, f - u).lastIndexOf(" ")),
+s = s.substring(0, l) + o,
+r[r.length - 1].appendChild(document.createTextNode(s));
+return
+}
+u += i.length
+}
+};
+return r.push(i.cloneNode(!1)), e(i.childNodes), n(r.pop().childNodes)
+}, this.each(function()
+{
+var t,
+r,
+u,
+i;
+try
+{
+if (t = n(this), t.closest(".ngSummarizeWrapper").length)
+{
+t.trigger("showSummary");
+return
+}
+r = n('<div class="ngSummarizeWrapper" style="display:inline;"/>'),
+t.wrap(r),
+u = splitNodes(this),
+i = t.clone(),
+t.hide(),
+i.empty().append(u).insertAfter(t).addClass("ngSummarize"),
+t.bind("showSummary", function()
+{
+t.hide(),
+i.show()
+}),
+t.bind("hideSummary", function()
+{
+t.show(),
+i.hide()
+})
+}
+catch(f) {}
+})
+}
+}(jQuery142),
+!function(n, t)
+{
+"use strict";
+var i=function(t, i)
+{
+this.$element = n(t),
+this.options = n.extend({}, n.fn.ngTermsAndConditions.defaults, i),
+this.$TCContainer = n('<div id="ngTCDialog"><div><a href="javascript:" id="ngTCClose">&times;<\/a><\/div><div id="ngTCContent"><\/div><div id="ngTCActions"><button type="button" id="ngTCAccept" class="ngButton">' + ngText.TermsAndConditionsAcceptButton + '<\/button><button type="button" id="ngTCDecline" class="ngButton">' + ngText.TermsAndConditionsDeclineButton + "<\/button><\/div><\/div>"),
+this.init()
+};
+i.prototype = {
+name: "NgTermsAndConditions", constructor: i, init: function()
+{
+var n=this;
+n.termsData = null,
+n.target = n.options.target || n.$element,
+n.doCheck()
+}, doCheck: function(i)
+{
+var r=this;
+n.when(r.checkTCAcceptance(i)).done(function(i)
+{
+if (i === !0)
+r.closeDialog(),
+n("body").find(".ngAcceptTCLink").length > 1 ? t.location.reload() : (r.target.find(".ngAcceptTCLink").remove(), r.options.acceptCallback());
+else if (!r.target.find(".ngAcceptTCLink").length)
+{
+var u=n('<a href="javascript:;" class="ngAcceptTCLink ' + (r.options.linkClass ? r.options.linkClass : "") + '">' + ngText.TermsAndConditionsLink + "<\/a>");
+u.on("click", function()
+{
+r.getTCText(r)
+});
+r.target.append(u),
+r.options.linkAddedCallback()
+}
+})
+}, checkTCAcceptance: function(t)
+{
+var i=this,
+r=i.options.baseurl + "/_vti_bin/ng/client.svc/TC/Accepted/";
+return r += t ? "?acceptTermsId=" + t + "&accept=" + i.options.ajaxDataType : "?accept=" + i.options.ajaxDataType, n.ajax({
+url: r, dataType: i.options.ajaxDataType, contentType: "application/json; charset=UTF-8"
+})
+}, getTCText: function(t)
+{
+var t=this;
+if (!n("body").find("#ngTCDialog").length)
+{
+if (t.TermsData)
+{
+t.showDialog();
+return
+}
+n.ajax({
+url: t.options.baseurl + "/_vti_bin/ng/client.svc/TC/?accept=" + t.options.ajaxDataType, dataType: t.options.ajaxDataType, contentType: "application/json; charset=UTF-8", cache: !0, success: function(n)
+{
+t.termsData = n,
+t.showDialog()
+}, error: function(){}
+})
+}
+}, showDialog: function()
+{
+var t=this,
+i=t.$TCContainer.find("#ngTCContent").html(t.termsData.TermsHtml);
+t.$TCContainer.find("#ngTCAccept").on("click", function()
+{
+t.doCheck(t.termsData.TermsId)
+});
+t.$TCContainer.find("#ngTCDecline, #ngTCClose").on("click", function()
+{
+t.closeDialog()
+});
+t.$TCContainer.show().appendTo(n("body"))
+}, closeDialog: function()
+{
+this.$TCContainer.remove()
+}
+},
+n.fn.ngTermsAndConditions = function(t)
+{
+return this.each(function()
+{
+var r=n(this),
+u=r.data("ngtac");
+u || r.data("ngtac", u = new i(this, t))
+})
+},
+n.fn.ngTermsAndConditions.defaults = {
+target: null, linkClass: null, acceptCallback: n.noop, linkAddedCallback: n.noop, ajaxDataType: "json", baseurl: t.spWebUrl
+},
+n.fn.ngTermsAndConditions.Constructor = i
+}(window.jQuery142, this, this.document),
+!function(n, t, i)
+{
+"use strict";
+function e(t)
+{
+var i=new Date(parseInt(t.substr(6)));
+return n.toISOString(i) / i.toISOString()
+}
+function u(n, t)
+{
+return t = t.split(":"), n.replace(/(^|\s)((([^:\/?#\s]+):)?\/\/)?(([A-Za-z0-9-]+\.)+[A-Za-z0-9-]+)(:\d+)?([^?#\s]*)(\?([^#\s]*))?(#(\S*))?/, function(n, r, u, f, e, o, s, h, c)
+{
+return (r ? r : "") + u + (o.indexOf(t[0]) > -1 ? t[0] + (t[1] !== i ? ":" + t[1] : "") : o) + c
+})
+}
+function o(n)
+{
+var t=n.split("/"),
+i=t[2].indexOf(":80") > -1 || t[2].indexOf(":443") > -1 ? t[2].split(":") : t[2].split();
+return i[0]
+}
+function s(n)
+{
+return n.replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, function(n)
+{
+return h(n)
+})
+}
+function h(n, t)
+{
+var t=typeof t != "undefined" ? t : 50,
+i=t / 2,
+n=n.replace("http://", "").replace("https://", ""),
+r,
+u;
+return n.length <= t ? n : (r = f(n, i, !1), u = f(n, i, !0), r + "..." + u)
+}
+function f(n, t, i)
+{
+for (var f=t * .8, i=typeof i != "undefined" ? i : !1, n=i ? n.split("").reverse().join("") : n, u="", r=0; r < t - 1; r++)
+if (u += n.charAt(r), r >= f)
+break;
+return i ? u.split("").reverse().join("") : u
+}
+var r=function(i, r)
+{
+if ((this.$element = n(i), this.options = n.extend({}, n.fn.ngRibbon.defaults, r), this.options.lookoutUrl !== n.noop && this.options.contextUrl !== n.noop) && (this.ua = NG && NG.navigator && NG.navigator.sayswho || {}, !NG || !NG.navigator || !NG.navigator.sayswho || !NG.navigator.sayswho.msie || NG.navigator.sayswho.version !== "6.0" && (NG.navigator.sayswho.version !== "7.0" || typeof NG.navigator.sayswho.trident != "undefined")))
+{
+n.support.cors = !0,
+this.options.safeHtmlHeader = "X-NG-SafeHTML";
+var u=t.location;
+this.options.lookoutUrl = this.options.lookoutUrl.toLowerCase(),
+this.options.hostName = o(this.options.lookoutUrl),
+this.options.inContextDomain = this.options.contextUrl.indexOf(u.hostname) > -1,
+this.options.isLookout = n("#ngDeckWrapper").length > 0,
+this.options.ajaxDataType = "jsonp",
+this.options.isExternal === !1 && (this.options.ajaxDataType = "json", this.options.inContextDomain = !0, this.options.contextUrl = ""),
+this.$tiles = n('<ul class="ngRibbonTiles">').css({width: this.options.tileContainerWidth}),
+this.$additionalLinks = n('<ul class="ngRibbonAdditionalLinks">'),
+this.$ribbonTemp,
+this.syncActive = !0,
+this.tileRequestInterval,
+this.$search = n('<div class="ngSearch" />'),
+this.options.tileRefreshInterval < 12e4 && (this.options.tileRefreshInterval = 12e4),
+this.$loading = n('<img alt="Working on it" src="' + this.options.contextUrl + '/_layouts/ng/images/modernuiloadingbar.gif" style="width: 220px; height: 20px;" />'),
+this.init()
+}
+};
+r.prototype = {
+constructor: r, dimension: function()
+{
+var n=this.$ribbon.hasClass("width");
+return n ? "width" : "height"
+}, init: function()
+{
+var i=this,
+r=this.options.autoInit ? i.load : null;
+typeof t.ngText == "undefined" || t.ngText && !t.ngText.hasOwnProperty("RibbonTitle") ? this.requestLocalText(r) : this.mixupLocalization(r),
+i.tileRequestInterval = setInterval(function()
+{
+
+}, i.options.tileRefreshInterval);
+n(NG.Events).on("ngDocumentActive", function(n, t)
+{
+t.isActive ? i.syncActive || (i.tileRequestInterval = setInterval(function()
+{
+
+}, i.options.tileRefreshInterval), i.syncActive = !0, i.requestTiles(i.updateTiles)) : (i.syncActive = !1, clearInterval(i.tileRequestInterval))
+});
+NG.InitActiveTimer()
+}, load: function(i)
+{
+var u,
+f,
+r=typeof i != "undefined" ? i : this,
+e=r.$element.find("." + n(r.options.ribbon).attr("class").replace(" ", ".")).first(),
+o=e.length === 1;
+if (r.$ribbon = o ? e : n(r.options.ribbon), f = r.dimension(), u = n.camelCase(["scroll", f].join("-")), r.$element.css({"padding-top": r.$ribbon[0][u]}), r.options.fixedPosition ? r.$ribbon.css({position: "fixed"}) : r.$ribbon.css({position: "absolute"}), o)
+{
+r.$ribbonTemp = r.$ribbon.css({"z-index": "1000"});
+r.$element.on("slidein", function()
+{
+r.ua.msie ? r.$ribbon.css({
+top: "0px", "padding-bottom": "3px"
+}) : r.$ribbon.css("top", "0px"),
+r.options.fixedPosition ? r.$ribbon.css({position: "fixed"}) : r.$ribbon.css({position: "absolute"}),
+r.$element.off("slidein"),
+r.$ribbonTemp.fadeOut(function()
+{
+n(this).remove()
+}),
+r.options.enableSearch && r.$search.ngsearch({
+contextUrl: r.options.contextUrl, defaultValue: ngText.Search.toLowerCase() + "..."
+})
+});
+r.$ribbon = n(r.options.ribbon),
+r.$ribbon.css({
+position: "absolute", top: "-9999px", "z-index": "999"
+}).empty(),
+r.$element.append(r.$ribbon)
+}
+else
+{
+r.$ribbon.appendTo(r.$element).css({top: "-9999px"});
+r.$element.on("slidein", function()
+{
+r.$ribbon.hide().css({
+top: "0px", "z-index": "999"
+}).slideDown("400", function()
+{
+r.$ribbon.css({overflow: "visible"})
+}),
+r.$element.animate({"padding-top": r.$ribbon[0][u] + (r.options.isExternal ? 4 : 0)}).off("slidein"),
+r.options.enableSearch && r.$search.ngsearch({
+contextUrl: r.options.contextUrl, defaultValue: ngText.Search.toLowerCase() + "..."
+})
+})
+}
+r.$ribbon.css({
+"font-family": r.options.titleFontFamily, "font-size": r.options.baseFontSize, "line-height": "1", "background-color": r.options.backgroundColor, color: r.options.fontColor
+}),
+r.$ribbon.ngTermsAndConditions({
+acceptCallback: function()
+{
+r.render(r)
+}, linkAddedCallback: function()
+{
+r.$element.trigger("slidein")
+}, linkClass: "ngribbon-loading", ajaxDataType: r.options.ajaxDataType, baseurl: r.options.contextUrl
+}),
+n(t).trigger("resize")
+}, render: function(t)
+{
+var i=typeof t != "undefined" ? t : this;
+i.$title = i.options.isLookout ? n('<span title="' + i.options.titleTooltip + '" class="ngribbon-title">' + i.options.title + "<\/span>") : n('<a href="' + i.options.lookoutUrl + '" target="' + (i.options.inContextDomain ? "_self" : "_blank") + '" title="' + i.options.titleTooltip + '" class="ngribbon-title">' + i.options.title + "<\/a>"),
+i.$title.css({
+"font-size": i.options.titleFontSize, color: i.options.fontColor
+}),
+i.$title.appendTo(i.$ribbon),
+i.options.enablePost && i.initPostControl(),
+i.$tiles.appendTo(i.$ribbon),
+i.requestTiles(i.initTiles),
+i.renderAdditionalLinks(),
+i.options.enableSearch && i.$search.appendTo(i.$ribbon),
+i.bindEvents()
+}, bindEvents: function()
+{
+var t=this;
+t.$ribbon.on("click", '[rel="popover"]', function(i)
+{
+var e=n(this),
+f,
+r;
+if (i.stopPropagation(), e.hasClass("ngPreventHide") || n("body").trigger("ngOverflowHide"), f = n(this).attr("id"), r = n(this).data("popover"), f.indexOf("ngRibbonTile") > -1)
+{
+var o=n(this).attr("id").replace("ngRibbonTile-", ""),
+s=n(this).attr("title"),
+h=n(this).attr("data-ngcustomendpoint"),
+u=n(".ngRibbonTileCount", n(this)),
+c=parseInt(u.text());
+t.renderTile(o, s, h, n(".popover-content p", r.tip()), c),
+u.length > 0 && u.html("0").hide()
+}
+else
+t.options.enablePost && n("iframe", t.$postControliFrame).clone().appendTo(n(".popover-content p", r.tip()));
+if (r.tip().hasClass("in"))
+{
+t.visiblePopover && n(t.visiblePopover.tip()).off("click") && t.visiblePopover.hide(),
+t.visiblePopover = r;
+n(".close-popover", t.visiblePopover.tip()).off("click").on("click", function()
+{
+t.visiblePopover && t.visiblePopover.hide(),
+t.visiblePopover = ""
+});
+n("body").one("click", function()
+{
+t.visiblePopover && t.visiblePopover.hide(),
+t.visiblePopover = ""
+});
+n(t.visiblePopover.tip()).on("click", function(n)
+{
+n.stopPropagation()
+})
+}
+else
+t.visiblePopover = ""
+});
+n("body").on("click", function()
+{
+n("body").trigger("ngOverflowHide")
+})
+}, mixupLocalization: function(t)
+{
+var r=this,
+i;
+(this.options.title = this.options.title === n.noop ? ngText.RibbonTitle : this.options.title, this.options.postTooltip = this.options.postTooltip === n.noop ? ngText.RibbonPostTooltip : this.options.postTooltip, this.options.titleTooltip = this.options.titleTooltip === n.noop ? ngText.RibbonTitleTooltip : this.options.titleTooltip, this.options.title !== n.noop && this.options.postTooltip !== n.noop && this.options.titleTooltip !== n.noop) && (this.options.localOverrides !== n.noop && (i = n("html").attr("lang"), i && r.options.localOverrides[i] && n.each(r.options.localOverrides[i], function(n, t)
+{
+r.options[n] = t
+})), this.options.titleTooltip = String.format(this.options.titleTooltip, this.options.title), t && t(this))
+}, requestLocalText: function(i)
+{
+var r,
+u=this,
+f;
+r = this.options.contextUrl + "/_vti_bin/ng/client.svc/localize/webui/?accept=" + u.options.ajaxDataType,
+f = n.ajax({
+url: r, dataType: this.options.ajaxDataType, contentType: "application/json; charset=UTF-8", success: function(r)
+{
+var f=n.parseJSON(r.data);
+t.ngText ? t.ngText = f : n("<script/>").append("window.ngText = " + f).appendTo(n("head")),
+n.timeago.settings.strings = {
+prefixAgo: null, prefixFromNow: null, suffixAgo: ngText.suffixAgo, suffixFromNow: ngText.suffixFromNow, ago: null, fromNow: null, seconds: ngText.timeAgoSeconds, minute: ngText.timeAgoMinute, minutes: ngText.timeAgoMinutes, hour: ngText.timeAgoHour, hours: ngText.timeAgoHours, day: ngText.timeAgoDay, days: ngText.timeAgoDays, month: ngText.timeAgoMonth, months: ngText.timeAgoMonths, year: ngText.timeAgoYear, years: ngText.timeAgoYears
+},
+u.mixupLocalization(i)
+}, error: function(){}
+})
+}, refreshOverflowCount: function()
+{
+var i=n("#ngRibbonTileOverflowWrapper"),
+r=n(".ngOverflowHandle .ngRibbonTileCount", i),
+u=i.find(".ngMenuOverflow li span"),
+t=0;
+n.each(u, function(i, r)
+{
+t += parseInt(n(r).text())
+}),
+r.html(t),
+t === 0 && r.hide()
+}, updateTiles: function(t, i, r)
+{
+var u=t,
+f=u.$tiles,
+h,
+a=f.innerHeight(),
+v,
+y=0,
+b,
+e,
+s,
+o,
+c,
+p,
+w,
+l,
+k;
+if (n("li", f).remove(), f.css("width", u.options.tileContainerWidth), n.each(i, function(t, i)
+{
+var r=n('<li id="ngRibbonTile-' + i.Id + '" class="ng-w16 ngTileIcon16px ' + i.IconClass + '" data-ngcustomendpoint="' + i.ClientUrl + '" title="' + i.Title + '" rel="popover" />');
+n('<span class="ngRibbonTileCount' + (i.DelayValueLoad ? " delay-" + i.Id : "") + '">' + (i.DelayValueLoad ? "" : i.Value) + "<\/span>").appendTo(r),
+r.data("tile", i),
+i.Value === "0" && n(".ngRibbonTileCount", r).hide(),
+r.appendTo(f)
+}), h = f.children("li"), v = h.filter(function()
+{
+var t=this.offsetTop + n(this).height() <= a;
+return t && (y += n(this).outerWidth(!0)), t
+}), u.requestExchangeTileData(i, t), v.length < h.length)
+{
+if (l = 0, f.css({width: y}), f.parent().attr("id") === "ngRibbonTilesWrapper" ? (e = n("#ngRibbonTileOverflowWrapper", u.$ribbon), s = n(".ngMenuOverflow", e)) : (f.wrap('<div id="ngRibbonTilesWrapper"/>'), e = n('<div id="ngRibbonTileOverflowWrapper" class="ngOverflowWrapper"><div class="ngOverflowHandle">&#8943;<span class="ngRibbonTileCount"><\/span><\/div><div class="ngMenuOverflow"><ul><\/ul><\/div>'), e.insertAfter(u.$tiles), s = n(".ngMenuOverflow", e), s.css({
+"font-family": u.options.titleFontFamily, "background-color": u.options.backgroundColor, color: u.options.fontColor
+})), o = n("ul", s), c = n(".ngOverflowHandle", e), p = n(".ngRibbonTileCount", c), b = f.parent(), b.css({width: f.outerWidth(!0) + 19 + (u.ua.mozilla ? 4 : 0)}), o.children("li").remove(), h.filter(function()
+{
+return this.offsetTop + n(this).height() > a && (l += parseInt(n(".ngRibbonTileCount", this).text())), this.offsetTop + n(this).height() > a
+}).clone(!0).addClass("ngPreventHide").prependTo(o[0]), o.children("li").length !== 0 ? c.removeClass("disabled") : o.fadeOut(500), l > 0)
+{
+p.text(l).show();
+e.off("refreshOverflowCount").on("refreshOverflowCount", function()
+{
+u.refreshOverflowCount()
+})
+}
+else
+p.text("").hide();
+w = n("li", o),
+k = w.length * 32,
+s.css({width: k});
+c.off("click").on("click", function(t)
+{
+var r=n(this),
+i;
+u.$ribbon.trigger("click"),
+r.hasClass("disabled") === !0 && t.stopPropagation(),
+i = r.next(".ngMenuOverflow"),
+i.fadeIn(500),
+i.offset().left < 10 && i.css("right", parseInt(i.css("right")) + i.offset().left - 10 + "px");
+n("body").trigger("ngOverflowHide").one("ngOverflowHide", function()
+{
+i.fadeOut(500)
+});
+t.stopPropagation()
+});
+w.popover({
+placement: function(t, i)
+{
+var f=n(i).offset(),
+e=n(document).outerHeight(),
+u=n(document).outerWidth(),
+r=u * .96;
+return n(t).width(r < 700 ? r : 700), "bottomstretch"
+}, template: '<div class="popover ngRibbon"><div class="arrow"><\/div><a class="close-popover">&#215;<\/a><div class="popover-inner"><h3 class="popover-title"><\/h3><div class="popover-content"><p><\/p><\/div><\/div><\/div>', animation: !1
+})
+}
+else
+f.css({width: y});
+v.popover({
+placement: function(t, i)
+{
+var f=n(i).offset(),
+e=n(document).outerHeight(),
+u=n(document).outerWidth(),
+r=u * .96;
+return n(t).width(r < 700 ? r : 700), "bottomstretch"
+}, template: '<div class="popover ngRibbon"><div class="arrow"><\/div><a class="close-popover">&#215;<\/a><div class="popover-inner"><h3 class="popover-title"><\/h3><div class="popover-content"><p><\/p><\/div><\/div><\/div>', animation: !1
+}),
+r && r()
+}, initTiles: function(n, t)
+{
+var i=n;
+i.updateTiles(i, t, i.options.autoInit ? function()
+{
+i.$element.trigger("slidein")
+} : null)
+}, initPostControl: function(i)
+{
+var r=typeof i != "undefined" ? i : this;
+r.$postControlBtn = n('<a href="#" title="' + r.options.postTooltip + '" id="ngRibbonPostControlBtn" class="ngRibbonPostControlBtn ng-w16" rel="popover" />'),
+r.$postControlBtn.popover({
+title: "", placement: function(t, i)
+{
+var f=n(i).offset(),
+e=n(document).outerHeight(),
+u=n(document).outerWidth(),
+r=u * .96;
+return n(t).width(r < 700 ? r : 700), "bottomstretch"
+}, template: '<div class="popover ngRibbon"><div class="arrow"><\/div><a class="close-popover">&#215;<\/a><div class="popover-inner"><div class="popover-content popover-postcontrol"><p><\/p><\/div><\/div><\/div>', animation: !1
+}),
+r.$postControlBtn.css({top: "-9999px"}).appendTo(r.$ribbon),
+t.setTimeout(function()
+{
+r.$postControliFrame = n('<div id="ngPostControlPreload" style="display:none;"><iframe src="' + r.options.contextUrl + "/_layouts/ng/pages/postcontrol.aspx?isdlg=1&forcemetro=1&hexoverride=" + r.options.backgroundColor.replace("#", "") + (r.options.isExternal ? "&externalurl=" + encodeURIComponent(t.location) : "") + '" frameBorder=0 style="border:none; width:672px; height:520px; overflow:hidden;" seamless/><\/div>'),
+r.$postControliFrame.appendTo(r.$ribbon),
+r.$postControlBtn.animate({top: "0px"}, 400)
+}, r.options.enablePostDelay)
+}, initSettings: function(){}, requestTiles: function(t)
+{
+var u,
+r,
+i=this,
+f;
+i.syncActive && (u = this.options.contextUrl + "/_vti_bin/ng/client.svc/tiles/?accept=" + i.options.ajaxDataType, f = n.ajax({
+url: u, dataType: this.options.ajaxDataType, contentType: "application/json; charset=UTF-8", beforeSend: function(n)
+{
+n.setRequestHeader("Accept", "application/json")
+}, success: function(u)
+{
+var f=!1;
+r = n.grep(u, function(n)
+{
+return !f && n.IsCustom && (f = !0), n.TileType !== "NGNewUser" && n.TileType !== "NGRecommendations"
+}),
+f ? i.requestCustomTileData(r, i, t) : t && t(i, r)
+}, error: function(){}
+}))
+}, requestCustomTileData: function(t, i, r)
+{
+var e,
+u=i,
+f=0;
+n.each(t, function(i, o)
+{
+if (o.IsCustom && o.ClientUrl !== null)
+{
+f++,
+e = u.options.contextUrl + (o.ClientUrl.indexOf("/") === 0 ? "" : "/") + o.ClientUrl + "lookout/value/" + o.Id + "/?accept=" + u.options.ajaxDataType;
+var s=n.ajax({
+url: e, dataType: u.options.ajaxDataType, contentType: "application/json; charset=UTF-8", beforeSend: function(n)
+{
+n.setRequestHeader("Accept", "application/json")
+}, success: function(n)
+{
+t[i].Value = n
+}, error: function()
+{
+t[i].Value = 0
+}, complete: function()
+{
+f--,
+f === 0 && r && r(u, t)
+}
+})
+}
+})
+}, requestExchangeTileData: function(t, i)
+{
+var u,
+r=i;
+n.each(t, function(t, i)
+{
+var f,
+e;
+i.DelayValueLoad && (f = "_vti_bin/ng/client.svc/lookout/value/" + i.Id + "/?accept=" + r.options.ajaxDataType, u = r.options.contextUrl + "/" + f, e = n.ajax({
+url: u, dataType: r.options.ajaxDataType, contentType: "application/json; charset=UTF-8", beforeSend: function(n)
+{
+n.setRequestHeader("Accept", "application/json")
+}, success: function(t)
+{
+var u=n(".delay-" + i.Id, r.$tiles);
+u.text(t),
+t === "0" && u.hide()
+}, error: function(){}
+}))
+})
+}, renderTile: function(i, r, f, o, h)
+{
+var c=this,
+l='<div data-target="{7}" class="ngRibbonTileItem {8}"><table cellspacing="2px" cellpadding="2px" width="100%"><tbody>  <tr valign="top">   <td valign="top" align="center" class="ngActivityProfileIconHolder {10}">      <div class="ngActivityProfileIconHolder">          <img src="{2}" alt="{3}" onerror="" onload="" class="ngActivityProfileIcon" />      <\/div>    <\/td>    <td valign="top" align="left">      <h3 class="title">{3}<\/h3>      <span class="timeago" title="{5}"><\/span>      <span class="ngSummary">{4}{9}<\/span>      <span class="ngRibbonSubText">{6}<\/span>    <\/td>  <\/tr><\/tbody><\/table><\/div>',
+a='<div class="{0}">  <div class="ngHeaderIcon"><\/div>  <span class="" text="{1}">{1}<\/span><\/div>',
+v,
+y;
+this.currentFeedUrl = this.options.contextUrl + "/" + (f && f !== "null" ? f + "lookout/items/" : "_vti_bin/ng/client.svc/lookout/items/") + i + "/?maxCount=" + (h > c.options.tileItemMaxCount && h < c.options.tileItemMaxCountCeiling ? h : h > c.options.tileItemMaxCountCeiling ? c.options.tileItemMaxCountCeiling : c.options.tileItemMaxCount) + "&accept=" + c.options.ajaxDataType,
+v = n(o).offset(),
+n(".popover-title", o).html(r),
+y = this.$loading.clone().appendTo(o),
+this.getFeed(this.currentFeedUrl, function(i, r)
+{
+var f;
+if (o.empty(), r.length > 0)
+{
+n.each(r, function(t, r)
+{
+r.goToUrl = r.goToUrl.indexOf("/") === 0 ? i.options.contextUrl + r.gotToUrl : r.goToUrl,
+r.iconUrl = r.iconUrl && r.iconUrl.indexOf("/") === 0 ? i.options.contextUrl + r.iconUrl : r.iconUrl,
+f = n(String.format(l, "0", r.id, r.iconUrl ? u(r.iconUrl, i.options.hostName) : "", r.title, s(r.summary), e(r.updated), r.subText, r.goToUrl, (t % 2 ? "even" : t === 0 ? "odd first" : "odd") + (h > 0 ? " showAsNew" : ""), u(r.thumbnailUrl, i.options.hostName), r.iconUrl ? "" : "ngHide")),
+r.itemTag === "promoted" && f.find(".ngSummary").parent().append(String.format(a, "ngPromotedHeader", ngText.PromotedLabel)),
+o.append(f),
+h--
+});
+n("[data-target]", o).on("click", function(i)
+{
+i.preventDefault();
+var r=n(this).attr("data-target"),
+u=screen.width / 2 - 325,
+f=screen.height / 2 - 250,
+e=t.open(r + "&forceHeight=500", "ngSinglePostWindow", "status=1,location=no,resizable=yes,height=500,width=650,left=" + u + ",top=" + f);
+e.focus(),
+n(this).removeClass("showAsNew").css("background-color", "").find("table").css("background-color", "")
+});
+n("span.timeago", o).timeago()
+}
+else
+n("<h3>" + ngText.RibbonTileNoData + "<\/h3>").appendTo(o);
+o.height() + n(o).offset().top > n(t).height() && o.css({
+height: n(t).height() - n(o).offset().top - n(o).offsetParent().offset().top, "overflow-y": "scroll"
+}),
+n(".showAsNew", o).css("background-color", i.options.backgroundColor),
+n("#ngRibbonTileOverflowWrapper").trigger("refreshOverflowCount")
+})
+}, renderAdditionalLinks: function()
+{
+var s,
+t=this,
+f,
+e,
+i,
+l,
+o,
+u,
+y,
+c,
+p;
+try
+{
+if (s = n.parseJSON(JSON.stringify(t.options.additionalLinks)), s)
+{
+if (t.$additionalLinks.css({
+width: t.options.additionalLinksWidth, "font-size": t.options.additionalLinksFontSize, height: t.options.additionalLinksFontSize, "line-height": t.options.additionalLinksFontSize, "margin-top": t.options.additionalLinksMarginTopOffset
+}), n.each(s, function(i, r)
+{
+n('<li><a href="' + r.url + '" target="' + r.target + '" title="' + i + '">' + i + "<\/a><\/li>").appendTo(t.$additionalLinks)
+}), e = typeof t.options.additionalLinksDropdownTitle != "undefined" && t.options.additionalLinksDropdownTitle != null && t.options.additionalLinksDropdownTitle.length > 0, f = t.$additionalLinks.children("li"), f.length === 0)
+return;
+switch (t.options.additionalLinksPosition)
+{
+case 0:
+i = "ng-p0",
+t.$additionalLinks.addClass(i).insertBefore(t.$title);
+break;
+case 1:
+i = "ng-p1",
+t.$additionalLinks.addClass(i).insertBefore(t.$tiles);
+break;
+case 2:
+i = "ng-p2",
+t.$additionalLinks.addClass(i).insertAfter(this.$tiles);
+break;
+case 3:
+default:
+i = "ng-p3",
+t.$additionalLinks.addClass(i).appendTo(t.$ribbon)
+}
+if (l = f.filter(function()
+{
+return this.offsetTop + n(this).height() <= n(this).innerHeight()
+}).length < f.length, l || e)
+{
+t.$additionalLinks.wrap('<div id="ngRibbonAdditionalLinksWrapper" class="' + i + '" />'),
+o = t.$additionalLinks.parent(),
+n('<div id="ngRibbonAdditionalLinksOverflowWrapper" class="ngOverflowWrapper">' + (e ? '<div class="ngOverflowHandle ngAdditionalDropdownLink">' + t.options.additionalLinksDropdownTitle + "<\/div>" : '<div class="ngOverflowHandle">&#8943<\/div>') + '<div class="ngMenuOverflow"><ul><\/ul><\/div>').insertAfter(t.$additionalLinks),
+n(".ngMenuOverflow", o).css({
+"font-family": t.options.titleFontFamily, "background-color": t.options.backgroundColor, color: t.options.fontColor
+});
+n("#ngRibbonAdditionalLinksOverflowWrapper .ngOverflowHandle").on("click", function(i)
+{
+var u=n(this),
+r;
+t.$ribbon.trigger("click"),
+u.hasClass("disabled") === !0 && i.stopPropagation(),
+r = u.next(".ngMenuOverflow"),
+r.fadeIn(500);
+n("body").trigger("ngOverflowHide").one("ngOverflowHide", function()
+{
+r.fadeOut(500)
+});
+i.stopPropagation()
+});
+var h=n("#ngRibbonAdditionalLinksOverflowWrapper"),
+a=t.$additionalLinks,
+r=h.find(".ngMenuOverflow ul"),
+v=a.innerHeight(),
+w=h.find(".ngOverflowHandle").addClass("disabled");
+r.children("div").remove(),
+u = a.children("li"),
+y = u.first().position().top,
+t.options.additionalLinksDropdownTitle ? (u.appendTo(r[0]), t.$additionalLinks.hide()) : u.filter(function()
+{
+return this.offsetTop - y + n(this).height() > v
+}).clone(!0).prependTo(r[0]),
+r.children("li").length !== 0 ? w.removeClass("disabled") : r.fadeOut(500),
+c = 0,
+p = u.filter(function()
+{
+var t=!e && this.offsetTop + n(this).height() <= v;
+return t && (c += n(this).outerWidth(!0)), t
+}),
+n(".ngMenuOverflow", h).css({
+width: t.options.additionalLinksWidth, "font-size": t.options.additionalLinksFontSize
+}),
+p.parent().css({
+width: c + (t.ua.msie ? 5 : 0), top: t.options.additionalLinksTopOffset
+}),
+o.css({width: o.outerWidth(!0)})
+}
+else
+t.$additionalLinks.css({top: t.options.additionalLinksTopOffset})
+}
+}
+catch(b) {}
+}, getFeed: function(t, i)
+{
+var r=this,
+u=n.ajax({
+url: t, dataType: this.options.ajaxDataType, contentType: "application/json; charset=UTF-8", beforeSend: function(n)
+{
+n.setRequestHeader("Accept", "application/json"),
+n.setRequestHeader(r.options.safeHtmlHeader, "true")
+}, success: function(n)
+{
+n = r._parseFeed(n.Items ? n.Items : n),
+i && i(r, n)
+}, error: function(){}
+})
+}, _parseFeed: function(t)
+{
+var r=this,
+i=[];
+return t != null && n.each(t, function(t, r)
+{
+var u={
+id: r.Id, title: r.Title, updated: r.Updated, goToUrl: encodeURI(r.GoToUrl + (r.GoToUrl.toLowerCase().indexOf("isdlg") === -1 ? (r.GoToUrl.indexOf("?") === -1 ? "?" : "&") + "IsDlg=1" : "")), iconUrl: r.IconUrl, summary: "", subText: r.SubText, thumbnailUrl: r.ThumbnailUrl ? '<p><img alt="" src="' + r.ThumbnailUrl + '" /><\/p>' : "", itemTag: r.ItemTag
+};
+r.SummaryNodes && n.each(r.SummaryNodes, function(t, i)
+{
+switch (i.NodeType)
+{
+case 0:
+if (i.StyleAttribute !== null)
+switch (i.StyleAttribute)
+{
+case"code":
+i.Text = n("<div />").html(i.Text).text(),
+u.summary += i.Text.replace(/[ ]\s/g, "&nbsp;&nbsp;&nbsp;&nbsp;").replace(/^[\r\n]+|[\r\n]+$/g, "").replace(/(\n\s*?\n)\s*\n/, "").replace(/\n/g, "<br //>").replace(/ +(?= )/g, "");
+break;
+default:
+i.Text && (u.summary += '<span class="nga_' + i.StyleAttribute + '">' + i.Text + "<\/span>")
+}
+else
+u.summary += u.goToUrl.toLowerCase().indexOf("exchange") === -1 ? i.Text.replace(/^[\r\n]+|[\r\n]+$/g, "").replace(/(\n\s*?\n)\s*\n/, "$1").replace(/\n/g, "<br //>") : i.Text.replace(/^[\r\n]+|[\r\n]+$/g, "").replace(/(\n\s*?\n)\s*\n/, "").replace(/\n/g, "").replace(/ +(?= )/g, "").replace(/&nbsp;+(?=&nbsp;)/g, " ");
+break;
+case 1:
+u.summary += i.Text;
+break;
+case 2:
+u.summary += "<br />";
+break;
+case 3:
+u.summary += i.Text;
+break;
+default:
+u.summary += i.Text.replace("\n", "<br //>")
+}
+}),
+u.summary = n("<div />").html(u.summary).text(),
+i.push(u)
+}), i
+}
+},
+n.toISOString = function(n)
+{
+var t,
+i,
+e,
+r,
+u,
+f;
+return typeof n !== Date && (n = new Date(n)), t = n.getUTCMonth() + 1, t < 10 && (t = "0" + t), i = n.getUTCDate(), i < 10 && (i = "0" + i), e = n.getUTCFullYear(), r = n.getUTCHours(), r < 10 && (r = "0" + r), u = n.getUTCMinutes(), u < 10 && (u = "0" + u), f = n.getUTCSeconds(), f < 10 && (f = "0" + f), e + "-" + t + "-" + i + "T" + r + ":" + u + ":" + f + "Z"
+},
+n.fn.ngRibbon = function(t)
+{
+return this.each(function()
+{
+var u=n(this),
+i=u.data("ngRibbon"),
+f=typeof t == "object" && t;
+i || u.data("ngRibbon", i = new r(this, f)),
+typeof t == "string" && i[t]()
+})
+},
+n.fn.ngRibbon.defaults = {
+toggle: !0, ribbon: '<div class="ngLookout360 ngRibbon" id="ngLookout360"><\/div>', fixedPosition: !1, backgroundColor: "#666666", fontColor: "#ffffff", baseFontSize: "8pt", lookoutUrl: n.noop, currentSiteUrl: n.noop, contextUrl: n.noop, titleFontFamily: "'Segoe UI', Segoe, Tahoma, Helvetica, Arial, sans-serif", titleFontSize: "1.4em", title: n.noop, titleTooltip: n.noop, postTooltip: n.noop, tileContainerWidth: "200px", tileRefreshInterval: 6e4, enablePost: !0, enablePostDelay: 5e3, additionalLinks: {}, additionalLinksPosition: "3", additionalLinksWidth: "200px", additionalLinksFontSize: "1.4em", additionalLinksMarginTopOffset: "-.4em", additionalLinksTopOffset: ".3em", localOverrides: n.noop, tileItemMaxCount: 25, tileItemMaxCountCeiling: 50, revealIframeWidthClass: "w700", isExternal: !0, enableSearch: !1, autoInit: !0
+},
+n.fn.ngRibbon.Constructor = r
+}(window.jQuery142, window),
+!function(n)
+{
+n(function()
+{
+"use strict";
+n.support.transition = function()
+{
+var n=function()
+{
+var i=document.createElement("bootstrap"),
+t={
+WebkitTransition: "webkitTransitionEnd", MozTransition: "transitionend", OTransition: "oTransitionEnd otransitionend", transition: "transitionend"
+},
+n;
+for (n in t)
+if (i.style[n] !== undefined)
+return t[n]
+}();
+return n && {end: n}
+}()
+})
+}(window.jQuery142),
+!function(n)
+{
+"use strict";
+var t=function(n, t)
+{
+this.init("tooltip", n, t)
+};
+t.prototype = {
+constructor: t, init: function(t, i, r)
+{
+var u,
+f;
+if (this.type = t, this.$element = n(i), this.options = this.getOptions(r), this.enabled = !0, this.options.trigger == "click")
+this.$element.on("click." + this.type, this.options.selector, n.proxy(this.toggle, this));
+else if (this.options.trigger != "manual")
+{
+u = this.options.trigger == "hover" ? "mouseenter" : "focus",
+f = this.options.trigger == "hover" ? "mouseleave" : "blur";
+this.$element.on(u + "." + this.type, this.options.selector, n.proxy(this.enter, this));
+this.$element.on(f + "." + this.type, this.options.selector, n.proxy(this.leave, this))
+}
+this.options.selector ? this._options = n.extend({}, this.options, {
+trigger: "manual", selector: ""
+}) : this.fixTitle()
+}, getOptions: function(t)
+{
+return t = n.extend({}, n.fn[this.type].defaults, t, this.$element.data()), t.delay && typeof t.delay == "number" && (t.delay = {
+show: t.delay, hide: t.delay
+}), t
+}, enter: function(t)
+{
+var i=n(t.currentTarget)[this.type](this._options).data(this.type);
+if (!i.options.delay || !i.options.delay.show)
+return i.show();
+clearTimeout(this.timeout),
+i.hoverState = "in",
+this.timeout = setTimeout(function()
+{
+i.hoverState == "in" && i.show()
+}, i.options.delay.show)
+}, leave: function(t)
+{
+var i=n(t.currentTarget)[this.type](this._options).data(this.type);
+if (this.timeout && clearTimeout(this.timeout), !i.options.delay || !i.options.delay.hide)
+return i.hide();
+i.hoverState = "out",
+this.timeout = setTimeout(function()
+{
+i.hoverState == "out" && i.hide()
+}, i.options.delay.hide)
+}, show: function()
+{
+var i,
+o,
+t,
+r,
+s,
+e,
+u,
+h,
+f;
+if (this.hasContent() && this.enabled)
+{
+i = this.tip(),
+this.setContent(),
+this.options.animation && i.addClass("fade"),
+e = typeof this.options.placement == "function" ? this.options.placement.call(this, i[0], this.$element[0]) : this.options.placement,
+o = /in/.test(e),
+i.remove().css({
+top: 0, left: 0, display: "block"
+}).appendTo(o ? this.$element : document.body),
+t = this.getPosition(o),
+r = i[0].offsetWidth,
+s = i[0].offsetHeight;
+switch (o ? e.split(" ")[1] : e)
+{
+case"bottom":
+u = {
+top: t.top + t.height, left: t.left + t.width / 2 - r / 2
+};
+break;
+case"top":
+u = {
+top: t.top - s, left: t.left + t.width / 2 - r / 2
+};
+break;
+case"left":
+u = {
+top: t.top + t.height / 2 - s / 2, left: t.left - r
+};
+break;
+case"right":
+u = {
+top: t.top + t.height / 2 - s / 2, left: t.left + t.width
+};
+break;
+case"bottomstretch":
+h = this.$element.closest("ul, .ngRibbonPostControlBtn").offset(),
+f = r + h.left > n(document).outerWidth() ? n(document).outerWidth() * .98 - r : h.left,
+t.left + t.width - f == t.width && (f = f - t.width),
+u = {
+top: t.top + t.height, left: f
+},
+i.find(".arrow").css("left", t.left + t.width - f)
+}
+i.css(u).addClass(e).addClass("in")
+}
+}, setContent: function()
+{
+var n=this.tip(),
+t=this.getTitle();
+n.find(".tooltip-inner")[this.options.html ? "html" : "text"](t),
+n.removeClass("fade in top bottom left right bottomstretch")
+}, hide: function()
+{
+function i()
+{
+var i=setTimeout(function()
+{
+t.off(n.support.transition.end).remove()
+}, 500);
+t.one(n.support.transition.end, function()
+{
+clearTimeout(i),
+t.remove()
+})
+}
+var r=this,
+t=this.tip();
+return t.removeClass("in"), n.support.transition && this.$tip.hasClass("fade") ? i() : t.remove(), this
+}, fixTitle: function()
+{
+var n=this.$element;
+(n.attr("title") || typeof n.attr("data-originaltitle") != "string") && n.attr("data-originaltitle", n.attr("title") || "")
+}, hasContent: function()
+{
+return this.getTitle()
+}, getPosition: function(t)
+{
+return n.extend({}, t ? {
+top: 0, left: 0
+} : this.$element.offset(), {
+width: this.$element[0].offsetWidth, height: this.$element[0].offsetHeight
+})
+}, getTitle: function()
+{
+var t=this.$element,
+n=this.options;
+return t.attr("data-originaltitle") || (typeof n.title == "function" ? n.title.call(t[0]) : n.title)
+}, tip: function()
+{
+return this.$tip = this.$tip || n(this.options.template)
+}, validate: function()
+{
+this.$element[0].parentNode || (this.hide(), this.$element = null, this.options = null)
+}, enable: function()
+{
+this.enabled = !0
+}, disable: function()
+{
+this.enabled = !1
+}, toggleEnabled: function()
+{
+this.enabled = !this.enabled
+}, toggle: function()
+{
+this[this.tip().hasClass("in") ? "hide" : "show"]()
+}, destroy: function()
+{
+this.hide().$element.off("." + this.type).removeData(this.type)
+}
+},
+n.fn.tooltip = function(i)
+{
+return this.each(function()
+{
+var u=n(this),
+r=u.data("tooltip"),
+f=typeof i == "object" && i;
+r || u.data("tooltip", r = new t(this, f)),
+typeof i == "string" && r[i]()
+})
+},
+n.fn.tooltip.Constructor = t,
+n.fn.tooltip.defaults = {
+animation: !0, placement: "top", selector: !1, template: '<div class="tooltip"><div class="tooltip-arrow"><\/div><div class="tooltip-inner"><\/div><\/div>', trigger: "hover", title: "", delay: 0, html: !0
+}
+}(window.jQuery142),
+!function(n)
+{
+"use strict";
+var t=function(n, t)
+{
+this.init("popover", n, t)
+};
+t.prototype = n.extend({}, n.fn.tooltip.Constructor.prototype, {
+constructor: t, setContent: function()
+{
+var n=this.tip(),
+t=this.getTitle(),
+i=this.getContent();
+n.find(".popover-title")[this.options.html ? "html" : "text"](t),
+n.find(".popover-content > *")[this.options.html ? "html" : "text"](i),
+n.removeClass("fade top bottom left right bottomstretch in")
+}, hasContent: function()
+{
+return this.getTitle() || this.getContent()
+}, getContent: function()
+{
+var t=this.$element,
+i=this.options,
+r=n("span", t);
+return t.attr("data-content") || (typeof i.content == "function" ? i.content.call(t[0]) : i.content)
+}, tip: function()
+{
+return this.$tip || (this.$tip = n(this.options.template)), this.$tip
+}, destroy: function()
+{
+this.hide().$element.off("." + this.type).removeData(this.type)
+}
+}),
+n.fn.popover = function(i)
+{
+return this.each(function()
+{
+var u=n(this),
+r=u.data("popover"),
+f=typeof i == "object" && i;
+r || u.data("popover", r = new t(this, f)),
+typeof i == "string" && r[i]()
+})
+},
+n.fn.popover.Constructor = t,
+n.fn.popover.defaults = n.extend({}, n.fn.tooltip.defaults, {
+placement: "right", trigger: "click", content: "", template: '<div class="popover"><div class="arrow"><\/div><div class="popover-inner"><h3 class="popover-title"><\/h3><div class="popover-content"><p><\/p><\/div><\/div><\/div>'
+})
+}(window.jQuery142),
+function(n)
+{
+var t={
+init: function(t)
+{
+var i=n.extend({}, n.fn.wordSwap.defaults, t),
+r=n(this).data("options", i);
+return this.each(function()
+{
+i.target !== n.noop && n(this).attr({
+"swap-initial": i.initial, "swap-alt": i.alt, "swap-target": i.target
+})
+})
+}, swap: function(t)
+{
+var i=this,
+u=this.data("options"),
+f=n.extend({dialogPosition: "top"}, t || {}),
+r=n(i.attr("swap-target"));
+return i.attr("swapped") ? (i.removeAttr("swapped"), r.text(i.attr("swap-initial"))) : (i.attr("swapped", "true"), r.text(i.attr("swap-alt"))), r
+}, swaptoalt: function()
+{
+var t=this,
+r=this.data("options"),
+i=n(t.attr("swap-target"));
+return t.attr("swapped", "true"), i.text(t.attr("swap-alt")), i
+}, reset: function()
+{
+var t=this,
+r=this.data("options"),
+i=n(t.attr("swap-target"));
+return t.removeAttr("swapped"), i.text(t.attr("swap-initial")), i
+}
+};
+n.fn.wordSwap = function(i)
+{
+if (t[i])
+return t[i].apply(this, Array.prototype.slice.call(arguments, 1));
+if (typeof i != "object" && i)
+n.error("Method " + i + " does not exist on jQuery.wordSwap");
+else
+return t.init.apply(this, arguments)
+},
+n.fn.wordSwap.defaults = {
+alt: n.noop, target: n.noop, initial: n.noop
+}
+}(window.jQuery142, window),
+function(n)
+{
+"use strict";
+var t=!1;
+n(document).on("click", "a[data-reveal-id]", function(t)
+{
+t.preventDefault();
+var i=n(this).attr("data-reveal-id");
+n("#" + i).reveal(n(this).data())
+});
+n.fn.reveal = function(i)
+{
+var r=n(document),
+u={
+animation: "fadeAndPop", animationSpeed: 300, closeOnBackgroundClick: !0, dismissModalClass: "close-reveal-modal", open: n.noop, opened: n.noop, close: n.noop, closed: n.noop
+};
+return i = n.extend({}, u, i), this.not(".reveal-modal.open").each(function()
+{
+function a()
+{
+s = !1
+}
+function l()
+{
+s = !0
+}
+function v()
+{
+var i=n(".reveal-modal.open");
+i.length === 1 && (t = !0, i.trigger("reveal:close"))
+}
+function y()
+{
+s || (l(), v(), u.addClass("open"), i.animation === "fadeAndPop" && (e.open.top = r.scrollTop() - h, e.open.opacity = 0, u.css(e.open), f.fadeIn(i.animationSpeed / 2), u.delay(i.animationSpeed / 2).animate({
+top: r.scrollTop() + o + "px", opacity: 1
+}, i.animationSpeed, function()
+{
+u.trigger("reveal:opened")
+})), i.animation === "fade" && (e.open.top = r.scrollTop() + o, e.open.opacity = 0, u.css(e.open), f.fadeIn(i.animationSpeed / 2), u.delay(i.animationSpeed / 2).animate({opacity: 1}, i.animationSpeed, function()
+{
+u.trigger("reveal:opened")
+})), i.animation === "none" && (e.open.top = r.scrollTop() + o, e.open.opacity = 1, u.css(e.open), f.css({display: "block"}), u.trigger("reveal:opened")))
+}
+function p()
+{
+var t=u.find(".flex-video"),
+n=t.find("iframe");
+n.length > 0 && (n.attr("src", n.data("src")), t.fadeIn(100))
+}
+function w()
+{
+s || (l(), u.removeClass("open"), i.animation === "fadeAndPop" && (u.animate({
+top: r.scrollTop() - h + "px", opacity: 0
+}, i.animationSpeed / 2, function()
+{
+u.css(e.close)
+}), t ? u.trigger("reveal:closed") : f.delay(i.animationSpeed).fadeOut(i.animationSpeed, function()
+{
+u.trigger("reveal:closed")
+})), i.animation === "fade" && (u.animate({opacity: 0}, i.animationSpeed, function()
+{
+u.css(e.close)
+}), t ? u.trigger("reveal:closed") : f.delay(i.animationSpeed).fadeOut(i.animationSpeed, function()
+{
+u.trigger("reveal:closed")
+})), i.animation === "none" && (u.css(e.close), t || f.css({display: "none"}), u.trigger("reveal:closed")), t = !1)
+}
+function b()
+{
+u.unbind(".reveal"),
+f.unbind(".reveal"),
+c.unbind(".reveal"),
+n("body").unbind(".reveal")
+}
+function k()
+{
+var t=u.find(".flex-video"),
+n=t.find("iframe");
+n.length > 0 && (n.data("src", n.attr("src")), n.attr("src", ""), t.fadeOut(100))
+}
+var u=n(this),
+o=parseInt(u.css("top"), 10),
+h=u.height() + o,
+s=!1,
+f=n(".reveal-modal-bg"),
+e={
+open: {
+top: 0, opacity: 0, visibility: "visible", display: "block"
+}, close: {
+top: o, opacity: 1, visibility: "hidden", display: "none"
+}
+},
+c;
+f.length === 0 && (f = n("<div />", {"class": "reveal-modal-bg"}).insertAfter(u), f.fadeTo("fast", .8)),
+u.bind("reveal:open.reveal", y),
+u.bind("reveal:open.reveal", p),
+u.bind("reveal:close.reveal", w),
+u.bind("reveal:closed.reveal", k),
+u.bind("reveal:opened.reveal reveal:closed.reveal", a),
+u.bind("reveal:closed.reveal", b),
+u.bind("reveal:open.reveal", i.open),
+u.bind("reveal:opened.reveal", i.opened),
+u.bind("reveal:close.reveal", i.close),
+u.bind("reveal:closed.reveal", i.closed),
+u.trigger("reveal:open"),
+c = n("." + i.dismissModalClass).bind("click.reveal", function(n)
+{
+n.stopPropagation(),
+u.trigger("reveal:close")
+}),
+i.closeOnBackgroundClick && (f.css({cursor: "pointer"}), f.bind("click.reveal", function(n)
+{
+n.stopPropagation(),
+u.trigger("reveal:close")
+})),
+n("body").bind("keyup.reveal", function(n)
+{
+n.which === 27 && u.trigger("reveal:close")
+})
+})
+}
+}(jQuery142),
+!function(n, t)
+{
+"use strict";
+var i=function(t, i)
+{
+this.$element = n(t),
+this.options = i,
+this.resultsContainer = n(i.resultsContainer, this.$element.parent()),
+this.innerResults = null,
+this.init()
+};
+i.prototype = {
+constructor: i, init: function()
+{
+var r=this,
+i=r.$element,
+u,
+f;
+this.type = "ngsearch",
+u = function(n)
+{
+if (n == r.options.defaultValue)
+{
+new NG.Tooltip(i, ngText.BlankSearchTerm, 2500, "bottom");
+return
+}
+r.doSearch(n)
+},
+r.searchControl || (r.searchControl = new NG.SearchControl(i, {
+searchCallback: u, that: this
+})),
+this.resultsContainer.length === 0 && (this.resultsContainer = n('<div class="ngGlobalSearchResults ngSearchPopup" style="position:absolute;left:0;"><a href="javascript:;" class="ngCloseSearch">×<\/a><\/div>').appendTo(i).css({display: "none"}), f = (n(t).height() - i.offset().top) * (3 / 4), this.resultsContainer.css({
+top: i.outerHeight(!0) + "px", maxHeight: f + "px", overflow: "auto", width: i.width() + "px"
+}), n(".ngCloseSearch", this.resultsContainer).click(function()
+{
+n(".ngGlobalSearchResults", i).hide()
+})),
+this.innerResults = n("<div class='ngInnerGlobalSearchResults'/>").appendTo(this.resultsContainer),
+i.find("input:first").val(this.options.defaultValue).data("default", this.options.defaultValue).focus(function()
+{
+this.value == n(this).data("default") && (this.value = "")
+}).blur(function()
+{
+NG.StringIsNullOrEmpty(n.trim(this.value)) && (this.value = n(this).data("default"))
+}),
+NG.StringIsNullOrEmpty(this.options.searchTerm) || (i.find("input:first").val(this.options.searchTerm), u(this.options.searchTerm)),
+this.resultsContainer.appendTo(i),
+i.css({position: "relative"}),
+n.isPlainObject(this.options.customContainerCss) && i.css(this.options.customContainerCss)
+}, renderCategory: function(t, i)
+{
+var f=this,
+r=n('<div class="ngSearchHolder"/>'),
+u;
+if (!i)
+{
+if (!t.MoreLink)
+return;
+u = String.format("{0} ({1})", t.Name, t.Count),
+t.MoreLink && !this.options.searchType ? r.append(n(String.format('<div class="ngSearchHeader"><a href="{1}" target="_blank">{0}<\/a><\/div>', u, t.MoreLink))) : r.append(n(String.format('<div class="ngSearchHeader">{0}<\/div>', u)))
+}
+return t.Results.length === 0 ? n('<div class="ngSearchResult">' + ngText.NoResults + "<\/div>").appendTo(r) : n.each(t.Results, function(i, u)
+{
+var o=n('<div class="ngSearchResult"/>').appendTo(r),
+e;
+u.ImageUrl && (u.ImageUrl.indexOf("/") === 0 && f.options.contextUrl && (u.ImageUrl = f.options.contextUrl + u.ImageUrl), n(String.format('<div class="ngSearchImageWrapper"><img src="{0}" alt="" class="ngSearchResultIcon"/><\/div>', u.ImageUrl)).appendTo(o)),
+e = n('<div class="ngSearchResultContent"/>').appendTo(o),
+t.InternalName == "NGActivities" ? (n(String.format('<div class="ngSearchResultTitle">{0}<\/div>', u.Title)).appendTo(e), n(String.format('<a href="{1}" class="ngViewMore">{0}<\/a>', ngText.ViewVerb, u.Url)).click(function(n)
+{
+NG.ModalView(n)
+}).appendTo(e)) : (u.Title && (u.Url ? n(String.format('<a class="ngSearchResultTitle" href="{1}" target="_blank">{0}<\/a>', u.Title, u.Url)).appendTo(e) : n(String.format('<div class="ngSearchResultTitle">{0}<\/div>', u.Title)).appendTo(e)), u.Description && n(String.format('<div class="ngSearchResultDescription">{0}<\/div>', u.Description)).appendTo(e))
+}), r
+}, addFragment: function(i)
+{
+if (this.options.fullView ? ($ajaxLoaderBar.remove(), this.innerResults.get(0).appendChild(i)) : this.innerResults.empty().get(0).appendChild(i), n().ngsummarize && (n(".ngSearchResult div.ngSearchResultTitle", this.resultsContainer).ngsummarize({maxLength: this.options.summaryLength}), n(".ngSearchResult div.ngSearchResultDescription", this.resultsContainer).ngsummarize({maxLength: this.options.summaryLength})), t.ngMiniProfileEnabled && n().miniProfile)
+try
+{
+n(".ngSearchResult a", this.innerResults).miniProfile()
+}
+catch(r) {}
+}, doSearchByType: function(t, i, r)
+{
+var u=this,
+f=document.createDocumentFragment(),
+e=NG.StringIsNullOrEmpty(r);
+NG.LoadGlobalSearchByType(t, i, r, u.options.contextUrl).then(function(r)
+{
+var h=u.renderCategory(r, !e),
+s=r.PagingToken,
+o;
+f.appendChild(h.get(0)),
+s && (o = n(String.format('<a class="ngActivityMore" href="javascript:;">{0}<\/a>', ngText.paging_more)).click(function()
+{
+n(this).remove(),
+u.innerResults.append($ajaxLoaderBar),
+u.doSearchByType(t, i, s)
+}), o.wrap("<div class='ngMoreDiv'/>"), f.appendChild(o.parent().get(0))),
+u.addFragment(f)
+})
+}, doSearch: function(t)
+{
+var r=this,
+i;
+this.innerResults.empty().append($ajaxLoaderBar).parent().show(),
+i = document.createDocumentFragment(),
+this.options.searchType ? r.doSearchByType(t, this.options.searchType) : NG.LoadGlobalSearch(t, this.options.maxCount, r.options.contextUrl).then(function(t)
+{
+n.each(t.Categories, function(n, t)
+{
+var u=r.renderCategory(t);
+typeof u != "undefined" && i.appendChild(u.get(0))
+}),
+i.childNodes.length === 0 && i.appendChild(n('<div class="ngSearchHolder">' + ngText.NoResults + "<\/div>").get(0)),
+r.addFragment(i)
+})
+}
+},
+n.fn.ngsearch = function(t, r)
+{
+return typeof arguments[0] == "string" && (r = Array.prototype.slice.call(arguments), r.splice(0, 1)), this.each(function()
+{
+var f=n(this),
+u=f.data("ngsearch"),
+e=n.extend({}, n.fn.ngsearch.defaults, f.data(), typeof t == "object" && t);
+u || f.data("ngsearch", u = new i(this, e)),
+typeof t == "string" && (r ? u[t].apply(u, r) : u[t]())
+})
+},
+n.fn.ngsearch.defaults = {
+resultsContainer: ".ngGlobalSearchResults", contextUrl: null, searchTerm: null, maxCount: 3, searchType: null, summaryLength: 250, defaultValue: ngText && ngText.Search && ngText.Search.toLowerCase() + "...", customContainerCss: null, fullView: !1
+},
+n.fn.ngsearch.Constructor = i
+}(window.jQuery142, window);

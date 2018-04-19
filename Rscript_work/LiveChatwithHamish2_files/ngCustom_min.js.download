@@ -1,0 +1,71 @@
+(function () { if (typeof jQuery142 == "undefined") return; var a = jQuery142; a(document).ready(function () { if (window.externalHost != null) typeof NG !== "undefined" && a(NG.Events).bind("activityStreamRendered", function (c, f) { var e = a(f.element), d = e[0].control, b = d ? d.newsFeedControl : null; if (b && !b.CustomAjaxImplementation) { b.DoServiceRequest = function (l, e, m, b, g, j, h, i) { var k = this, f = ""; if (e && e.Targets) { f = e.Targets; e.Targets = "" } var d = new Sys.Net.WebRequest; if (!NG.StringIsNullOrEmpty(f)) d.get_headers()["x-ng-targets"] = f; d.set_url(m); d.set_httpVerb(l); d.get_headers()["Content-Type"] = "application/json; charset=utf-8"; d.set_body(JSON.stringify(e)); d.add_completed(function (e) { if (e == null) e = new Sys.Net.WebRequestExecutor; var d = e.get_statusCode(), f = e.get_statusText(); if (d >= 200 && d < 300 || d === 304 || d === 1223) { k.ReloadSingleActivity(g, j, h); i && i(f, d) } else try { switch (d) { case 404: case 410: b = ngText.EventNotFoundError; break; case 400: b = ngText.InvalidOperationError; new NG.Tooltip(g, b, 5e3, "bottom"); var m = function () { this.ReloadSingleActivity(a(c.currentTarget), j, h) }, l = Function.createDelegate(k, m); window.setTimeout(l, 2500); return; break; case 412: b = f; if (!b || b == "") b = errorThrown; break; case 500: if (errorThrown.indexOf("Cannot edit") > -1) b = ngText.EditItemError; else b = NG.GetDefaultErrorMessage(d); break; default: b = NG.GetDefaultErrorMessage(d) } new NG.Tooltip(g, b, 5e3, "bottom") } catch (o) { } }); d.invoke() }; b.Unlike = function (b) { var g = this, h = b.attr("metaId"), f = b.attr("eventId"), e = b.attr("authorId"); if (h < 0) meta = f; if (NG.StringIsNullOrEmpty(e)) e = 0; var i = a(".ngActivityEventDiv_" + b.attr("eventid") + " .ngSummary").text(), j = (b.attr("actionUrl") ? encodeURI(decodeURI(b.attr("actionUrl"))) : encodeURI(decodeURI(g.options.actionUrl))) + "Like/" + h + "/x/", d = new Sys.Net.WebRequest; d.set_url(j); d.set_httpVerb("POST"); d.get_headers()["Content-Type"] = "text/plain"; d.add_completed(function (d) { if (d == null) d = new Sys.Net.WebRequestExecutor; var h = d.get_statusCode(), k = d.get_statusText(); if (h >= 400 && h <= 500) new NG.Tooltip(c.target, ngText.RequestError, 5e3, "bottom"); else { a(NG.Events).trigger("unlike", [{ eventId: f, eventText: i}]); g.ReloadSingleActivity(b, f, e, b.attr("actionUrl") ? encodeURI(decodeURI(b.attr("actionUrl"))) : encodeURI(decodeURI(g.options.actionUrl))) } }); d.invoke() }; b.UnlikeComment = function (b) { var e = this, f = e.GetEventId(b), g = b.parents("div.ngActivityMetaDiv").first(), i = b.attr("metaId"), h = (b.attr("actionUrl") ? encodeURI(decodeURI(b.attr("actionUrl"))) : encodeURI(decodeURI(e.options.actionUrl))) + "Like/" + i + "/x/", d = new Sys.Net.WebRequest; d.set_url(h); d.set_httpVerb("POST"); d.get_headers()["Content-Type"] = "text/plain"; d.add_completed(function (d) { if (d == null) d = new Sys.Net.WebRequestExecutor; var h = d.get_statusCode(), j = d.get_statusText(); if (h >= 400 && h <= 500) new NG.Tooltip(c.target, ngText.RequestError, 5e3, "bottom"); else { a(NG.Events).trigger("unlike", [{ eventid: f, eventId: f, eventText: a(".ngSummary", g).text()}]); e.ReloadSingleActivity(b, f, null, b.attr("actionUrl") ? encodeURI(decodeURI(b.attr("actionUrl"))) : encodeURI(decodeURI(e.options.actionUrl))) } }); d.invoke() }; b.UnFollowUp = function (b) { var f = this, d = b.attr("eventId"), e = b.attr("authorId"); if (NG.StringIsNullOrEmpty(e)) e = 0; var g = (b.attr("actionUrl") ? encodeURI(decodeURI(b.attr("actionUrl"))) : encodeURI(decodeURI(f.options.actionUrl))) + "FollowUp/" + d + "/x/", c = new Sys.Net.WebRequest; c.set_url(g); c.set_httpVerb("POST"); c.get_headers()["Content-Type"] = "text/plain"; c.add_completed(function (c) { if (c == null) c = new Sys.Net.WebRequestExecutor; var h = c.get_statusCode(), i = c.get_statusText(); if (h >= 400 && h <= 500) { var g; switch (XMLHttpRequest.status) { case 404: case 410: g = ngText.EventNotFoundError; break; case 400: g = ngText.InvalidOperationError; break; default: g = i } new NG.Tooltip(b, g, 5e3, "bottom") } else { a(NG.Events).trigger("unFollowUp", [{ eventId: d, eventText: a("div.ngActivityEventDiv_" + d + " .ngSummary").text()}]); f.ReloadSingleActivity(b, d, e, b.attr("actionUrl") ? encodeURI(decodeURI(b.attr("actionUrl"))) : encodeURI(decodeURI(f.options.actionUrl))) } }); c.invoke() }; b.DeleteComment = function (b) { var f = this; if (!confirm(ngText.ConfirmDelete)) return; var k = b.attr("metaId"), h = b.attr("eventId"), d = b.attr("authorId"); if (NG.StringIsNullOrEmpty(d)) d = 0; var i = (b.attr("actionUrl") ? b.attr("actionUrl") : f.options.actionUrl) + "Comment/" + k + "/x/", g = a(b).parents(".ngActivityRow").last(), e = g.attr("remoteSourceId"); if (e && !NG.StringIsNullOrEmpty(e)) i = "/_vti_bin/ng/remote/activityfeed." + e + ".ashx/Comment/" + k + "/x/"; var j = a("<span class='ngLoading'></span>"); b.css("display", "none").after(j); var c = new Sys.Net.WebRequest; c.set_url(i); c.set_httpVerb("POST"); c.get_headers()["Content-Type"] = "text/plain"; c.add_completed(function (c) { if (c == null) c = new Sys.Net.WebRequestExecutor; var e = c.get_statusCode(), k = c.get_statusText(); if (e >= 400 && e <= 500) { j.remove(); b.css("display", ""); new NG.Tooltip(b, ngText.RequestError, 5e3, "bottom") } else { f.ReloadSingleActivity(b, h, d, b.attr("actionUrl") ? b.attr("actionUrl") : f.options.actionUrl); a(NG.Events).trigger("deleteComment", [{ eventId: h, eventText: a(".ngSummary", g).text()}]) } }); c.invoke() }; b.DeleteActivity = function (b) { var g = this, e = b.attr("eventId"), d = b.attr("authorId"); if (NG.StringIsNullOrEmpty(d)) d = 0; if (d > 0) if (!confirm(ngText.DeleteActivityConfirmation)) return; var h = b.parents("div.ngActivityRow").first(), f = a("<span class='ngLoading'></span>"); b.css("display", "none").after(f); var c = new Sys.Net.WebRequest; c.set_url(g.options.actionUrl + String.format("{0}/{1}/x/", d, e)); c.set_httpVerb("POST"); c.get_headers()["Content-Type"] = "application/json; charset=utf-8"; c.add_completed(function (c) { if (c == null) c = new Sys.Net.WebRequestExecutor; var d = c.get_statusCode(), j = c.get_statusText(); if (d >= 400 && d <= 500) { f.remove(); b.css("display", ""); new NG.Tooltip(b, ngText.RequestError, 5e3, "bottom") } else { h.remove(); g.RemoveAllDeletedEventsForEvent(e); a(NG.Events).trigger("activityDelete") } }); c.invoke() }; b.CustomAjaxImplementation = true } }) }) })()
+OrgBrowserHack = function () {
+    if (! jQuery142) {
+        setTimeout(OrgBrowserHack, 100);
+        return;
+    }
+jQuery142('#ReportingHierarchy')
+        .siblings('table')
+        .find('a')
+        .html('Organisation Browser');
+
+}
+OrgBrowserHack();
+NG.useLegacyUpload = true;
+var currentSetting = "NOTSTARTED";
+FixPosition = function (object) {
+    if (jQuery142('#ngSettingsNav li.active').text() == currentSetting) {
+        return false;
+    }
+    var doNothing = false;
+    /*if (currentSetting == "" && jQuery142('#ngSettingsNav li.active').text() != "") {
+        //first round, do nothing
+        doNothing = true;
+    
+    }*/
+    currentSetting = jQuery142('#ngSettingsNav li.active').text();
+    //alert(currentSetting);
+    setTimeout(FixPositionCallback, 100);
+}
+FixPositionCallback = function () {
+    console.log(currentSetting);
+   /* if (currentSetting == jQuery142('#ngSettingsNav li.active').text()) {
+        console.log("waiting");
+        setTimeout(FixPositionCallback, 100);
+        return;
+    }*/
+    console.log("FixPositionCallback1");
+    setTimeout(FixPositionCallback1, 10);
+  //  jQuery142('[aria-describedby="ngSettings"]').css("position", "relative");
+  //  jQuery142('[aria-describedby="ngSettings"]').top(jQuery142('[aria-describedby="ngSettings"]').top());
+  //  jQuery142('[aria-describedby="ngSettings"]').top(jQuery142('[aria-describedby="ngSettings"]').top());
+   
+    // style("absolute");
+
+    //jQuery142('[aria-describedby="ngSettings"]').css("position", "relative");
+
+}
+FixPositionCallback1 = function () {
+    jQuery142('[aria-describedby="ngSettings"]').css("position", "relative");
+    setTimeout(FixPositionCallback2, 10);
+}
+FixPositionCallback2= function() {
+    jQuery142('[aria-describedby="ngSettings"]').css("position", "absolute");
+}
+FixSettingsNav = function () {
+    if (!jQuery142) {
+        setTimeout(FixSettingsNav, 100);
+        return;
+    }
+    jQuery142('#ngSettingsNav li').live('click',FixPosition);
+
+
+}
+function isIE() {
+    var myNav = navigator.userAgent.toLowerCase();
+    return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+}
+
+if (isIE() == 8) {
+    FixSettingsNav();
+}

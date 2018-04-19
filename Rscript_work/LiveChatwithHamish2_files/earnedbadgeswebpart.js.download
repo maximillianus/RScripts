@@ -1,0 +1,136 @@
+typeof NG == "undefined" && Type.registerNamespace("NG"),
+typeof NG.KE == "undefined" && Type.registerNamespace("NG.KE"),
+function(n)
+{
+NG.KE.earnedBadgesWebpart = function(t)
+{
+var i=this;
+i.maxItemsPerRequest = 6,
+i.template = t,
+i.elm = n("#" + i.template.elementID),
+i.loadingElm = n("#" + i.template.properties.clientID + "_loading"),
+i.options = i.template.properties.clientProperties,
+i.res = WebpartTextResources,
+i.spotlightUrl = String.format("{0}/_vti_bin/ng/spotlight/spotlightservice.svc/", _spPageContextInfo.siteServerRelativeUrl),
+i.getEarnedBadgesUrl = String.format("{0}/users/earnedbadges/?accountName={1}&kudosMode={2}", i.spotlightUrl, encodeURIComponent(i.options.profileOwner), i.options.kudosMode).replace("//", "/"),
+i.changeBadgeVisibilityUrl = String.format("{0}/User/EarnedBadges/", i.spotlightUrl).replace("//", "/"),
+i.deleteEarnedKudosBadgeUrl = String.format("{0}/DeleteKudos/", i.spotlightUrl).replace("//", "/"),
+i.statusMessageContainer = n("<div />"),
+i.earnedBadgesContainer = n("<div />"),
+i.showMoreContainer = n('<div class="ngShowDiv" />'),
+i.lastUpdatedContainer = n('<div class="timeago" />').css("text-align", "center"),
+i.init = function()
+{
+i.elm.append(i.statusMessageContainer).append(i.earnedBadgesContainer).append(i.showMoreContainer).append(i.lastUpdatedContainer),
+n('<a href="javascript:void(0);" />').addClass("ngShowLink").text(i.res.MoreLink).appendTo(i.showMoreContainer.hide()).click(i.getMoarEarnedBadges),
+i.statusMessageContainer.hide(),
+i.options.kudosMode && i.lastUpdatedContainer.hide(),
+!i.options.firstPerson && i.options.hiddenFromPublic ? (i.lastUpdatedContainer.hide(), i.loadingElm.hide(), i.statusMessageContainer.show().text(String.format(i.res.EBHiddenBadgeMessageThirdPerson, i.options.profileOwnerDisplayName))) : (i.options.hiddenFromPublic && i.statusMessageContainer.show().text(i.res.EBHiddenBadgeMessageFirstPerson), i.refresh()),
+i.options.kudosMode && n(NG.Events).bind("kudosSent", i.refresh)
+},
+i.refresh = function()
+{
+i.earnedBadgesContainer.empty(),
+i.getMoarEarnedBadges()
+},
+i.getMoarEarnedBadges = function()
+{
+n.ajax({
+url: i.getEarnedBadgesUrl + "&max=" + (i.maxItemsPerRequest + 1) + "&start=" + i.earnedBadgesContainer.children().length, error: function(n, t, r)
+{
+i.error(r)
+}, success: function(t)
+{
+var u,
+r,
+f;
+i.loadingElm.hide(),
+i.options.kudosMode || (u = new Date, u.setYear(u.getYear() - 1), r = n.trim(t.LastUpdated), r = r.replace(/-/, "/").replace(/-/, "/"), r = r.replace(/T/, " ").replace(/Z/, " UTC"), r = r.replace(/([\+-]\d\d)\:?(\d\d)/, " $1$2"), f = new Date(r), f <= u ? i.lastUpdatedContainer.hide() : i.lastUpdatedContainer.text(String.format(i.res.LastUpdated, n.timeago(t.LastUpdated)))),
+t.EarnedBadges.length > i.maxItemsPerRequest ? i.showMoreContainer.show() : i.showMoreContainer.hide(),
+t.EarnedBadges.length == 0 && (i.lastUpdatedContainer.hide(), i.options.kudosMode ? i.statusMessageContainer.show().text(i.options.firstPerson ? i.res.EBNoKudosBadgesFirstPerson : String.format(i.res.EBNoKudosBadgesThirdPerson, i.options.profileOwnerDisplayName)) : i.statusMessageContainer.show().text(i.options.firstPerson ? i.res.EBNoBadgesFirstPerson : String.format(i.res.EBNoBadgesThirdPerson, i.options.profileOwnerDisplayName))),
+n.each(t.EarnedBadges, function(t, r)
+{
+var o,
+l,
+c,
+s,
+u,
+f,
+e,
+h;
+t != i.maxItemsPerRequest && (o = "", r.SpotlightUserGivingKudos ? (l = n('<a class="ngAuthorLink" />').text(r.SpotlightUserGivingKudos.PreferredName).attr("accountname", r.SpotlightUserGivingKudos.AccountName).get(0).outerHTML, s = n("<div />").html(r.KudosMessage).shrinkAndLink().get(0).outerHTML, o = String.format(i.options.firstPerson ? i.res.EBKudosFirstPerson : i.res.EBKudosThirdPerson, l) + s) : (u = r.Rule, u == null && (u = r.Badge), c = u.CurrentCultureName ? u.CurrentCultureName : i.getCurrentResource(u.Resources).Name, s = u.CurrentCultureDescription ? u.CurrentCultureDescription : i.getCurrentResource(u.Resources).Description, o = String.format("{0} - {1}", c, s)), f = n('<div class="ngBadgeHolder" />').data("earnedBadge", r).append(n(String.format('<img src="/_layouts/ng/spotlight/badge.ashx?maxsize=36&bid={0}" alt="" title="{1}" />', r.Badge.BadgeId, c))).append(n('<div class="ngBadgeName" />').html(o)), i.options.firstPerson && !i.options.hiddenFromPublic && (e = n('<a href="javascript:void(0);" />').text(r.HiddenFromPublic ? i.res.EBShowBadge : i.res.EBHideBadge), n('<div class="options ngActionbullet" />').append(e).appendTo(f.find(".ngBadgeName")), e.click(function()
+{
+if (SP.UI)
+var t=SP.UI.Notify.addNotification(i.res.EBChangeBadgeVisibilityStatus, !1);
+n.ajax({
+url: i.changeBadgeVisibilityUrl + String.format("{0}/?hideFromPublic={1}", r.EarnedBadgeId, !r.HiddenFromPublic), error: function(t, i, r)
+{
+e.replaceWith(n("<span />").text(r))
+}, type: "POST", success: function()
+{
+r.HiddenFromPublic = !r.HiddenFromPublic,
+e.text(r.HiddenFromPublic ? i.res.EBShowBadge : i.res.EBHideBadge),
+SP.UI.Notify.removeNotification(t)
+}
+})
+})), i.options.kudosMode && (i.options.firstPerson || r.SpotlightUserGivingKudos.AccountName == i.options.currentUser) && (h = n('<a href="javascript:void(0);" />').text(i.res.EBDeleteKudosBadge), n('<div class="options ngActionbullet" />').append(h).appendTo(f.find(".ngBadgeName")), h.click(function()
+{
+var u=n('<div style="text-align:center; padding:30px;" />').text(i.res.EBDeleteKudosConfirmation),
+e=n('<input type="button" class="ngButton" style="margin:5px;" />').prop("value", i.res.Yes),
+o=n('<input type="button" class="ngButton" style="margin:5px;" />').prop("value", i.res.No),
+t;
+n('<div style="margin-top:10px"/>').append(e, o).appendTo(u),
+t = SP.UI.ModalDialog.showModalDialog({
+html: u.get(0), autoSize: !0, allowMaximize: !1, title: i.res.EBDeleteKudosConfirmationTitle, showClose: !1
+}),
+o.click(function()
+{
+t.close()
+}),
+e.click(function()
+{
+if (t.close(), SP.UI)
+var u=SP.UI.Notify.addNotification(i.res.EBDeleteKudosBadgeStatus, !1);
+n.ajax({
+url: i.deleteEarnedKudosBadgeUrl + r.EarnedBadgeId, error: function(t, i, r)
+{
+h.replaceWith(n("<span />").text(r))
+}, type: "POST", success: function()
+{
+f.hide("slideup", function()
+{
+f.remove()
+}),
+SP.UI.Notify.removeNotification(u),
+NG.NewsFeedReload()
+}
+})
+})
+})), f.append(n('<div class="ngClearFloat" />')).appendTo(i.earnedBadgesContainer).find(".ngAuthorLink").miniProfile())
+})
+}
+})
+},
+i.error = function(n)
+{
+i.elm.empty(),
+n ? i.elm.text(String.format("{0}: {1}", i.res.EBError, n)) : i.elm.text(i.res.EBError)
+},
+i.getCurrentResource = function(t)
+{
+window.ngCurrentLocale == null && (window.ngCurrentLocale = "en-us");
+var i=t[0];
+return n.each(t, function(n, t)
+{
+if (t.CultureInfoName.toLowerCase() == ngCurrentLocale.toLowerCase())
+return i = t, !1
+}), i
+}
+},
+n(document).ready(function()
+{
+if (_ngEarnedBadgesWebpart)
+while (_ngEarnedBadgesWebpart.length > 0)
+new NG.KE.earnedBadgesWebpart(_ngEarnedBadgesWebpart.shift()).init()
+})
+}(jQuery142);

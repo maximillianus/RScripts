@@ -1,0 +1,125 @@
+(function(n)
+{
+"use strict";
+var t={
+init: function(t)
+{
+function r(t, r, u)
+{
+for (var s=i.margin, c=(100 - s * r.length) / r.length, v=t.width() * c / 100, h=i.maxRowHeight, y=0, l, o=0, f, a, p, e=null; o < r.length; o++)
+f = n(r[o]),
+i.wrapperClass !== null && typeof i.wrapperClass == "string" && (e = f.closest("." + i.wrapperClass)),
+e !== null && e.length || (f.wrap(n("<div/>")), e = f.closest("div"), i.wrapperClass !== null && typeof i.wrapperClass == "string" && e.addClass(i.wrapperClass)),
+a = parseInt(e.css("max-height")),
+isNaN(a) || (h = a),
+y = h * u + u * s * 2,
+e.css({
+width: c + "%", height: h + "px", position: "absolute", top: y + "px", left: c * o + o * s + "%", overflow: "hidden", "text-align": "center"
+}),
+f.css({
+height: "100%", "max-width": "none", border: 0, position: "relative"
+}),
+l = f.width(),
+l > v && r.length > 1 && f.css({left: -((l - v) / 2) + "px"});
+p = h * (u + 1) + u * s * 2,
+t.css("height", p + "px")
+}
+function u(n, t)
+{
+function f(e, o)
+{
+e.length && (e.length <= i.maxImagesInRow && r(n, e, o), u = t.splice(0, Math.min(t.length, i.maxImagesInRow)), f(u, o + 1))
+}
+var e=n.width(),
+u;
+n.show(),
+t.length > 1 && (t.length % i.maxImagesInRow > 0 && t.sort(function(n, t)
+{
+var i=n.offsetWidth,
+r=t.offsetWidth;
+return i > r ? 1 : i < r ? -1 : 0
+}), u = t.splice(0, Math.min(t.length, i.maxImagesInRow)), f(u, 0))
+}
+var i=n.extend({}, n.fn.imageTiler.defaults, t || {});
+return this.each(function()
+{
+function r(n)
+{
+var r=n.find("img");
+r.length ? (u(n, r), typeof i.renderComplete == "function" && i.renderComplete()) : t.show()
+}
+var t=n(this);
+t.css({position: "relative"}).hide(),
+t.data("ng.imgsLoaded") !== !0 ? t.imagesLoaded(function()
+{
+r(t),
+t.data("ng.imgsLoaded", !0)
+}) : r(t)
+})
+}, reset: function(n)
+{
+t.init.call(this, n)
+}
+},
+i;
+n.fn.imageTiler = function(i)
+{
+if (typeof t[i] == "function")
+return t[i].apply(this, Array.prototype.slice.call(arguments, 1));
+if (typeof i != "object" && i)
+n.error("Method " + i + " does not exist on jQuery.ImageTiler");
+else
+return t.init.apply(this, arguments);
+return this
+},
+n.fn.imageTiler.defaults = {
+maxImagesInRow: 4, margin: 2, wrapperClass: null, maxRowHeight: 150, renderComplete: n.noop
+},
+i = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+n.fn.imagesLoaded = function(t)
+{
+function c()
+{
+var i=n(s),
+o=n(e);
+r && (e.length ? r.reject(u, i, o) : r.resolve(u)),
+n.isFunction(t) && t.call(f, u, i, o)
+}
+function l(n)
+{
+h(n.target, n.type === "error")
+}
+function h(t, f)
+{
+t.src !== i && n.inArray(t, o) === -1 && (o.push(t), f ? e.push(t) : s.push(t), n.data(t, "imagesLoaded", {
+isBroken: f, src: t.src
+}), a && r.notifyWith(n(t), [f, u, n(s), n(e)]), u.length === o.length && (setTimeout(c), u.unbind(".imagesLoaded", l)))
+}
+var f=this,
+r=n.isFunction(n.Deferred) ? n.Deferred() : 0,
+a=n.isFunction(r.notify),
+u=f.find("img").add(f.filter("img")),
+o=[],
+s=[],
+e=[];
+return n.isPlainObject(t) && n.each(t, function(n, i)
+{
+n === "callback" ? t = i : r && r[n](i)
+}), u.length ? u.bind("load.imagesLoaded error.imagesLoaded", l).each(function(t, r)
+{
+var f=r.src,
+u=n.data(r, "imagesLoaded");
+if (u && u.src === f)
+{
+h(r, u.isBroken);
+return
+}
+if (r.complete && r.naturalWidth !== undefined)
+{
+h(r, r.naturalWidth === 0 || r.naturalHeight === 0);
+return
+}
+(r.readyState || r.complete) && (r.src = i, r.src = f)
+}) : c(), r ? r.promise(f) : f
+}
+})(jQuery142);

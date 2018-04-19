@@ -1,0 +1,15 @@
+!function(n)
+{
+function t()
+{
+typeof _spBodyOnLoadWrapper != "undefined" ? _spBodyOnLoadCalled || _spBodyOnLoadWrapper : i()
+}
+function i()
+{
+setTimeout(t, 50)
+}
+n && n(document).ready(function()
+{
+t()
+})
+}(window.jQuery142, window);

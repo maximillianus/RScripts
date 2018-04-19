@@ -1,0 +1,3922 @@
+﻿function MaxConnectUrlForMax(orgUrl)
+{
+	var subStr=orgUrl.substring(orgUrl.indexOf("//")+2);
+	return "http://maxconnect.global.anz.com:50004"+subStr.substring(subStr.indexOf("/"));
+}
+
+var $ie8flag=null;
+
+function IsIE8()
+{
+    //"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0E; .NET4.0C)"
+	if($ie8flag==null)
+	{
+		$ie8flag=/MSIE.+Trident\/4.0/i.test(navigator.userAgent);
+	}
+	return $ie8flag;
+}
+
+function IsMaxSite()
+{
+	return /https:[\/][\/]max.global.anz.com[\/].+/i.test(window.location.href);
+}
+
+function IsMaxConnectDefaultZoneUrl(src)
+{
+	return /https:[\/][\/]maxconnect.global.anz.com[\/].+/i.test(src);
+}
+
+function fixRTEBug() {
+    function n() {
+        var n = RTE.Range.prototype.parentElement;
+        RTE.Range.prototype.parentElement = function() {
+            try {
+                n()
+            } catch (t) {}
+        }
+    }
+    typeof ngSharepointVersion != "undefined" && ngSharepointVersion === 14 && (typeof RTE.Canvas.checkCurrentFocus != "undefined" && (RTE.Canvas.checkCurrentFocus = function() {
+        var n, t;
+        n: ;n = RTE.Selection.getSelectionRange(),
+        n && (t = n.parentElement(),
+        RTE.Canvas.isInEditable(t) && !RTE.Cursor.get_range().isValid() && (RTE.Cursor.updateRangeToCurrentSelection(),
+        RTE.Cursor.update()))
+    }
+    ),
+    n())
+}
+Type.registerNamespace("NG"),
+NG.Events = jQuery142(document.createElement("DIV")),
+NG.ColleagueList = null,
+NG.CommunityList = null,
+NG.HashTags = [],
+NG.UserSuggestions = {},
+NG.GroupSuggestions = {},
+$ajaxLoader = null,
+$ajaxLoaderBar = null,
+function() {
+    var n = jQuery142, t, i, r, u;
+    $ajaxLoader = n("<span class='ngLoading'><\/span>"),
+    $ajaxLoaderBar = n("<span class='ngLoadingBar'><\/span>"),
+    NG.hasWhiteSpaces = function(n) {
+        return /\s/g.test(n)
+    }
+    ,
+    !function(n) {
+        "use strict";
+        var t = function() {
+            this.init()
+        };
+        t.prototype = {
+            constructor: t,
+            sayswho: i,
+            init: function() {
+                this.sayswho = i
+            }
+        };
+        var r = function(n) {
+            n = n.toLowerCase();
+            var t = /(chrome)[ \/]([\w.]+)/.exec(n) || /(webkit)[ \/]([\w.]+)/.exec(n) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(n) || /(msie) ([\w.]+)/.exec(n) || n.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(n) || [];
+            return {
+                browser: t[1] || "",
+                version: t[2] || "0",
+                trident: /Trident\/(\d+(\.\d+)*)/i.exec(n) || 0
+            }
+        }
+          , i = function() {
+            var t = r(navigator.userAgent)
+              , n = {};
+            return t.browser && (n[t.browser] = !0,
+            n.version = t.version,
+            t.trident !== 0 && (n.trident = t.trident[1])),
+            n.chrome ? n.webkit = !0 : n.webkit && (n.safari = !0),
+            n
+        }();
+        n.navigator = new t
+    }(NG),
+    NG.InputControl = function(t, i, r, u) {
+        var e, f, l;
+        if (!r || n(t).length == 0) {
+            Sys.Debug.trace("Can't create input control. You must supply an input and callback");
+            return
+        }
+        if (e = 0,
+        t = n(t),
+        i = n(i),
+        u = u || {},
+        f = {
+            input: t,
+            options: u,
+            button: i,
+            submit: function(n) {
+                (u.suppressEnter || t.val(t.val().replace(/\n/g, "")),
+                n.data.defaultValue = u.defaultValue,
+                r(n) !== !1) && t.trigger("reset")
+            },
+            reset: function() {
+                window.setTimeout(function() {
+                    e = 0
+                }, 500),
+                i.removeAttr("disabled"),
+                u.defaultValue !== undefined && t.val(u.defaultValue),
+                u.autoGrow && t[0].autoGrow && t.trigger("autosize.resize");
+                try {
+                    u.tagAssistant && u.tagAssistant.ClearAll()
+                } catch (n) {
+                    Sys.Debug.trace("Could not clear tag suggestions")
+                }
+            },
+            changeDefaultValue: function(n) {
+                t.val() == u.defaultValue && (t.val(n),
+                t.attr("title", n)),
+                u.defaultValue = n
+            }
+        },
+        t.bind("reset", f.reset),
+        t.focus(function() {
+            if (u.defaultValue !== undefined && this.value == u.defaultValue) {
+                if (u.maxTextLengthTarget) {
+                    var i = u.maxTextLengthTarget.data("extraCount");
+                    n(u.maxTextLengthTarget).data("extraCount", i === undefined ? 0 : i),
+                    t.trigger("ngupdatemaxlength")
+                }
+                this.value = ""
+            }
+        }).blur(function() {
+            if (n.trim(this.value) == "" && u.defaultValue !== undefined && (this.value = u.defaultValue,
+            u.maxTextLengthTarget)) {
+                var i = u.maxTextLengthTarget.data("extraCount");
+                n(u.maxTextLengthTarget).data("extraCount", i === undefined ? 0 : i),
+                t.trigger("ngupdatemaxlength")
+            }
+        }),
+        u.defaultValue && (t.val(u.defaultValue),
+        t.attr("title", u.defaultValue)),
+        u.autoGrow)
+            try {
+                t[0].autoGrow = n(t[0]).autosize()
+            } catch (a) {
+                Sys.Debug.trace("Could not wire up autogrow.")
+            }
+        var s = u.autocomplete && NG && NG.navigator && NG.navigator.sayswho && NG.navigator.sayswho.mozilla
+          , h = {
+            input: t,
+            button: i,
+            defaultValue: u.defaultValue,
+            options: u,
+            callback: r,
+            args: u.args
+        }
+          , o = t.val()
+          , c = t.is("textarea");
+        t.on("keypress", h, function(n) {
+            if (!u.suppressEnter && n.keyCode == Sys.UI.Key.enter)
+                return s && o != t.val() || (e == 0 && f.submit(n),
+                e++),
+                o = t.val(),
+                !1;
+            var i = t.attr("maxLength");
+            if (i && i > 0 && c && n.which > 47 && t.val().length >= parseInt(i))
+                return !1;
+            s && setTimeout(function() {
+                o = t.val()
+            }, 0)
+        });
+        u.autocomplete && t.ngautocomplete && t.ngautocomplete(u.autocomplete.data || u.autocomplete.url || u.autocomplete.getFunc, u.autocomplete),
+        u.maxTextLengthTarget && u.maxTextLengthTarget.length > 0 && (NG.MaxTextLength(t, n(u.maxTextLengthTarget), {
+            maxLength: t.attr("maxLength")
+        }),
+        u.defaultValue && (l = n(u.maxTextLengthTarget).data("extraCount"),
+        n(u.maxTextLengthTarget).data("defaultTextLength", u.defaultValue.length),
+        t.trigger("ngupdatemaxlength"))),
+        NG.SetPasteEvent(t);
+        i.on("click", h, function(n) {
+            return f.submit(n),
+            !1
+        });
+        return f
+    }
+    ,
+    NG.Tooltip = function(t, i, r, u, f) {
+        var e = this == NG ? {} : this
+          , s = n(t)
+          , a = s.parent()
+          , c = s.offsetParent();
+        if (e.targetElement = s.get(0),
+        e.targetElement) {
+            e.targetElement.ngTooltip && e.targetElement.ngTooltip.Remove(),
+            r || (r = 2e3);
+            var o = e.div = n('<div class="ngTooltip">' + i + "<\/div>")
+              , h = s.position()
+              , l = a.position();
+            return u == "bottom" ? o.css({
+                left: h.left + "px",
+                top: h.top + s.outerHeight() + 10 + "px"
+            }) : u == "top" ? o.css({
+                left: h.left + "px",
+                top: h.top + "px"
+            }) : u == "parent-bottom-left" ? o.css({
+                left: l.left + "px",
+                top: h.top + s.outerHeight() + 10 + "px"
+            }) : o.css({
+                left: h.left + s.outerWidth() + 10 + "px",
+                top: h.top + "px"
+            }),
+            c.append(o),
+            u == "parent-bottom-left" && l.left + o.width() > c.width() && o.css("width", c.width() - (l.left + 15) + "px"),
+            (f == null || f == !0) && NG.AdjustPopupOnScreen(o),
+            e.Remove = function() {
+                e.timeoutId && window.clearTimeout(e.timeoutId),
+                o.unbind("click"),
+                o.fadeOut(500),
+                e.targetElement.ngTooltip = null
+            }
+            ,
+            o.click(e.Remove),
+            e.timeoutId = null,
+            r > 0 && (e.timeoutId = window.setTimeout(function() {
+                e.Remove()
+            }, r)),
+            e.targetElement.ngTooltip = this,
+            this
+        }
+    }
+    ,
+    NG.StripQueryParams = function(n) {
+        return n.substring(0, n.indexOf("?"))
+    }
+    ,
+    NG.StripQueryParam = function(n, t) {
+        var i = NG.GetQueryStringKey(n, t);
+        return i && (n = n.replace(i.toString(), "")),
+        n
+    }
+    ,
+    NG.ReplaceOrAddQueryParam = function(n, t, i) {
+        var r = NG.GetQueryStringKey(n, t);
+        return r ? n = n.replace(r.toString(), r.toString().split("=")[0] + "=" + i) : (NG.StripQueryParam(n, t),
+        n += n.indexOf("?") > 0 ? String.format("&{0}={1}", t, i) : String.format("?{0}={1}", t, i)),
+        n
+    }
+    ,
+    NG.StringIsNullOrEmpty = function(n) {
+        return n == null || n === ""
+    }
+    ,
+    NG.GetQueryStringValue = function(n, t) {
+        if (NG.StringIsNullOrEmpty(n) || NG.StringIsNullOrEmpty(t))
+            return "";
+        var r = new RegExp(t + "=([^&]+)($|&)","i")
+          , i = r.exec(n);
+        return i === null ? "" : i[1]
+    }
+    ,
+    NG.GetQueryStringKey = function(n, t) {
+        if (NG.StringIsNullOrEmpty(n))
+            return null;
+        var r = new RegExp("(" + t + "=([^&]+))($|&)","i")
+          , i = r.exec(n);
+        return i === null ? null : i[1]
+    }
+    ,
+    NG.ConvertJSONDateToLocal = function(n) {
+        return new Date(parseInt(n.substr(6)))
+    }
+    ,
+    NG.ConvertDateToLocal = function(t, i) {
+        var r, u, f;
+        return NG.StringIsNullOrEmpty(t) ? t : (r = new Date(t),
+        u = r,
+        isNaN(r.getTime()) && (f = n.trim(t).replace(/-/, "/").replace(/-/, "/").replace(/T/, " ").replace(/Z/, "").replace(/([\+-]\d\d)\:?(\d\d)/, " $1$2"),
+        r = new Date(f),
+        u = new Date(r.getTime() - r.getTimezoneOffset() * 6e4)),
+        isNaN(r.getTime()) ? t : i ? u.format(i) : u.format("M/d/yyyy h:mm:ss tt"))
+    }
+    ,
+    NG.ConvertDateToISOFormat = function(n) {
+        return NG.StringIsNullOrEmpty(n) || isNaN(new Date(n).getTime()) ? n : new Date(n).toISOString()
+    }
+    ,
+    NG.GetUrlSafeTag = function(n) {
+        return encodeURIComponent(n.replace(/^\#?\[?([^\]]+)\]?/, "$1"))
+    }
+    ,
+    t = 0,
+    NG.SetupPresence = function(i) {
+        try {
+            NG && NG.navigator && NG.navigator.sayswho && NG.navigator.sayswho.msie && (bIMNControlInited === !0 && IMNControlObj === null && (bIMNControlInited = !1),
+            n(i).find("span.ngPresenceSpan").each(function() {
+                var r = n(this), i;
+                r.attr("presenceCounter") || (t++,
+                r.attr("presenceCounter", t),
+                i = r.attr("sip"),
+                NG.StringIsNullOrEmpty(i) && (i = r.attr("email")),
+                i && (i = i.replace(/'/g, "\\\\u0027")),
+                ngSharepointVersion && ngSharepointVersion == 15 ? r.append(String.format('<a class="ms-imnlink ms-spimn-presenceLink" href="javascript:void(0);"><span class="ms-spimn-presenceWrapper ms-spimn-imgSize-10x10"><img name="imnmark" class="ms-spimn-img ms-spimn-presence-offline-10x10x32" id="ngPresence_{1},type=sip" onload="QueuePopulateIMNRC(\'{0}\', this);" src="/_layouts/15/images/spimn.png" alt="Offline" border="0" ShowOfflinePawn="1" /><\/span><\/a>', i, t)) : r.append(String.format('<a class="ms-imnlink" href="javascript:void(0);"><img name="imnmark" width="12" height="12" id="ngPresence_{1},type=sip" onload="QueuePopulateIMNRC(\'{0}\', this);" alt="Offline" src="/_layouts/images/imnoff.png" border="0" ShowOfflinePawn="1" /><\/a>', i, t)))
+            }))
+        } catch (r) {
+            Sys.Debug.trace("Error setting up presence")
+        }
+    }
+    ,
+    NG.SetPasteEvent = function(t) {
+        n(t).attr("maxLength") && t.attr("maxLength") > 0 && n(t).is("textarea") && (n(t).get(0).addEventListener ? n(t).get(0).addEventListener("input", function(n) {
+            NG.FixPasteLength(n.target)
+        }, !1) : n(t).bind("keyup paste", {
+            input: n(t)
+        }, function() {
+            NG.FixPasteLength(t)
+        }))
+    }
+    ,
+    NG.FixPasteLength = function(t) {
+        var i = parseInt(n(t).attr("maxLength"));
+        !isNaN(i) && i > 0 && n(t).val().length > i && n(t).val(n(t).val().substring(0, i))
+    }
+    ,
+    NG.CommonInit = function(n) {
+        n.errorHandler = NG.XmlControlDefaultErrorHandler
+    }
+    ,
+    NG.XmlControlDefaultErrorHandler = function(n, t) {
+        this.element.innerHTML = NG.GetDefaultErrorMessage(t.status)
+    }
+    ,
+    NG.GetDefaultErrorMessage = function(n) {
+        switch (n) {
+        case 401:
+        case 403:
+            return ngText.UnauthorizedError;
+        case 404:
+            return ngText.NotFoundError;
+        case 409:
+            return ngText.ConflictError;
+        case 410:
+            return ngText.GoneError;
+        case 503:
+            return ngText.OfflineError;
+        case 504:
+            return ngText.TimeoutError;
+        case 12031:
+            return "";
+        default:
+            return ngText.RequestError
+        }
+    }
+    ,
+    NG.AddColleague = function(t) {
+        var r = n(t.currentTarget)
+          , i = r.attr("userId");
+        !i && t.data && (i = t.data.userId),
+        i && n.ajax({
+            type: "POST",
+            contentType: "text/plain",
+            url: window.spWebUrl + "/_vti_bin/ng/colleague.svc/add/" + i + "/",
+            success: function() {
+                if (new NG.Tooltip(r,ngText.ColleagueAdded,2500,"bottom"),
+                r.hide(),
+                n("a.ngAddColleague[userId='" + i + "']").hide(),
+                ngUserProfiles && ngUserProfiles[i])
+                    try {
+                        n(ngUserProfiles[i]).children("User").children("IsColleague").text("true")
+                    } catch (t) {}
+                n("[id=ngColleagueCount]").each(function() {
+                    var i = n(this), t;
+                    i && (t = parseInt(n(i).attr("count")),
+                    isNaN(t) || (t += 1,
+                    n(i).attr("count", t),
+                    t == 1 ? n(i).html(ngText.ColleagueCountLabelSingular) : n(i).html(String.format(ngText.ColleagueCountLabelPlural, t))))
+                }),
+                n(NG.Events).trigger("addColleague", i)
+            },
+            error: function(t) {
+                t.status == 409 ? (new NG.Tooltip(r,ngText.ColleagueAdded,2500,"bottom"),
+                r.hide(),
+                n("a.ngAddColleague[userId='" + i + "']").hide(),
+                n(NG.Events).trigger("addColleague", i)) : new NG.Tooltip(r,ngText.RequestError,5e3,"bottom")
+            }
+        })
+    }
+    ,
+    NG.IgnoreColleague = function(t) {
+        var r = n(t.currentTarget)
+          , i = r.attr("userId");
+        !i && t.data && (i = t.data.userId),
+        i && n.ajax({
+            type: "POST",
+            contentType: "text/plain",
+            url: window.spWebUrl + "/_vti_bin/ng/colleague.svc/ignore/" + i + "/",
+            success: function() {
+                if (new NG.Tooltip(r,ngText.ColleagueIgnored,2500,"bottom"),
+                r.hide(),
+                n("a.ngAddColleague[userId='" + i + "']").hide(),
+                ngUserProfiles && ngUserProfiles[i])
+                    try {
+                        n(ngUserProfiles[i]).children("User").children("IsColleague").text("false")
+                    } catch (t) {}
+                n(NG.Events).trigger("ignoreColleague", i)
+            },
+            error: function() {
+                new NG.Tooltip(r,ngText.RequestError,5e3,"bottom")
+            }
+        })
+    }
+    ,
+    NG.StopWatch = function() {
+        return this.startTime = (new Date).getTime(),
+        this.Start = function(n) {
+            this.startTime = (new Date).getTime(),
+            n && Sys.Debug.trace(n + " Start")
+        }
+        ,
+        this.Stop = function(n) {
+            var t = (new Date).getTime()
+              , i = t - this.startTime;
+            Sys.Debug.trace(n + " Stop Time: " + i)
+        }
+        ,
+        this
+    }
+    ,
+    NG.LoadCurrentUserProfile = function(t) {
+        if (window.ngUserProfile != null) {
+            t && t(!0);
+            return
+        }
+        n.ajax({
+            type: "GET",
+            url: window.spWebUrl + "/_vti_bin/ng/userprofile.svc/my/",
+            contentType: "application/json; charset=utf-8",
+            success: function(n) {
+                window.ngUserProfile = n,
+                t && t(!0)
+            },
+            error: function() {
+                Sys.Debug.trace("Couldn't load profile for current user"),
+                t && t(!1)
+            }
+        })
+    }
+    ,
+    NG.ParseNGUser = function(t) {
+        var r = n(t)
+          , i = {};
+        return r.children().each(function(t, r) {
+            var u = n(r).text();
+            i[r.tagName] = u
+        }),
+        i.UserId = parseInt(i.UserId, 10),
+        i.ColleagueCount = parseInt(i.ColleagueCount, 10),
+        i.IsColleague = i.IsColleague == "true",
+        i
+    }
+    ,
+    NG.Localize = function(n, t) {
+        try {
+            n.find(".localtext").localtext(t).removeClass("localtext"),
+            n.find(".ngButton").localtextvalue(t),
+            n.find(".localtitle").localtitle(t).removeClass("localtitle"),
+            n.find(".localalt").localalt(t).removeClass("localalt")
+        } catch (i) {}
+    }
+    ,
+    NG.AdjustPopupOnScreen = function(t) {
+        var i = n(t).eq(0), y = i.get(0), e = n(window), o = e.scrollTop(), h = o + e.height(), u = i.offset().top, c = u + i.outerHeight(!0), l = c <= h, a = u >= o, s = i.offset().left, v = i.position().left, r, f;
+        widthDiff = s + i.outerWidth(!0) - e.width(),
+        l && a || (r = {
+            top: u
+        },
+        l || (r.top = r.top - (c - h) - 5),
+        a || (r.top = u - o + r.top),
+        i.css(r)),
+        widthDiff > 0 && (f = v - (widthDiff + 15)),
+        s < 0 && (f = Math.max(5, s)),
+        f && i.css({
+            left: f
+        })
+    }
+    ,
+    i = {
+        targetElem: null,
+        alignment: "bottom",
+        offset: 10,
+        content: null,
+        title: null,
+        onscreen: !0,
+        showEffect: function(n) {
+            n.fadeIn(function() {
+                NG && NG.navigator && NG.navigator.sayswho && NG.navigator.sayswho.msie && n.get(0).style.removeAttribute("filter")
+            })
+        },
+        hideEffect: function(n) {
+            n.fadeOut(function() {
+                n.remove()
+            })
+        }
+    },
+    NG.ShowPopup = function(t) {
+        var t = n.extend({}, i, t), s = n(t.targetElem), h = t.parentTarget || (t.targetElem ? s.offsetParent() : n(document.body)), u = t.position || s.position(), r = n(document.createElement("div")).css({
+            display: "none",
+            position: "absolute"
+        }), f, e, o;
+        return r.html(String.format("<div class='ngClose'><div class='ngHeader'><\/div><div><a title='{0}' href='javascript:void(0)' class='ngPopupClose'><\/a><\/div><\/div><div class='ngPopupContent'><\/div>", ngText.CloseVerb)),
+        n(".ngPopupContent", r).append(t.content),
+        t.title && n(".ngHeader", r).append(t.title),
+        r.bind("close", function() {
+            t.hideEffect(r)
+        }),
+        n(".ngPopupClose", r).click(function() {
+            r.trigger("close")
+        }),
+        h.append(r),
+        f = t.offset,
+        t.alignment == "bottom" ? (e = s.outerHeight(!0),
+        u.top = u.top + e + f * 2) : t.alignment == "top" ? (e = r.outerHeight(!0),
+        u.top = u.top - e - f) : t.alignment == "right" ? (o = s.outerWidth(!0),
+        u.left = u.left + o + f) : t.alignment == "left" && (o = r.outerWidth(!0),
+        u.left = u.left - o - f),
+        r.addClass("ngPopup ngShadow ngWrapper").css({
+            left: u.left + "px",
+            top: u.top + "px"
+        }),
+        t.showEffect(r),
+        t.onscreen && NG.AdjustPopupOnScreen(r),
+        r
+    }
+    ,
+    n.htmlEncode = function(t) {
+        return n(document.createElement("div")).text(t).html()
+    }
+    ,
+    n.htmlDecode = function(t) {
+        return n(document.createElement("div")).html(t).text()
+    }
+    ,
+    n.isInArray = function(t, i) {
+        return n.inArray(i.toLowerCase(), n.map(t, function(n) {
+            return n.toLowerCase()
+        })) > -1
+    }
+    ,
+    n.stripHtml = function(n) {
+        return n.replace(/(<([^>]+)>)/ig, "")
+    }
+    ,
+    n.isNullOrUndefined = function(n) {
+        return n === undefined || n === null
+    }
+    ,
+    NG.ShowCommunityList = function() {
+        var n = NG.ShowPageAsDialog({
+            url: window.spWebUrl + "/_layouts/NGC/Communities.aspx",
+            width: 600,
+            height: 500
+        })
+    }
+    ,
+    NG.ShowTermsAndConditions = function() {
+        var n = NG.ShowPageAsDialog({
+            url: window.spWebUrl + "/_layouts/ng/pages/TermsAndConditions.aspx",
+            width: 600,
+            height: 500,
+            dialogReturnValueCallback: SP.UI.ModalDialog.RefreshPage
+        })
+    }
+    ,
+    NG.ModalView = function(t, i) {
+        var f;
+        t.preventDefault();
+        var e = t.target
+          , r = {}
+          , u = GetGotoLinkUrl(e);
+        if (u == null)
+            try {
+                u = GetGotoLinkUrl(n(e).parent()[0])
+            } catch (o) {
+                return
+            }
+        u != null && (f = n(window).height() - 300,
+        r.url = u + (u.indexOf("?") < 0 ? "?" : "&") + "forceHeight=" + f,
+        r.height = f,
+        r.width = 800,
+        r.dialogReturnValueCallback = function(n, t) {
+            n == SP.UI.DialogResult.OK && t == "delete" && NG.NewsFeedReload()
+        }
+        ,
+        i !== "undefined" && i === 1 && (r.url = r.url + "&Lcid=0"),
+        NG.ShowPageAsDialog(r))
+    }
+    ,
+    NG.ProfileImageLoadHandler = function(n) {
+        n.naturalHeight == 0 && n.naturalWidth == 0 && NG.ProfileImageErrorHandler(n)
+    }
+    ,
+    NG.ProfileImageErrorHandler = function(n) {
+        var currentSrc=n.src;
+		if(IsMaxConnectDefaultZoneUrl(currentSrc) //is the url like https://maxconnect.global.anz.com/
+		   && IsMaxSite()//load on max.global.anz.com
+		   && !IsIE8()) //not load on IE 8 browser
+		{
+			//only do this on max.global.anz.com and image url like https://maxconnect.global.anz.com and not IE 8 browser.
+			n.onerror = null;
+			n.src = MaxConnectUrlForMax(currentSrc);
+		}
+		else 
+		{
+			n.onerror = null;
+			n.src = "/_layouts/images/O14_person_placeHolder_96.png"
+		}
+		//n.onerror = null,
+        //n.src = "/_layouts/images/O14_person_placeHolder_96.png"
+    }
+    ,
+    NG.CommunityImageErrorHandler = function(n) {
+        n.onerror = null,
+        n.src = "/_layouts/images/siteicon.png"
+    }
+    ,
+    NG.ParseCommunityFromXnode = function(t) {
+        var r = n(t)
+          , i = {};
+        return r.children().each(function(t, r) {
+            var u = n(r).text();
+            i[r.tagName] = u
+        }),
+        i.CreateDate = Date.parse(i.CreateDate),
+        i.UpdateDate = Date.parse(i.UpdateDate),
+        i.Discoverable = i.Discoverable == "true",
+        i.IsMember = i.IsMember == "true",
+        i.IsOwner = i.IsOwner == "true",
+        i.LockUserFollow = i.LockUserFollow == "true",
+        i.MemberReadOnly = i.MemberReadOnly == "true",
+        i
+    }
+    ,
+    NG.ParseGroupOverviewFromXnode = function(n) {
+        var t = NG.ParseCommunityFromXnode(n);
+        return t.MemberCount = parseInt(t.MemberCount, 10),
+        t.LastActivityDate = Date.parse(t.LastActivityDate),
+        t
+    }
+    ,
+    NG.MicroblogDialog = function(t, i) {
+        var o = this, s = "/_vti_bin/ng/activityfeed.svc/", e, u;
+        i = n.extend({
+            defaultValue: "",
+            showDefaultValue: !0,
+            callback: null,
+            title: ngText.AddPostTitle,
+            description: ""
+        }, i || {}),
+        n(".ngMicroblogDialog").trigger("close"),
+        o.PostMicroblog = function(t) {
+            var u = t.data.input.val().trim();
+            if (i.showDefaultValue || (u += " " + i.defaultValue),
+            u.length == 0 || u == t.data.defaultValue) {
+                new NG.Tooltip(t.data.input.get(0),ngText.BlankAlert,2500,"top");
+                return
+            }
+            new NG.Tooltip(t.data.input.get(0),ngText.Saving + "...",0,"top"),
+            i.callback ? i.callback(t, u, i, r) : n.ajax({
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded",
+                url: s,
+                data: u,
+                success: function() {
+                    new NG.Tooltip(n(".ngMicroblogDialog").get(0),ngText.UpdateSaved,2500,"top"),
+                    r.trigger("close", [!0]),
+                    i.callback && i.callback()
+                },
+                error: function() {
+                    new NG.Tooltip(t.data.input.get(0),ngText.MicroblogPostFailed,5e3,"top")
+                }
+            })
+        }
+        ,
+        e = "",
+        i.description && (e = String.format("<div class='ngMicroblogDescription'>{0}<\/div>", i.description)),
+        u = null,
+        i.data && i.data.shareEventAction && i.data.shareEventAction.OriginalItem ? (i.data.shareEventAction.OriginalItem.length > 1697 && (i.data.shareEventAction.OriginalItem = i.data.shareEventAction.OriginalItem.substr(0, 1697) + "..."),
+        u = 1e4 - i.data.shareEventAction.OriginalItem.length) : u = 1e4;
+        var h = n(String.format("<div class='ngStatusHolder'>{1}<div class='ngMicroblogInputDiv ngInput'><textarea id='ngMicroblogInput' maxlength='" + u + "' title='{2}' spellcheck='true'><\/textarea><\/div><span class='ngTextLength' id='ngMicroblogLength'><\/span><div class='ngSharePrivacyWarning ngPrivacyWarning' id='ngSharePrivacyWarning'><\/div><div class='ngActionBar'><div class='ngPostButton'><button id='ngMicroblogPost' class='ngButton'><span>{0}<\/span><\/button><\/div><\/div><\/div><div>", ngText.PostVerb, e, i.title))
+          , r = NG.ShowPopup({
+            offset: 1,
+            targetElem: n(t),
+            alignment: "bottom",
+            title: i.title,
+            content: h,
+            showEffect: function(n) {
+                n.show()
+            },
+            hideEffect: function(n) {
+                n.remove()
+            }
+        }).addClass("ngMicroblogDialog")
+          , f = r.find("#ngMicroblogInput")
+          , c = i.data && i.data.shareEventAction ? i.data.shareEventAction.Privacy : null;
+        NG.InputControl(n(f), r.find("#ngMicroblogPost").get(0), o.PostMicroblog, {
+            autoGrow: !0,
+            autocomplete: new NG.AutoComplete({
+                inputControl: n(f),
+                privacy: c,
+                keypressCallback: i.keypressCallback ? i.keypressCallback : null
+            }).AutocompleteOptions,
+            maxTextLengthTarget: r.find("#ngMicroblogLength"),
+            suppressEnter: !0
+        }),
+        i.showDefaultValue && n(f).val(i.defaultValue),
+        n(f).focus()
+    }
+    ,
+    NG.ShowPageAsDialog = function(n) {
+        if (!n) {
+            Sys.Debug.trace("args to open dialog cannot be null.");
+            return
+        }
+        var t = n.url.indexOf("#")
+          , i = n.url.indexOf("?");
+        t > 0 & i > 0 ? n.url = n.url.replace("#", "&IsDlg=1#") : t > 0 && (n.url = n.url.replace("#", "?IsDlg=1#")),
+        ExecuteOrDelayUntilScriptLoaded(function() {
+            var t = {
+                url: n.url,
+                width: n.width || 600,
+                height: n.height || 500
+            };
+            n.dialogReturnValueCallback && (t.dialogReturnValueCallback = n.dialogReturnValueCallback),
+            SP.UI.ModalDialog.showModalDialog(t)
+        }, "sp.js")
+    }
+    ,
+    n.ngCreateCache = function(t) {
+        var i = {};
+        return function(r, u) {
+            return typeof r == "undefined" && (r = null),
+            i[r] || (i[r] = n.Deferred(function(n) {
+                t(n, r)
+            }).promise()),
+            i[r].done(u)
+        }
+    }
+    ,
+    n.ngCreateSearchCache = function(t) {
+        var i = {};
+        return function(r, u, f, e) {
+            var o = r + u;
+            return i[o] || (i[o] = n.Deferred(function(n) {
+                t(n, r, u, f)
+            }).promise()),
+            i[o].done(e)
+        }
+    }
+    ,
+    NG.LoadGlobalSearch = function(t, i) {
+        return n.Deferred(function(r) {
+            NG.StringIsNullOrEmpty(t) && r.reject();
+            var u = window.spWebUrl + "/_vti_bin/ng/search.svc/";
+            i && (u += "?maxItems=" + i),
+            n.ajax({
+                type: "POST",
+                url: u,
+                data: t,
+                contentType: "application/json; charset=utf-8",
+                success: r.resolve,
+                error: r.reject
+            })
+        }).promise()
+    }
+    ,
+    NG.LoadGlobalSearchByType = function(t, i, r) {
+        return n.Deferred(function(u) {
+            NG.StringIsNullOrEmpty(t) && u.reject();
+            var f = String.format("{0}/_vti_bin/ng/search.svc/{1}/?pagingToken={2}", window.spWebUrl, i, r);
+            n.ajax({
+                type: "POST",
+                url: f,
+                data: t,
+                contentType: "application/json; charset=utf-8",
+                success: u.resolve,
+                error: u.reject
+            })
+        }).promise()
+    }
+    ,
+    NG.LoadUserSuggestions = n.ngCreateSearchCache(function(t, i, r, u) {
+        var f, e, o;
+        NG.StringIsNullOrEmpty(r) && t.resolve(),
+        i ? (NG[i] == null && (NG[i] = {}),
+        NG[i].UserSuggestions == null && (NG[i].UserSuggestions = {}),
+        NG[i].UserSuggestions[r] = []) : NG.UserSuggestions[r] = [],
+        f = window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/usersuggestions/",
+        i && (f = window.spWebUrl + "/_vti_bin/ng/remote/activityfeed." + i + ".ashx/usersuggestions/"),
+        e = {
+            searchTerm: "",
+            maxItems: u
+        },
+        e.searchTerm = r,
+        o = Sys.Serialization.JavaScriptSerializer.serialize(e),
+        n.ajax({
+            type: "POST",
+            url: f,
+            contentType: "application/json; charset=utf-8",
+            data: o
+        }).done(function(t) {
+            n(t).find("Colleague").each(function() {
+                i ? NG[i].UserSuggestions[r].push(NG.ParseColleague(n(this), i)) : NG.UserSuggestions[r].push(NG.ParseColleague(n(this), i))
+            })
+        }).fail(function() {
+            i ? NG[i].UserSuggestions[r] = [] : NG.UserSuggestions[r] = [],
+            Sys.Debug.trace("Could not retrieve user suggestions")
+        }).always(t.resolve, t.reject)
+    }),
+    NG.LoadColleagues = n.ngCreateCache(function(t, i) {
+        var r = window.spWebUrl + "/_vti_bin/ng/colleague.svc/slim/";
+        i && (r = window.spWebUrl + "/_vti_bin/ng/remote/colleague." + i + ".ashx/slim/"),
+        n.get(r).done(function(t) {
+            i ? (NG[i] == null && (NG[i] = {}),
+            NG[i].ColleagueList = []) : NG.ColleagueList = [],
+            n(t).find("Colleague").each(function() {
+                i ? NG[i].ColleagueList.push(NG.ParseColleague(n(this), i)) : NG.ColleagueList.push(NG.ParseColleague(n(this)))
+            }),
+            NG.SortColleagues(i ? NG[i].ColleagueList : NG.ColleagueList)
+        }).fail(function() {
+            i ? NG[i].ColleagueList = [] : NG.ColleagueList = [],
+            Sys.Debug.trace("Could not retrieve colleagues")
+        }).always(t.resolve, t.reject)
+    }),
+    NG.SortColleagues = function(n) {
+        n.sort(function(n, t) {
+            var i, r, u, f;
+            return n == t || n.Id == t.Id ? 0 : n == null ? 1 : t == null ? -1 : (i = n.name.toLowerCase(),
+            r = t.name.toLowerCase(),
+            i != r) ? i < r ? -1 : 1 : (u = n.AccountName.toLowerCase(),
+            f = t.AccountName.toLowerCase(),
+            u != f) ? u < f ? -1 : 1 : n.Id < t.Id ? -1 : 1
+        })
+    }
+    ,
+    NG.ParseColleague = function(n, t) {
+        return t ? {
+            AccountName: n.find("TextAlias").text(),
+            Id: n.find("UserId").text(),
+            name: n.find("Name").text(),
+            uri: n.find("Uri").text(),
+            PictureUrl: n.find("PictureUrl").text(),
+            RemoteContext: t,
+            RemoteSource: n.find("RemoteSource").text(),
+            UserName: n.find("AccountName").text()
+        } : {
+            AccountName: n.find("TextAlias").text(),
+            Id: n.find("UserId").text(),
+            name: n.find("Name").text(),
+            uri: n.find("Uri").text(),
+            PictureUrl: n.find("PictureUrl").text(),
+            UserName: n.find("AccountName").text()
+        }
+    }
+    ,
+    NG.LoadCommunitySuggestions = n.ngCreateSearchCache(function(t, i, r, u) {
+        var f, e, o;
+        NG.StringIsNullOrEmpty(r) && t.resolve(),
+        i ? (NG[i] == null && (NG[i] = {}),
+        NG[i].GroupSuggestions == null && (NG[i].GroupSuggestions = {}),
+        NG[i].GroupSuggestions[r] = []) : NG.GroupSuggestions[r] = [],
+        f = window.spWebUrl + "/_vti_bin/ngc/communityservice.svc/Groups/Discoverable/Public/Suggestions/",
+        i && (f = window.spWebUrl + "/_vti_bin/ngc/remote/communityservice." + i + ".ashx/Groups/Discoverable/Public/Suggestions/"),
+        e = {
+            searchTerm: "",
+            maxItems: u
+        },
+        e.searchTerm = r,
+        o = Sys.Serialization.JavaScriptSerializer.serialize(e),
+        n.ajax({
+            type: "POST",
+            url: f,
+            contentType: "application/json; charset=utf-8",
+            data: o
+        }).done(function(t) {
+            n(t).find("SocialGroup").each(function() {
+                var u = n(this)
+                  , t = NG.ParseCommunityFromXnode(u);
+                i ? NG[i].GroupSuggestions[r].push(t) : NG.GroupSuggestions[r].push(t)
+            })
+        }).fail(function() {
+            i ? NG[i].GroupSuggestions[r] = [] : NG.GroupSuggestions[r] = [],
+            Sys.Debug.trace("Could not retrieve group suggestions")
+        }).always(t.resolve, t.reject)
+    }),
+    NG.LoadCommunities = n.ngCreateCache(function(t, i) {
+        var r = window.spWebUrl + "/_vti_bin/ngc/communityservice.svc/groups/";
+        i && (r = window.spWebUrl + "/_vti_bin/ng/remote/communityservice." + i + ".ashx/groups/"),
+        n.get(r).done(function(t) {
+            var r, f, u;
+            i ? (NG[i] == null && (NG[i] = {}),
+            NG[i].CommunityList = []) : NG.CommunityList = [],
+            n(t).find("SocialGroup").each(function() {
+                var r = n(this)
+                  , t = NG.ParseCommunityFromXnode(r);
+                i ? NG[i].CommunityList.push(t) : NG.CommunityList.push(t)
+            }),
+            i || (r = window.ngCommunityID || window.ngGroupID,
+            r && (f = NG.CommunityList || [],
+            u = n.grep(f, function(n) {
+                return n.Id == r
+            }),
+            u.length > 0 && (NG.CurrentCommunity = u[0])))
+        }).fail(function() {
+            i ? NG[i].CommunityList = [] : NG.CommunityList = [],
+            Sys.Debug.trace("Could not retrieve communities")
+        }).always(t.resolve, t.reject)
+    }),
+    NG.CurrentCommunity = null,
+    NG.LoadCurrentCommunity = n.ngCreateCache(function(t) {
+        window.ngCommunityID && !NG.CurrentCommunity ? n.get((window.spWebUrl || "") + "/_vti_bin/ngc/communityservice.svc/").done(function(t) {
+            n(t).find("SocialGroup").each(function() {
+                var t = n(this)
+                  , i = NG.ParseCommunityFromXnode(t);
+                NG.CurrentCommunity = i
+            })
+        }).fail(function() {
+            NG.CurrentCommunity = [],
+            Sys.Debug.trace("Could not retrieve current community")
+        }).always(t.resolve, t.reject) : t.resolve()
+    }),
+    NG.AutoComplete = function(t) {
+        function s(n) {
+            switch (n.type) {
+            case "user":
+                return (n.name + " " + n.id).toLowerCase();
+            case "group":
+                return (n.id + " " + n.name).toLowerCase();
+            case "hashtag":
+                return n.name.toLowerCase()
+            }
+        }
+        var i = this, h, c;
+        i.autocompleteItems = null,
+        i.hashTagSuggestions = [],
+        i.term = null;
+        var f = null
+          , u = null
+          , e = null
+          , r = {}
+          , o = "";
+        return i.FormatAutocompleteItemDisplay = function(t) {
+            var i, f, u, r;
+            switch (t.type) {
+            case "group":
+                return i = t.isPrivate ? ngText.PrivateCommunity : ngText.PublicCommunity,
+                f = t.logoUrl,
+                t.isContext && (i = t.isPrivate ? t.externalId ? i = ngText.Glassboard : ngText.PrivateGroup : ngText.PublicGroup),
+                u = String.format('<img src="{0}" onerror="NG.CommunityImageErrorHandler(this)" alt=""/><div class="name">{1}<small>{2}<\/small><\/div>', f, n.htmlEncode(t.name), i),
+                t.isPrivate && (u += "<div class='private'><\/div>"),
+                u;
+            case "user":
+                return r = window.spWebUrl + "/_layouts/images/O14_person_placeHolder_96.png",
+                t.PictureUrl && t.PictureUrl.length > 0 && (r = t.PictureUrl),
+                t.id.toLowerCase() == String.format("({0})", t.name.toLowerCase()) ? String.format('<img src="{0}" onerror="NG.ProfileImageErrorHandler(this)" alt=""/><div class="name">{1}<\/div>', r, t.name) : String.format('<img src="{0}" onerror="NG.ProfileImageErrorHandler(this)" alt=""/><div class="name">{1}<small>{2}<\/small><\/div>', r, t.name, t.id);
+            case "hashtag":
+                return String.format('<div class="name">{0}<\/div>', n.htmlEncode(t.name));
+            default:
+                Sys.Debug.trace("Unknown autocomplete item type: " + t.type)
+            }
+        }
+        ,
+        i.FormatAutocompleteItemForSearch = function(n) {
+            switch (n.type) {
+            case "group":
+                return n.name;
+            case "user":
+                return n.id + " " + n.name;
+            case "hashtag":
+                return n.id;
+            default:
+                Sys.Debug.trace("Unknown autocomplete item type: " + n.type)
+            }
+        }
+        ,
+        i.FormatAutocompleteItemText = function(n) {
+            switch (n.type) {
+            case "group":
+                return "@[" + n.id + "]";
+            case "user":
+                return "@" + n.id;
+            case "hashtag":
+                return n.name;
+            default:
+                Sys.Debug.trace("Unknown autocomplete item type: " + n.type)
+            }
+        }
+        ,
+        i.FormatAutocompleteNoResults = function(n) {
+            var i, t;
+            if (!n || n.length == 0)
+                return !1;
+            if (i = n.charAt(0) == "@" || n.charAt(0) == "#",
+            !i)
+                return null;
+            if (n.length == 1)
+                if (n.charAt(0) == "@")
+                    if (r.includeCommunities || r.includeColleagues)
+                        t = r.includeCommunities ? ngText.AutocompletePrompt : ngText.AutocompletePersonPrompt;
+                    else
+                        return !1;
+                else {
+                    if (!r.includeHashTags)
+                        return !1;
+                    t = ngText.HashtagAutocompletePrompt
+                }
+            else
+                t = String.format(ngText.AutocompleteNoResults, n);
+            return String.format("<small>{0}<\/small>", t)
+        }
+        ,
+        i.MungeAutocompleteTerm = function(t, e) {
+            var l = ["@", "#"], a = t.charAt(0), s, h, c;
+            if (e !== "undefined" && n.inArray(a, l) === -1 && (s = e.toUpperCase().split(" "),
+            h = n.inArray(t.toUpperCase(), s) - 1,
+            h > -1 && (c = s[h],
+            n.inArray(c.charAt(0), l) !== -1 && (t = c + " " + t))),
+            i.autocompleteFilter = t.charAt(0),
+            t.charAt(0) == "@") {
+                if (t = t.substring(1),
+                i.context = r.newsFeedControl && r.newsFeedControl.options.currentModule ? r.newsFeedControl.options.currentModule.remoteConnection : null,
+                o != i.context && (i.autocompleteLoaded = !1,
+                i.autocompleteItems = [],
+                u = null,
+                f = null,
+                o = i.context),
+                (t.charAt(0) == "[" || t.charAt(0) == "(") && (t = t.substring(1)),
+                window.ngEnableTargetAllUsers == !0) {
+                    if (i.term != t)
+                        return i.term = t,
+                        i.LoadUserAutoCompleteData(),
+                        t
+                } else
+                    i.LoadDirectMessageAutocompleteData();
+                return t
+            }
+            return t.charAt(0) == "#" && (t = t.substring(1),
+            t.charAt(0) == "[" && (t = t.substring(1)),
+            (t.charAt(t.length - 1) == "]" || t.charAt(t.length - 1) == ")") && (t = t.substring(0, t.length - 1)),
+            t.length > 0) ? (i.LoadHashTagAutocompleteData(t),
+            t) : !1
+        }
+        ,
+        i.LoadDirectMessageAutocompleteData = function() {
+            if (!i.autocompleteLoading && !i.autocompleteLoaded) {
+                i.autocompleteLoading = !0;
+                var n = Function.createDelegate(i, i.asyncLoadDirectMessageAutocompleteData);
+                window.setTimeout(n, 5)
+            }
+        }
+        ,
+        i.asyncLoadDirectMessageAutocompleteData = function() {
+            i.autocompleteLoaded = !0,
+            i.autocompleteLoading = !0,
+            window.ngEnableTargetAllUsers || n.when(NG.LoadColleagues(i.context)).then(function() {
+                f = i.context ? NG[i.context].ColleagueList : NG.ColleagueList,
+                i.setAutocompleteData()
+            }),
+            n.when(NG.LoadCommunities(i.context)).then(function() {
+                u = i.context ? NG[i.context].CommunityList : NG.CommunityList,
+                n.when(NG.LoadCurrentCommunity()).then(function() {
+                    e = NG.CurrentCommunity,
+                    i.setAutocompleteData()
+                })
+            })
+        }
+        ,
+        i.setAutocompleteData = function() {
+            if (i.autocompleteLoading = !1,
+            u && f) {
+                i.autocompleteItems = [];
+                var t = /^(?:.*\\)?(.*)$/;
+                n(f).each(function(n, r) {
+                    var u = r.AccountName.replace(t, "$1"), f = u.split("|"), e;
+                    f.length > 0 && (u = f[f.length - 1]),
+                    e = {
+                        id: u,
+                        name: r.name,
+                        PictureUrl: r.PictureUrl,
+                        type: "user",
+                        profileId: r.Id,
+                        accountName: r.UserName
+                    },
+                    i.autocompleteItems.push(e)
+                }),
+                n(u).each(function(n, t) {
+                    r.excludeCurrentCommunity && e && t.Id == e.Id || (t.IsOwner || !t.MemberReadOnly) && i.autocompleteItems.push({
+                        id: t.Name,
+                        name: t.Name,
+                        type: "group",
+                        logoUrl: t.LogoUrl || "/_layouts/images/siteicon.png",
+                        isPrivate: !t.PrivacyLevel || t.PrivacyLevel.toLowerCase() == "private",
+                        isContext: t.SocialGroupType == "StandAlone",
+                        externalId: t.ExternalLinkId
+                    })
+                }),
+                i.resetAutocomplete(),
+                r.dataLoadCallback && r.dataLoadCallback(f, u)
+            }
+        }
+        ,
+        i.LoadUserAutoCompleteData = function() {
+            var t = i.term, o;
+            t && t.length > 0 && (o = t.substring(0, t.length - 1),
+            i.context ? !NG[i.context] == null && (f = NG[i.context].UserSuggestions[o]) : f = NG.UserSuggestions[o],
+            f && f.length != r.max ? (i.context ? !NG[i.context] == null && (NG[i.context].UserSuggestions[t] = f) : NG.UserSuggestions[t] = f,
+            window.ngEnableTargetAllPublicGroups && i.LoadGroupAutoCompleteData()) : n.when(NG.LoadUserSuggestions(i.context, t, r.max)).then(function() {
+                f = i.context ? NG[i.context].UserSuggestions[t] : NG.UserSuggestions[t],
+                window.ngEnableTargetAllPublicGroups ? i.LoadGroupAutoCompleteData() : n.when(NG.LoadCommunities(i.context)).then(function() {
+                    u = i.context ? NG[i.context].CommunityList : NG.CommunityList,
+                    n.when(NG.LoadCurrentCommunity()).then(function() {
+                        e = NG.CurrentCommunity,
+                        i.setAutocompleteData()
+                    })
+                })
+            }))
+        }
+        ,
+        i.LoadGroupAutoCompleteData = function() {
+            var t = i.term, f;
+            t && t.length > 0 && (f = t.substring(0, t.length - 1),
+            i.context ? !NG[i.context] == null && (u = NG[i.context].GroupSuggestions[f]) : u = NG.GroupSuggestions[f],
+            u && u.length != r.max ? (i.context ? !NG[i.context] == null && (NG[i.context].GroupSuggestions[t] = u) : NG.GroupSuggestions[t] = u,
+            i.setAutocompleteData()) : n.when(NG.LoadCommunitySuggestions(i.context, t, r.max), NG.LoadCurrentCommunity()).then(function() {
+                u = i.context ? NG[i.context].GroupSuggestions[t] : NG.GroupSuggestions[t],
+                e = NG.CurrentCommunity,
+                i.setAutocompleteData()
+            }))
+        }
+        ,
+        i.resetAutocomplete = function() {
+            n(r.inputControl).flushCache().setOptions(i.GetAutocompleteOptions())
+        }
+        ,
+        i.hashTagsLoaded = {},
+        i.LoadHashTagAutocompleteData = function(t) {
+            var s = r.max, f, h, o, c, u, e;
+            if (document.useMetaDataAutocomplete && (s = 20),
+            !i.hashTagsLoaded[t]) {
+                for (f = t; f.length > 0; f = f.substring(0, f.length - 1))
+                    if (h = i.hashTagsLoaded[f],
+                    h < s)
+                        return;
+                i.hashTagsLoaded[t] = 1,
+                o = /\s/,
+                typeof window.customTagAutoCompleteLoad == "function" ? n.when(window.customTagAutoCompleteLoad(t)).done(function(r) {
+                    if (r) {
+                        if (r !== Array) {
+                            Sys.Debug.trace("Custom Hashtag service method did not return an array as expected!");
+                            return
+                        }
+                        n.each(r, function(r, u) {
+                            i.hashTagsLoaded[t] = 0;
+                            var f = u
+                              , e = n.grep(i.hashTagSuggestions, function(n) {
+                                return n.id == f
+                            });
+                            e.length == 0 && i.hashTagSuggestions.push({
+                                id: f,
+                                name: o.test(f) ? "#[" + f + "]" : "#" + f,
+                                type: "hashtag"
+                            }),
+                            NG.AddTagToCache(f),
+                            i.hashTagsLoaded[t]++
+                        }),
+                        i.resetAutocomplete()
+                    }
+                }) : document.useMetaDataAutocomplete ? (c = document.getElementById("__REQUESTDIGEST").value,
+                (typeof ngtagUI == "undefined" || ngtagUI == null) && (ngtagUI = {
+                    lcid: 1033,
+                    SspId: "00000000-0000-0000-0000-000000000000",
+                    termSetList: "00000000-0000-0000-0000-000000000000",
+                    excludedTermset: "00000000-0000-0000-0000-000000000000"
+                }),
+                u = {
+                    start: "",
+                    lcid: ngtagUI.lcid,
+                    sspList: ngtagUI.SspId,
+                    termSetList: ngtagUI.termSetList,
+                    anchorId: "00000000-0000-0000-0000-000000000000",
+                    isSpanTermStores: !0,
+                    isSpanTermSets: !0,
+                    isIncludeUnavailable: !1,
+                    isIncludeDeprecated: !1,
+                    isAddTerms: !0,
+                    isIncludePathData: !1,
+                    excludeKeyword: !1,
+                    excludedTermset: ngtagUI.excludedTermset
+                },
+                u.start = t,
+                e = Sys.Serialization.JavaScriptSerializer.serialize(u),
+                n.ajax({
+                    type: "POST",
+                    url: window.spWebUrl + "/_vti_bin/TaxonomyInternalService.json/GetSuggestions",
+                    contentType: "application/json; charset=utf-8",
+                    headers: {
+                        "x-requestdigest": c
+                    },
+                    data: e,
+                    success: function(r) {
+                        var f, e;
+                        if (r.d.Groups[0])
+                            for (f in r.d.Groups[0].Suggestions) {
+                                var s = r.d.Groups[0].Suggestions[f]
+                                  , u = s.DefaultLabel
+                                  , h = n.grep(i.hashTagSuggestions, function(n) {
+                                    return n.id == u
+                                });
+                                h.length == 0 && (e = o.test(u) ? "#[" + u + "]" : "#" + u,
+                                i.hashTagSuggestions.push({
+                                    id: u,
+                                    name: e,
+                                    type: "hashtag"
+                                })),
+                                NG.AddTagToCache(u),
+                                i.hashTagsLoaded[t]++
+                            }
+                        i.resetAutocomplete()
+                    },
+                    error: function() {
+                        UpdateFormDigest && _spFormDigestRefreshInterval && _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl && UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval),
+                        Sys.Debug.trace("Failed to load tag suggestions for tag " + t)
+                    }
+                })) : (u = {
+                    tag: "",
+                    maxItems: r.max
+                },
+                u.tag = t,
+                e = Sys.Serialization.JavaScriptSerializer.serialize(u),
+                n.ajax({
+                    type: "POST",
+                    url: window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/tagsuggestions/",
+                    contentType: "application/json; charset=utf-8",
+                    data: e,
+                    success: function(r) {
+                        i.hashTagsLoaded[t] = 0;
+                        var u = /\s/;
+                        n(r).find("Tag").find("tag").each(function() {
+                            var r = n(this).text()
+                              , f = n.grep(i.hashTagSuggestions, function(n) {
+                                return n.id == r
+                            });
+                            f.length == 0 && i.hashTagSuggestions.push({
+                                id: r,
+                                name: u.test(r) ? "#[" + r + "]" : "#" + r,
+                                type: "hashtag"
+                            }),
+                            NG.AddTagToCache(r),
+                            i.hashTagsLoaded[t]++
+                        }),
+                        i.resetAutocomplete()
+                    },
+                    error: function() {
+                        i.hashTagsLoaded[t] = !1,
+                        Sys.Debug.trace("Failed to load tag suggestions for tag " + t)
+                    }
+                }))
+            }
+        }
+        ,
+        i.autocompleteResultFilter = function(t) {
+            if (i.autocompleteFilter == "@") {
+                var u = typeof dontAllowMixed != "undefined" && dontAllowMixed === !0
+                  , f = e && e.PrivacyLevel.toLowerCase() == "private";
+                return (i.AutocompleteOptions.type == "post" && f || i.AutocompleteOptions.type == "response" && i.AutocompleteOptions.privacy == "Private") && u ? n.grep(t, function(n) {
+                    return r.includeColleagues && n.data.type == "user"
+                }) : i.AutocompleteOptions.type == "response" && i.AutocompleteOptions.privacy == "Private" && u ? n.grep(t, function(n) {
+                    return r.includeColleagues && n.data.type == "user"
+                }) : (i.AutocompleteOptions.type == "response" && i.AutocompleteOptions.privacy == "Public" || i.AutocompleteOptions.type == "post" && e && e.PrivacyLevel.toLowerCase() == "public") && u === !0 ? n.grep(t, function(n) {
+                    return r.includeColleagues && n.data.type == "user" || r.includeCommunities && n.data.type == "group" && !n.data.isPrivate
+                }) : n.grep(t, function(n) {
+                    return r.includeColleagues && n.data.type == "user" || r.includeCommunities && n.data.type == "group"
+                })
+            }
+            return n.grep(t, function(n) {
+                return n.data.type == "hashtag"
+            })
+        }
+        ,
+        i.autocompleteSortFunc = function(n, t) {
+            var i = new RegExp("\\b" + n,"i");
+            t.sort(function(n, t) {
+                if (n == null && t == null)
+                    return 0;
+                if (n == null)
+                    return 1;
+                if (t == null)
+                    return -1;
+                if (n.value == t.value)
+                    return 0;
+                var f = s(n.data)
+                  , e = s(t.data)
+                  , r = f.search(i)
+                  , u = e.search(i);
+                return r == u ? f < e ? -1 : 1 : r >= 0 && (u < 0 || r < u) ? -1 : 1
+            })
+        }
+        ,
+        i.CheckKeypress = function(t) {
+            var u = NG.navigator.sayswho, f;
+            (!u.trident || u.trident > 4) && i.CheckInput(t.data),
+            f = n(r.inputControl).val(),
+            n(r.resultsHolder).find("div").each(function() {
+                var t = n(this)
+                  , i = t.data("ngTarget")
+                  , r = i.split(":")[1];
+                f.indexOf(r) < 0 && t.remove()
+            })
+        }
+        ,
+        i.CheckInput = function(t) {
+            var u = r.checkInputSource != null ? n(r.checkInputSource) : n(r.inputControl)
+              , i = n(u)
+              , f = i.val();
+            i.get(0).inputControl && f == i.get(0).inputControl.options.defaultValue || r.keypressCallback(f, u, t ? t.privacy : null)
+        }
+        ,
+        i.AddResult = function(t) {
+            n("<div/>").html(t.name).data("ngTarget", t.profileId + ":@" + t.id).appendTo(n(r.resultsHolder))
+        }
+        ,
+        i.GetAutocompleteOptions = function() {
+            var t = i.autocompleteItems;
+            return i.hashTagSuggestions.length > 0 && (t = t ? n.merge([], t) : [],
+            t = n.merge(t, i.hashTagSuggestions)),
+            n.extend(r || {}, {
+                precomplete: t ? function() {}
+                : i.LoadDirectMessageAutocompleteData,
+                data: t
+            })
+        }
+        ,
+        h = {
+            formatItem: i.FormatAutocompleteItemDisplay,
+            formatMatch: i.FormatAutocompleteItemForSearch,
+            formatResult: i.FormatAutocompleteItemText,
+            formatNoResults: i.FormatAutocompleteNoResults,
+            precomplete: i.LoadDirectMessageAutocompleteData,
+            data: null,
+            mungeTerm: i.MungeAutocompleteTerm,
+            resultFilter: i.autocompleteResultFilter,
+            sort: i.autocompleteSortFunc
+        },
+        c = {
+            multiple: !0,
+            mustMatch: !1,
+            autoFill: !0,
+            matchContains: !0,
+            multipleSeparator: " ",
+            selectFirst: !0,
+            scroll: !0,
+            preserveLineBreak: !0,
+            preserveMultiWord: !0,
+            max: 50,
+            cacheLength: 50,
+            includeCommunities: !0,
+            includeColleagues: !0,
+            includeHashTags: !0,
+            excludeCurrentCommunity: !0,
+            inputControl: null,
+            keypressCallback: null,
+            checkInputSource: null,
+            dataLoadCallback: null,
+            itemSelectedCallback: null,
+            type: "post",
+            resultsHolder: null,
+            captureTargetResults: !0
+        },
+        n.extend(r, n.extend(c, t), h),
+        i.AutocompleteOptions = r,
+        r.captureTargetResults && !r.resultsHolder && (r.resultsHolder = n('<div class="ngACTargetResults" style="display:none;"/>'),
+        n(r.inputControl).parent().append(r.resultsHolder)),
+        r.keypressCallback && (n(r.inputControl).bind("keypress keyup", r, i.CheckKeypress),
+        n(r.inputControl).bind("result", function(n, t) {
+            r.captureTargetResults && t.type && t.type == "user" && i.AddResult(t),
+            i.CheckInput(r),
+            r.itemSelectedCallback && r.itemSelectedCallback(t)
+        })),
+        i
+    }
+    ,
+    r = {
+        vAlign: "bottom",
+        hAlign: "left",
+        offset: 1,
+        hOffset: 0,
+        width: "250px",
+        targetElem: null,
+        menuItems: [],
+        hideOnHoverOut: !1,
+        includeArrow: !1
+    },
+    NG.ContextMenu = function(t) {
+        function k(t) {
+            t.slideDown(100, function() {
+                n("body").off("click.ngContextMenu").one("click.ngContextMenu", function() {
+                    a(t)
+                })
+            })
+        }
+        function a(n) {
+            n.slideUp(100, function() {
+                n.remove()
+            })
+        }
+        var t = n.extend({}, r, t), b, u, i, c, w, s, h;
+        if (t.menuItems.length == 0) {
+            Sys.Debug.trace("Must supply menuItems for the context menu");
+            return
+        }
+        b = 0,
+        u = n(t.targetElem);
+        var e = null
+          , d = 1e3
+          , y = t.targetElem ? u.offsetParent() : n(document.body)
+          , f = u.position()
+          , p = n(y).find(".ngContextMenu");
+        if (p.length > 0) {
+            a(n(p));
+            return
+        }
+        n(".ngContextMenu").remove(),
+        i = n(document.createElement("div")).css({
+            display: "none",
+            width: t.width,
+            position: "absolute"
+        }),
+        c = n(document.createElement("ul")),
+        n.each(t.menuItems, function(t, i) {
+            if (NG.StringIsNullOrEmpty(i.text))
+                n(document.createElement("li")).addClass("ngMenuSeparator").appendTo(c);
+            else {
+                var r = n(document.createElement("li")).html(i.text).addClass("ngContextMenuItem");
+                i.itemClass && r.addClass(i.itemClass),
+                r.bind("click", i.data, function(t) {
+                    t.stopPropagation(),
+                    i.callback(t),
+                    (typeof i.removeAfterAction == "undefined" || i.removeAfterAction === !0) && n(".ngContextMenu").remove()
+                }),
+                r.appendTo(c)
+            }
+        }),
+        y.append(i),
+        c.appendTo(i);
+        var o = t.offset
+          , v = f.top
+          , l = f.left;
+        t.vAlign == "bottom" ? (t.includeArrow && (o += 9,
+        t.hAlign == "right" ? n('<div class="arrow-up"/>').prependTo(i).css({
+            position: "absolute",
+            top: "-9px",
+            right: "5px"
+        }) : n('<div class="arrow-up"/>').prependTo(i).css({
+            position: "absolute",
+            top: "-9px",
+            left: "5px"
+        })),
+        s = u.outerHeight(),
+        v = f.top + s + o,
+        t.hAlign == "right" && (w = u.outerWidth(),
+        l = f.left - (i.width() - t.hOffset) + w)) : t.alignment == "top" ? (s = i.height(),
+        v = f.top - s - o) : t.alignment == "right" ? (h = u.outerWidth(),
+        l = f.left + h + o) : t.alignment == "left" && (h = i.width(),
+        l = f.left - h - o),
+        i.addClass("ngContextMenu").css({
+            left: l + "px",
+            top: v + t.offset + "px"
+        }),
+        k(i),
+        t.hideOnHoverOut && i.add(u).hover(function() {
+            e && clearTimeout(e)
+        }, function() {
+            e && clearTimeout(e),
+            e = setTimeout(function() {
+                a(i)
+            }, d)
+        }),
+        NG.AdjustPopupOnScreen(i)
+    }
+    ,
+    NG.AddTagToCache = function(n) {
+        NG.IsTagInCache(n) || NG.HashTags.push(n)
+    }
+    ,
+    NG.IsTagInCache = function(t) {
+        return n.isInArray(NG.HashTags, t)
+    }
+    ,
+    NG.TagAutoCompleteLoad = function(t, i) {
+        var f, r, u;
+        typeof window.customTagAutoCompleteLoad == "function" ? n.when(window.customTagAutoCompleteLoad(t)).done(function(t) {
+            if (t) {
+                if (t !== Array) {
+                    Sys.Debug.trace("Custom Hashtag service method did not return an array as expected!");
+                    return
+                }
+                var r = [];
+                n.each(t, function(n, t) {
+                    var i = t;
+                    r.push({
+                        id: i,
+                        data: i,
+                        value: i,
+                        result: i
+                    }),
+                    NG.AddTagToCache(i)
+                }),
+                i(r)
+            }
+        }) : document.useMetaDataAutocomplete ? (f = document.getElementById("__REQUESTDIGEST").value,
+        (typeof ngtagUI == "undefined" || ngtagUI == null) && (ngtagUI = {
+            lcid: 1033,
+            SspId: "00000000-0000-0000-0000-000000000000",
+            termSetList: "00000000-0000-0000-0000-000000000000",
+            excludedTermset: "00000000-0000-0000-0000-000000000000"
+        }),
+        r = {
+            start: "",
+            lcid: ngtagUI.lcid,
+            sspList: ngtagUI.SspId,
+            termSetList: ngtagUI.termSetList,
+            anchorId: "00000000-0000-0000-0000-000000000000",
+            isSpanTermStores: !0,
+            isSpanTermSets: !0,
+            isIncludeUnavailable: !1,
+            isIncludeDeprecated: !1,
+            isAddTerms: !0,
+            isIncludePathData: !1,
+            excludeKeyword: !1,
+            excludedTermset: ngtagUI.excludedTermset
+        },
+        r.start = t,
+        u = Sys.Serialization.JavaScriptSerializer.serialize(r),
+        n.ajax({
+            type: "POST",
+            url: window.spWebUrl + "/_vti_bin/TaxonomyInternalService.json/GetSuggestions",
+            contentType: "application/json; charset=utf-8",
+            headers: {
+                "x-requestdigest": f
+            },
+            data: u,
+            success: function(n) {
+                var r = [], u, f, t;
+                if (n.d.Groups[0])
+                    for (u in n.d.Groups[0].Suggestions)
+                        f = n.d.Groups[0].Suggestions[u],
+                        t = f.DefaultLabel,
+                        r.push({
+                            id: t,
+                            data: t,
+                            value: t,
+                            result: t
+                        }),
+                        NG.AddTagToCache(t);
+                i(r)
+            },
+            error: function() {
+                UpdateFormDigest && _spFormDigestRefreshInterval && _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl && UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval),
+                Sys.Debug.trace("Failed to load tag suggestions for tag " + t)
+            }
+        })) : (r = {
+            tag: "",
+            maxItems: 20
+        },
+        r.tag = t,
+        u = Sys.Serialization.JavaScriptSerializer.serialize(r),
+        n.ajax({
+            type: "POST",
+            url: window.spWebUrl + "/_vti_bin/ng/activityfeed.svc/tagsuggestions/",
+            contentType: "application/json; charset=utf-8",
+            data: u,
+            cacheLength: 500,
+            success: function(t) {
+                var r = [];
+                n(t).find("Tag").find("tag").each(function() {
+                    var t = n(this).text();
+                    r.push({
+                        id: t,
+                        data: t,
+                        value: t,
+                        result: t
+                    }),
+                    NG.AddTagToCache(t)
+                }),
+                i(r)
+            },
+            error: function() {
+                Sys.Debug.trace("Failed to load tag suggestions for tag " + t)
+            }
+        }))
+    }
+    ,
+    u = {
+        maxLength: 1e4,
+        warningLength: 10
+    },
+    NG.MaxTextLength = function(t, i, r) {
+        function f(t, i, r) {
+            var f = e ? n(t).html() : n(t).val()
+              , c = f.length
+              , o = parseInt(n(t).attr("maxLength") && n(t).attr("maxLength") > 0 ? n(t).attr("maxLength") : r.maxLength)
+              , s = n(i).data("extraCount")
+              , h = n(i).data("defaultTextLength")
+              , l = n(t).prop("title") != "" && n(t).prop("title") === f
+              , u = o - (c + (s === undefined ? 0 : s) - (l && h !== undefined ? h : 0));
+            u >= 0 ? n(i).html(String.format(ngText.CharactersRemaining, u)) : n(i).html(String.format(ngText.CharactersRemaining, 0)),
+            u <= 0 ? (n(t).val(f.substring(0, o)),
+            n(i).addClass("ngErrorText")) : u <= r.warningLength ? n(i).addClass("ngErrorText") : n(i).removeClass("ngErrorText")
+        }
+        if (!NG.navigator || !NG.navigator.sayswho || !NG.navigator.sayswho.msie || NG.navigator.sayswho.version !== "8.0" && NG.navigator.sayswho.version !== "7.0" || typeof NG.navigator.sayswho.trident == "undefined" || NG.navigator.sayswho.trident !== "4.0") {
+            var r = n.extend({}, u, r)
+              , e = n(t).is("div");
+            f(t, i, r);
+            n(t).focus(function() {
+                f(t, i, r)
+            }).keyup(function() {
+                f(t, i, r)
+            }).blur(function() {
+                f(t, i, r)
+            }).on("ngupdatemaxlength", function() {
+                f(t, i, r)
+            })
+        }
+    }
+    ,
+    NG.CommunitySubscriptionControl = function(t, i) {
+        var r = this;
+        i = n.extend({
+            dataUrl: window.spWebUrl + "/_vti_bin/ngc/communityservice.svc",
+            groupId: null,
+            includeQuestions: !0,
+            showManually: !1
+        }, i || {});
+        var u = null
+          , f = "Microblogging"
+          , e = "NewsGatorQA";
+        r.GetSubscriptions = function(t) {
+            n.ajax({
+                type: "GET",
+                url: i.dataUrl + "/subscriptions/" + (i.groupId ? i.groupId + "/" : ""),
+                success: function(i) {
+                    u = [],
+                    n(i).find("string").each(function() {
+                        u.push(n(this).text())
+                    }),
+                    r.ShowSubscriptionDialog(t)
+                },
+                error: function() {
+                    u = [],
+                    Sys.Debug.trace("Could not retrieve subcriptions")
+                }
+            })
+        }
+        ,
+        r.ShowSubscriptionSettings = function() {
+            n(".ngSubscriptionDialog").length > 0 || r.GetSubscriptions(n(t))
+        }
+        ,
+        r.ShowSubscriptionDialog = function(t) {
+            var h = n(String.format('<div class=\'ngSubscriptionHolder\'><div class=\'ngSubscriptionInputDiv\'><input id="ngSubscribeMicroblog" type="checkbox" /><label for="ngSubscribeMicroblog">{0}<\/label><\/div><div>', i.groupId ? ngText.SubscribeGroupMicroblogInput : ngText.SubscribeMicroblogInput)), s, o, c, l, a, v;
+            i.includeQuestions && h.append(n(String.format('<div class=\'ngSubscriptionInputDiv\'><input id="ngSubscribeQuestion" type="checkbox" /><label for="ngSubscribeQuestion">{0}<\/label><\/div>', i.groupId ? ngText.SubscribeGroupQuestionInput : ngText.SubscribeQuestionInput))),
+            h.append(n(String.format('<div class=\'ngSubscriptionInputDiv\'><input id="ngSubscribeComment" type="checkbox" /><label for="ngSubscribeComment">{0}<\/label><\/div>', i.groupId ? ngText.SubscribeGroupCommentInput : ngText.SubscribeCommentInput))),
+            h.append(n(String.format('<div class=\'ngSubscriptionInputDiv\'><input id="ngSubscribeDigest" type="checkbox" /><label for="ngSubscribeDigest">{0}<\/label><\/div>', i.groupId ? ngText.SubscribeSphereDigest : ngText.SubscribeSocialGroupDigest))),
+            s = NG.ShowPopup({
+                offset: 1,
+                targetElem: n(t),
+                alignment: "bottom",
+                title: ngText.SubscriptionSettingsTitle,
+                content: h,
+                onscreen: !1,
+                showEffect: function(n) {
+                    n.show()
+                },
+                hideEffect: function(n) {
+                    n.remove()
+                }
+            }).addClass("ngSubscriptionDialog"),
+            NG.AdjustPopupOnScreen(s);
+            var y = !1
+              , p = !1
+              , w = !1
+              , b = !1;
+            for (o = 0; o < u.length; o++)
+                u[o].toLowerCase() == f.toLowerCase() && (y = !0),
+                u[o].toLowerCase() == e.toLowerCase() && (p = !0),
+                u[o].toLowerCase() == "comment" && (w = !0),
+                u[o].toLowerCase() == "digest" && (b = !0);
+            c = s.find("#ngSubscribeMicroblog"),
+            c.click(r.UpdateSubscription),
+            c.prop("checked", y),
+            i.includeQuestions && (l = s.find("#ngSubscribeQuestion"),
+            l.click(r.UpdateSubscription),
+            l.prop("checked", p)),
+            a = s.find("#ngSubscribeComment"),
+            a.click(r.UpdateSubscription),
+            a.prop("checked", w),
+            v = s.find("#ngSubscribeDigest"),
+            v.click(r.UpdateSubscription),
+            v.prop("checked", b)
+        }
+        ,
+        r.UpdateSubscription = function(t) {
+            var r = t.currentTarget, o = "", s;
+            r.id == "ngSubscribeMicroblog" ? o = f : r.id == "ngSubscribeQuestion" ? o = e : r.id == "ngSubscribeComment" ? o = "Comment" : r.id == "ngSubscribeDigest" && (o = "Digest"),
+            s = r.checked ? "" : "x/",
+            r.checked ? u.push(o) : u = n.grep(u, function(n) {
+                return n != o
+            }),
+            n.ajax({
+                type: "POST",
+                url: String.format("{0}/subscribe/{1}/{2}{3}", i.dataUrl, o, i.groupId ? i.groupId + "/" : "", s),
+                success: function() {
+                    new NG.Tooltip(r,ngText.UpdateSaved,0,"right")
+                },
+                error: function(n) {
+                    errText = NG.GetDefaultErrorMessage(n.status),
+                    new NG.Tooltip(r,errText,5e3,"right")
+                }
+            })
+        }
+        ,
+        i.showManually || n(t).click(r.ShowSubscriptionSettings)
+    }
+    ,
+    NG.GetSPContentDiv = function() {
+        return n("#s4-workspace")
+    }
+    ,
+    NG.GetParentScrollingDiv = function(n) {
+        for (var t = n.offsetParent(), i; t.length && t[0] !== document.body; ) {
+            if (i = t.css("overflowY"),
+            i && (i == "auto" || i == "scroll"))
+                return t;
+            t = t.offsetParent()
+        }
+        return n.offsetParent()
+    }
+    ,
+    NG.UpdatePaging = function(t, i, r, u) {
+        if (t.show(),
+        n("#ng_PageInfo", t).text(String.format(ngText.PagingText, i + 1, r + 1)),
+        n("#nges_pagingIcons span", t).unbind("click").removeClass("enabled disabled"),
+        i != 0) {
+            n("#nav_First", t).addClass("enabled").one("click", {
+                pageIndex: 0
+            }, u);
+            n("#nav_Prev", t).addClass("enabled").one("click", {
+                pageIndex: i - 1
+            }, u)
+        } else
+            n("#nav_First", t).addClass("disabled"),
+            n("#nav_Prev", t).addClass("disabled");
+        if (i != r) {
+            n("#nav_Last", t).addClass("enabled").one("click", {
+                pageIndex: r
+            }, u);
+            n("#nav_Next", t).addClass("enabled").one("click", {
+                pageIndex: i + 1
+            }, u)
+        } else
+            n("#nav_Last", t).addClass("disabled"),
+            n("#nav_Next", t).addClass("disabled")
+    }
+    ,
+    NG.SearchControl = function(t, i, r) {
+        var u = this, f = n(t), e;
+        return (i = n.extend({
+            searchCallback: null,
+            clearCallback: null
+        }, i || {}),
+        !i.searchCallback) ? (Sys.Debug.trace("Must supply a callback for search"),
+        null) : (u.DoSearch = function() {
+            var n = u.searchInput.val().trim();
+            if (NG.StringIsNullOrEmpty(n)) {
+                new NG.Tooltip(u.searchInput,ngText.BlankSearchTerm,2500,"bottom");
+                return
+            }
+            u.clearButton.css("visibility", "visible"),
+            u.searchInput.get(0).ngTooltip && u.searchInput.get(0).ngTooltip.Remove(),
+            i.searchCallback && i.searchCallback(n)
+        }
+        ,
+        u.ClearSearch = function() {
+            u.ClearSearchDisplay(),
+            i.clearCallback && i.clearCallback()
+        }
+        ,
+        u.ClearSearchDisplay = function() {
+            u.searchInput.val(""),
+            u.clearButton.css("visibility", "hidden")
+        }
+        ,
+        e = '<div class="ngClearFix ngSearchControl"><span class="ngSearchInput"><input type="text" maxlength="100" class="ngSearchText" title="' + ngText.Search + '"><a class="ngSearchButton" title="' + ngText.Search + '" class="ngSearchButton" href="javascript:void(0);"><\/a><\/span>',
+        i.clearCallback && (e += '<a class="ngClearSearchButton" title="' + ngText.ClearSearch + '" class="ngClearSearchButton" href="javascript:void(0);" style="visibility:hidden;"><\/a>'),
+        e += "<\/div>",
+        n(e).appendTo(f),
+        u.searchInput = n(".ngSearchText", f),
+        u.searchButton = n(".ngSearchButton", f),
+        u.clearButton = n(".ngClearSearchButton", f),
+        NG.InputControl(u.searchInput, u.searchButton, u.DoSearch, r),
+        u.clearButton.click(u.ClearSearch),
+        u)
+    }
+    ;
+    var f = /[@]\[([^\]]+)\]/g
+      , e = /@([A-Za-z0-9\.\-\\]+[A-Za-z0-9])/g
+      , o = /@\(([A-Za-z0-9\.\-\\\s',]+[A-Za-z0-9\s])\)/g;
+    NG.GetUserMatches = function(n) {
+        for (var t = [], i, r; (i = e.exec(n)) != null; )
+            t.push(i[1]);
+        while ((r = o.exec(n)) != null)
+            t.push(r[1]);
+        return t
+    }
+    ,
+    NG.GetCommunityMatches = function(t, i) {
+        for (var r = [], u; (u = f.exec(t)) != null; )
+            r.push(u[1].toLowerCase());
+        return i || NG.CurrentCommunity && NG.CurrentCommunity.Name && n.inArray(NG.CurrentCommunity.Name.toLowerCase(), r) == -1 && r.push(NG.CurrentCommunity.Name.toLowerCase()),
+        r
+    }
+    ,
+    NG.DisplayActivityStream = function(t) {
+        if (t = n.extend({
+            xslUrl: window.spWebUrl + "/_layouts/ng/xml/activityfeed.xslt?cache=" + ngCacheKey,
+            wrapperClass: ""
+        }, t || {}),
+        t.detailDiv.get(0).ngXmlControl)
+            t.detailDiv.get(0).ngXmlControl.LoadXml(t.url);
+        else {
+            t.detailDiv.wrap('<div class="ngNewsFeedContent ngWrapper ' + t.wrapperClass + '"/>');
+            var i = {
+                xmlUrl: t.url,
+                xslUrl: t.xslUrl,
+                clientID: t.clientId
+            }
+              , r = {
+                init: NG.CommonInit,
+                render: function(n) {
+                    n.newsFeedControl || (n.newsFeedControl = new NG.NewsFeed(n._element,{
+                        dataUrl: t.url,
+                        actionUrl: t.actionUrl,
+                        view: t.view,
+                        linkHashTags: t.linkHashTags ? t.linkHashTags : !1,
+                        hideLinkAvailable: t.hideLinkAvailable
+                    })),
+                    n.newsFeedControl && n.newsFeedControl.Render()
+                }
+            };
+            t.detailDiv.get(0).ngXmlControl = $create(SharePointAjax.XmlControl, i, r, null, t.detailDiv.get(0))
+        }
+    }
+    ,
+    NG.DisplayRecommendations = function(t) {
+        if (t = n.extend({
+            xslUrl: window.spWebUrl + "/_layouts/ng/xml/recommendations.xslt?cache=" + ngCacheKey,
+            wrapperClass: ""
+        }, t || {}),
+        t.detailDiv.get(0).ngXmlControl)
+            t.detailDiv.get(0).ngXmlControl.LoadXml(t.url);
+        else {
+            var i = {
+                xmlUrl: t.url,
+                xslUrl: t.xslUrl
+            }
+              , r = {
+                init: NG.CommonInit,
+                render: function(t) {
+                    var i = n(t._element);
+                    n(".ngAddColleague", i).click(function(t) {
+                        var i = n(t.currentTarget);
+                        NG.AddColleague(t),
+                        i.empty().append($ajaxLoaderBar),
+                        n(".ngIgnoreColleagueRecommendation", i.parents(".ngRecommendationActions")).hide()
+                    }),
+                    n(".ngAuthorLink", i).miniProfile(),
+                    n(".ngFollowCommunity", i).each(function(t, i) {
+                        $element = n(i),
+                        $element.click({
+                            group: {
+                                Id: $element.attr("groupId"),
+                                Name: $element.attr("groupName")
+                            }
+                        }, function(t) {
+                            var i = n(t.currentTarget);
+                            i.empty().append($ajaxLoaderBar),
+                            NG.JoinLeaveCommunity(t, "Join", function() {
+                                i.hide(),
+                                n(".ngIgnoreCommunityRecommendation", i.parents(".ngRecommendationActions")).hide(),
+                                new NG.Tooltip(i.parent(),String.format(ngText.FollowingCommunityConfirmation, t.data.group.Name),2500,"top")
+                            })
+                        })
+                    }),
+                    n(".ngIgnoreColleagueRecommendation", i).click(function(t) {
+                        var i = n(t.currentTarget);
+                        i.empty().append($ajaxLoaderBar),
+                        n.ajax({
+                            type: "POST",
+                            url: window.spWebUrl + "/_vti_bin/ng/dashboard.svc/Ignore/ColleagueRecommendations/",
+                            data: JSON.stringify([n(this).attr("userId")]),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            success: function() {
+                                new NG.Tooltip(i,ngText.RecommendationIgnored,2500,"top"),
+                                i.hide(),
+                                n(".ngAddColleague", i.parents(".ngRecommendationActions")).hide()
+                            },
+                            error: function() {
+                                new NG.Tooltip(i,ngText.RequestError,5e3,"top")
+                            }
+                        })
+                    }),
+                    n(".ngIgnoreCommunityRecommendation", i).click(function(t) {
+                        var i = n(t.currentTarget);
+                        i.empty().append($ajaxLoaderBar),
+                        n.ajax({
+                            type: "POST",
+                            url: window.spWebUrl + "/_vti_bin/ng/dashboard.svc/Ignore/CommunityRecommendations/",
+                            data: JSON.stringify([n(this).attr("groupId")]),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            success: function() {
+                                new NG.Tooltip(i,ngText.RecommendationIgnored,2500,"top"),
+                                i.hide(),
+                                n(".ngFollowCommunity", i.parents(".ngRecommendationActions")).hide()
+                            },
+                            error: function() {
+                                new NG.Tooltip(i,ngText.RequestError,5e3,"top")
+                            }
+                        })
+                    }),
+                    NG.Localize(i)
+                }
+            };
+            t.detailDiv.get(0).ngXmlControl = $create(SharePointAjax.XmlControl, i, r, null, t.detailDiv.get(0))
+        }
+    }
+    ,
+    NG.DisplayExchangeStream = function(t) {
+        if (t = n.extend({
+            xslUrl: window.spWebUrl + "/_layouts/ng/xml/exchangemail.xslt?cache=" + ngCacheKey,
+            wrapperClass: ""
+        }, t || {}),
+        !t.detailDiv.get(0).ngXmlControl) {
+            (t.type == "NGExchangeTask" || t.type == "NGExchangeCalendar") && (t.xslUrl = window.spWebUrl + "/_layouts/ng/xml/exchangeitem.xslt?cache=" + ngCacheKey);
+            var i = {
+                xmlUrl: t.url,
+                xslUrl: t.xslUrl,
+                clientID: t.clientId
+            }
+              , r = {
+                init: NG.CommonInit,
+                render: function(t) {
+                    var i = n(t._element);
+                    i.find(".ngActivityRow").on("click", function(t) {
+                        t.preventDefault();
+                        var r = t.currentTarget
+                          , i = n(r).attr("data-url");
+                        i != null && NG.ShowPageAsDialog({
+                            url: i,
+                            width: 600,
+                            height: 500
+                        })
+                    });
+                    NG.Localize(i),
+                    i.find(".ngActivityDate").each(function() {
+                        var t = n(this)
+                          , i = NG.ConvertDateToLocal(t.attr("title"), "M/d/yyyy h:mm tt");
+                        t.html(i)
+                    }),
+                    setTimeout(function() {
+                        NG.SetupPresence(i)
+                    }, 100)
+                }
+            };
+            t.detailDiv.get(0).ngXmlControl = $create(SharePointAjax.XmlControl, i, r, null, t.detailDiv.get(0))
+        }
+    }
+    ,
+    NG.DocPreviewOnLoad = function(t) {
+        n(t).closest(".ngDocPreviewContainer").css({
+            display: "inline-block"
+        })
+    }
+    ,
+    typeof JSON == "undefined" && (JSON = function() {}
+    ),
+    typeof JSON.stringify == "undefined" && (JSON.stringify = function(n) {
+        return Sys.Serialization.JavaScriptSerializer.serialize(n)
+    }
+    ),
+    Date.prototype.toISOString || (Date.prototype.toISOString = function() {
+        function n(n) {
+            return n < 10 ? "0" + n : n
+        }
+        return this.getUTCFullYear() + "-" + n(this.getUTCMonth() + 1) + "-" + n(this.getUTCDate()) + "T" + n(this.getUTCHours()) + ":" + n(this.getUTCMinutes()) + ":" + n(this.getUTCSeconds()) + "Z"
+    }
+    ),
+    String.format = function(n) {
+        if (NG.StringIsNullOrEmpty(n))
+            return "undefined";
+        try {
+            var t = Function._validateParams(arguments, [{
+                name: "format",
+                type: String
+            }, {
+                name: "args",
+                mayBeNull: !0,
+                parameterArray: !0
+            }]);
+            if (t)
+                throw t;
+            return String._toFormattedString(!1, arguments)
+        } catch (t) {
+            return Sys.Debug.trace("String.format failed: " + t.message),
+            "undefined"
+        }
+    }
+    ,
+    NG.WaitForFinalEvent = function() {
+        var n = {};
+        return function(t, i, r) {
+            r || (r = (new Date).getMilliseconds()),
+            n[r] && clearTimeout(n[r]),
+            n[r] = setTimeout(t, i)
+        }
+    }(),
+    NG.ActiveInterval = null,
+    NG.InitActiveTimer = function() {
+        if (NG.ActiveInterval == null) {
+            n(document).on("mousemove.ngActiveDocument, click.ngActiveDocument", function() {
+                NG.WaitForFinalEvent(function() {
+                    n(NG.Events).trigger("ngDocumentActive", [{
+                        isActive: !0
+                    }]),
+                    clearTimeout(NG.ActiveInterval),
+                    NG.ActiveInterval = setTimeout(function() {
+                        n(NG.Events).trigger("ngDocumentActive", [{
+                            isActive: !1
+                        }])
+                    }, 6e5)
+                }, 250, "ngDocumentActive")
+            });
+            n(document).trigger("click.ngActiveDocument")
+        }
+    }
+    ,
+    NG.SingleTagAutoCompleteOptions = {
+        multiple: !1,
+        mustMatch: !1,
+        autoFill: !1,
+        matchContains: !0,
+        multipleSeparator: "",
+        selectFirst: !0,
+        formatItem: function(n) {
+            return n
+        },
+        getFunc: NG.TagAutoCompleteLoad,
+        scroll: !0,
+        max: 20,
+        cacheLength: 50
+    },
+    n(document).ready(function() {
+        window.spWebUrl || ExecuteOrDelayUntilScriptLoaded(function() {
+            var n;
+            n = window.spWebUrl ? window.spWebUrl : SP.ClientContext.get_current().get_url(),
+            n == "/" && (n = ""),
+            window.spWebUrl = n
+        }, "SP.js")
+    })
+}(),
+function(n, t, r) {
+    var u = {
+        init: function(t) {
+            var i = n.extend({}, n.fn.ngsettings.defaults, t)
+              , r = n(this).data("options", i);
+            return this.each(function() {
+                if (n(i.settingsContainer).length !== 0)
+                    try {
+                        NG.NM && NG.NM.SubscriptionsAllowed && i.subscriptionsAllowed == null ? NG.NM.SubscriptionsAllowed(function(n) {
+                            i.subscriptionsAllowed = n,
+                            u.show.call(r)
+                        }) : u.show.call(r)
+                    } catch (t) {
+                        Sys.Debug.trace("Error checking NewsManager SubscriptionsAllowed"),
+                        u.show.call(r)
+                    }
+            })
+        },
+        show: function() {
+            function h() {
+                n(r.parent).prepend(n("<ul/>").prop("id", i.settingsNavContainer).css("float", "left")),
+                o = n("#" + i.settingsNavContainer),
+                n.each(f, function(t, i) {
+                    o.append(n("<li/>").text(i.display))
+                });
+                o.on("click", "li", function() {
+                    var t = n(this)
+                      , i = n.grep(f, function(n) {
+                        return n.display == t.text()
+                    })[0];
+                    t.parent().find("li").removeClass("active"),
+                    t.addClass("active"),
+                    n(r.settingsContainer).html(""),
+                    i.call(),
+                    n(r.dialogButtonContainer).empty()
+                });
+                o.find("li").first().trigger("click")
+            }
+            var e = this, r = this.data("options"), i = n.extend({
+                newsInterestsEndPointUri: "/_layouts/ng/nm/pages/newsinterests.aspx?IsDlg=1&autoclose=0",
+                userSubscriptionsEndPointUri: "/_layouts/ng/nm/pages/usersubscription.aspx?IsDlg=1",
+                sphereEndPointUri: "/_layouts/ng/pages/managegroups.aspx?IsDlg=1",
+                communitiesEndPointUrl: "/_layouts/ngc/communities.aspx?IsDlg=1",
+                newsInterestsContentId: "ngNewsIntegrations",
+                userSubscriptionsContentId: "ngSubscriptions",
+                sphereContentId: "ngSphereFrame",
+                settingsNavContainer: "ngSettingsNav",
+                communitiesContentId: "ngCommunityResults",
+                dialogMinHeight: 700,
+                dialogResize: !0,
+                dialogIsModal: !0,
+                dialogPosition: "top"
+            }, r || {}), s = {}, f = [], o;
+            f.push({
+                display: ngText.SettingsLink,
+                call: function() {
+                    u.renderSimpleSettings.call(e, {
+                        settingsNavContainer: i.settingsNavContainer
+                    })
+                }
+            }),
+            f.push({
+                display: ngText.ActivityStreamLink,
+                call: function() {
+                    u.renderEventSettings.call(e)
+                }
+            }),
+            f.push({
+                display: ngText.NotificationsLink,
+                call: function() {
+                    u.renderNotificationSettings.call(e)
+                }
+            }),
+            NG.NM && (f.push({
+                display: ngText.NewsInterestsLink,
+                call: function() {
+                    u.renderFrameTab.call(e, {
+                        endPointUri: i.newsInterestsEndPointUri,
+                        contentId: i.newsInterestsContentId
+                    })
+                }
+            }),
+            r.subscriptionsAllowed && f.push({
+                display: ngText.SubscriptionsLink,
+                call: function() {
+                    u.renderFrameTab.call(e, {
+                        endPointUri: i.userSubscriptionsEndPointUri,
+                        contentId: i.userSubscriptionsContentId
+                    })
+                }
+            })),
+            t.ngSpheresEnabled && f.push({
+                display: ngText.SpheresLink,
+                call: function() {
+                    u.renderFrameTab.call(e, {
+                        endPointUri: i.sphereEndPointUri,
+                        contentId: i.sphereContentId
+                    })
+                }
+            }),
+            t.ngSpotlightEnabled && f.push({
+                display: ngText.SpotlightTitle,
+                call: function() {
+                    NG && NG.KE && NG.KE.initUserSettings ? NG.KE.initUserSettings(e) : ljs.loadjs("/_layouts/ng/spotlight/script/usersettings.js?cache=" + (new Date).getTime(), function() {
+                        NG.KE.initUserSettings(e)
+                    })
+                }
+            }),
+            f.push({
+                display: ngText.Communities,
+                call: function() {
+                    u.renderFrameTab.call(e, {
+                        endPointUri: i.communitiesEndPointUrl,
+                        contentId: i.communitiesContentId
+                    })
+                }
+            }),
+            s[ngText.CloseVerb] = function() {
+                n(this).dialog("close")
+            }
+            ,
+            i.showInDialog ? n("#ngSettings").dialog({
+                minHeight: i.dialogMinHeight,
+                resize: i.dialogResize,
+                width: i.dialogWidth,
+                modal: i.dialogIsModal,
+                dialogClass: "ng-ui-wrapper",
+                position: i.dialogPosition,
+                buttons: s,
+                draggable: !1,
+                create: function() {
+                    n(r.dialogButtonContainer).empty(),
+                    n(function() {
+                        n(t).resize(function() {
+                            $dialog = n(r.parent).parent(),
+                            $dialog.height() > n(t).height() ? $dialog.height(n(t).height() * .95) : $dialog.height("auto"),
+                            n(r.settingsContainer).css("height", $dialog.height() - n(r.settingsContainer).position().top - 15 - n(".ui-dialog-titlebar", $dialog).height())
+                        })
+                    })
+                },
+                open: function() {
+                    $dialog = n(r.parent).parent(),
+                    $dialog.height() > n(t).height() && $dialog.height(n(t).height() * .95),
+                    h(),
+                    n(r.settingsContainer).css("height", $dialog.height() - n(r.settingsContainer).position().top - 15 - n(".ui-dialog-titlebar", $dialog).height())
+                },
+                close: function() {
+                    n(this).dialog("destroy"),
+                    n(r.settingsContainer).empty(),
+                    n("#" + i.settingsNavContainer).remove()
+                }
+            }) : h()
+        },
+        renderFrameTab: function(i) {
+            var c = this, e = this.data("options"), u = n.extend({
+                endPointUri: r,
+                contentId: r,
+                title: r,
+                iframeHeight: "500",
+                iframeWidth: "100%",
+                iframeScrolling: "no",
+                iframeBorder: 0
+            }, i), f;
+            if (u.endPointUri !== r && u.contentId !== r) {
+                var o = n("<div/>").prop("id", u.contentId + "Wrapper")
+                  , h = n("<span/>").addClass("ngLoading").appendTo(o)
+                  , s = n(e.dialogButtonContainer);
+                s.find(".tempButton").remove(),
+                u.title && o.append(n("<h3/>").append(n("<a/>").prop("href", "#").text(u.title))),
+                o.append(n("<div/>").append(n("<iframe/>").attr({
+                    id: u.contentId,
+                    src: t.spWebUrl + u.endPointUri + "&dashboard=1",
+                    scrolling: u.iframeScrolling,
+                    frameborder: u.iframeBorder,
+                    width: u.iframeWidth,
+                    height: u.iframeHeight
+                }))),
+                n(e.settingsContainer).empty().append(o),
+                f = n(e.settingsContainer).find("iframe#" + u.contentId),
+                f.hide(),
+                f.ready(function() {
+                    var t, i, r;
+                    f.show(),
+                    t = f.contents(),
+                    f.hide(),
+                    i = t.find(".ngButtons").children(),
+                    i.hide(),
+                    s.find(".tempButton").remove(),
+                    n.each(i, function(t, i) {
+                        var r = n(i), u;
+                        if (r.prop("id").indexOf("ngCancel") < 0) {
+                            u = n("<button/>", {
+                                id: "iframe_" + r.prop("id"),
+                                href: "javascript:void(0);",
+                                "class": "ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only tempButton",
+                                style: "",
+                                html: '<span class="ui-button-text">' + r.prop("value") + "<\/span>",
+                                role: "button",
+                                "aria-disabled": !1
+                            }).appendTo(s);
+                            u.on("click", function() {
+                                r.trigger("click")
+                            })
+                        }
+                    }),
+                    n("a#lnkFeed, .ngPreview .ngNewsArticles a", t).attr("target", "_blank"),
+                    r = n(e.settingsContainer).height() * .98,
+                    h.remove(),
+                    f.height(n(e.settingsContainer).height() * .98).show(400, function() {
+                        (u.contentId === "ngSphereFrame" || u.contentId === "ngCommunityResults") && setTimeout(function() {
+                            f.contents().find("#s4-workspace").css({
+                                height: r + "px"
+                            })
+                        }, 1e3)
+                    })
+                }),
+                n(t).resize(function() {
+                    f.height(n(e.settingsContainer).height() * .98)
+                })
+            }
+        },
+        renderSimpleSettings: function(i) {
+            var s = this
+              , e = this.data("options")
+              , r = u.getEventDialogSettings(e)
+              , o = n(e.settingsContainer)
+              , f = n('<div id="ngSimpleSettings"/>').appendTo(o);
+            u.renderEventUserSettings(r, f, function() {
+                var h;
+                n("#ngNFCustomChoice").closest("li").hide(),
+                n("#" + r.eventSettingsContainer).hide(),
+                h = n("#ngEventChoices"),
+                n("<a>").attr({
+                    href: "javascript:;",
+                    id: "ngShowAdvanced"
+                }).addClass("ngShowAdvanced").append(ngText.AdvancedStreamSettingsLink).appendTo(f);
+                n("#ngShowAdvanced").on("click", function() {
+                    n("#" + i.settingsNavContainer).find("li:eq(1)").trigger("click"),
+                    n(NG.Events).bind("ngEventSettingsSectionRendered", function() {
+                        n(NG.Events).unbind("ngEventSettingsSectionRendered"),
+                        n("#ngNFCustomChoice").prop("checked", !0).trigger("change")
+                    })
+                });
+                f.append(n("<h3/>").text(ngText.Settings_SimpleNotificationsHeader).addClass("head")),
+                r = u.getNotificationDialogSettings(e);
+                var o = n("<div/>").prop({
+                    id: "ngNotificationContainer"
+                }).appendTo(f)
+                  , c = n("<ul>").appendTo(o)
+                  , l = n("<ul>").appendTo(o)
+                  , s = n("<div id='ngInstant'>").appendTo(o)
+                  , a = n("<ul>").appendTo(s)
+                  , v = u.getGeneralNotificationUserSettings(r, o, s, l, a)
+                  , y = n.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: String.format("{0}/{1}", t.spWebUrl, r.digestWeeklyEndPointUri),
+                    success: function(i) {
+                        checkbox = n("<input>").attr({
+                            type: "checkbox",
+                            name: "ngSetting_WeeklyDigestEnabled",
+                            id: "ngSetting_WeeklyDigestEnabled"
+                        }).addClass("chk ngNotificationSetting"),
+                        i.Enabled && checkbox.prop("checked", !0),
+                        n("<li/>").append(checkbox).append(n('<label for="ngSetting_WeeklyDigestEnabled" />').append(ngText.ReceiveWeeklyDigest)).appendTo(c),
+                        checkbox.change(function() {
+                            var i = n(this)
+                              , f = String.format("{0}/{1}Schedule/?timeUTC={2}&day=6&enabled={3}", t.spWebUrl, r.digestWeeklyEndPointUri, encodeURIComponent("10:00"), i.is(":checked"));
+                            n.ajax({
+                                type: "POST",
+                                contentType: "application/json; charset=utf-8",
+                                url: f,
+                                success: function() {
+                                    u.giveFeedback(i)
+                                },
+                                error: function(n) {
+                                    alert(NG.GetDefaultErrorMessage(n.status))
+                                }
+                            })
+                        })
+                    },
+                    error: function() {}
+                });
+                n.when(v, y).done(function() {
+                    n(".ngNotifyActions").hide(),
+                    n("#ngCustomInstant").hide(),
+                    n(".ngInstantSettingsDesc").hide(),
+                    n("#ngCustomInstantHeader").hide(),
+                    n("<a>").attr({
+                        href: "javascript:;",
+                        id: "ngShowNoteAdvanced"
+                    }).addClass("ngShowAdvanced").append(ngText.AdvancedNotificationSettingsLink).appendTo(o);
+                    n("#ngShowNoteAdvanced").on("click", function() {
+                        n("#" + i.settingsNavContainer).find("li:eq(2)").trigger("click")
+                    })
+                })
+            })
+        },
+        getEventDialogSettings: function(t) {
+            return n.extend({
+                endPointUri: "_vti_bin/ng/activityfeed.svc/ActivityTypes/",
+                hideActivityTypeUri: "_vti_bin/ng/activityfeed.svc/Hide/",
+                followActivityTypeUri: "_vti_bin/ng/activityfeed.svc/Follow/",
+                toggleActivityTypesUri: "_vti_bin/ng/activityfeed.svc/Toggle/Activities/",
+                setStreamLcidUri: "_vti_bin/ng/userprofile.svc/StreamLcid/",
+                eventSettingsContainer: "ngEventSettings",
+                newsFeedSettingsContainer: "ngNFSettings",
+                parentContainer: "ngNFEventSettings",
+                eventGrouping: {
+                    communication: {
+                        title: ngText.EventGroupingCommunicationTitle,
+                        htmlStaging: "<ul />"
+                    },
+                    content: {
+                        title: ngText.EventGroupingContentTitle,
+                        htmlStaging: "<ul />"
+                    },
+                    social: {
+                        title: ngText.EventGroupingSocialTitle,
+                        htmlStaging: "<ul />"
+                    },
+                    profile: {
+                        title: ngText.EventGroupingProfileTitle,
+                        htmlStaging: "<ul />"
+                    },
+                    custom: {
+                        title: ngText.EventGroupingCustomTitle,
+                        htmlStaging: "<ul />"
+                    }
+                },
+                eventList: {
+                    NewsGatorV15Microblogging: {
+                        group: "communication",
+                        category: 1
+                    },
+                    NewsGatorV15NewsGatorQA: {
+                        group: "communication",
+                        category: 1
+                    },
+                    NewsGatorV15Blog: {
+                        group: "content",
+                        category: 1
+                    },
+                    BlogUpdate: {
+                        group: "content",
+                        category: 1
+                    },
+                    NewsGatorV15BlogComment: {
+                        group: "content",
+                        category: 1
+                    },
+                    NewsGatorV15Picture: {
+                        group: "content",
+                        category: 1
+                    },
+                    NewsGatorV15Discussion: {
+                        group: "content",
+                        category: 1
+                    },
+                    NewsGatorV15DiscussionReply: {
+                        group: "content",
+                        category: 1
+                    },
+                    NewsGatorIdeaModuleIdea: {
+                        group: "custom",
+                        category: 1
+                    },
+                    NewsGatorV15ModerationNotification: {
+                        group: "custom",
+                        category: 1
+                    },
+                    NewsGatorV15SysNotification: {
+                        group: "custom",
+                        category: 1
+                    },
+                    NewsGatorV15DocumentFollowing: {
+                        group: "custom",
+                        category: 1
+                    },
+                    NewsGatorV15NGWorkflow: {
+                        group: "custom",
+                        category: 1
+                    },
+                    StatusMessage: {
+                        group: "communication",
+                        category: 2
+                    },
+                    NoteboardPosts: {
+                        group: "communication",
+                        category: 2
+                    },
+                    NewsGatorV15Wiki: {
+                        group: "content",
+                        category: 2
+                    },
+                    SocialTaggingByColleague: {
+                        group: "content",
+                        category: 2
+                    },
+                    SocialTaggingByAnyone: {
+                        group: "content",
+                        category: 2
+                    },
+                    Birthday_Today: {
+                        group: "profile",
+                        category: 2
+                    },
+                    WorkplaceAnniversary_Today: {
+                        group: "profile",
+                        category: 2
+                    },
+                    NewsGatorRssModuleRssModule: {
+                        group: "custom",
+                        category: 2
+                    },
+                    SharingInterest: {
+                        group: "profile",
+                        category: 2
+                    },
+                    NewsGatorSpotlightModuleNGBadging: {
+                        group: "custom",
+                        category: 2
+                    },
+                    NewsGatorSpotlightModuleNGKudos: {
+                        group: "custom",
+                        category: 2
+                    },
+                    NewsGatorLearningModuleNgKnowledgeBase: {
+                        group: "custom",
+                        category: 2
+                    },
+                    NewsGatorLearningModuleNgAddedToKnowledgeBase: {
+                        group: "custom",
+                        category: 2
+                    },
+                    NewsGatorVideoStreamModuleVideoAuthor: {
+                        group: "custom",
+                        category: 2
+                    },
+                    NewsGatorVideoStreamModuleVideo: {
+                        group: "custom",
+                        category: 2
+                    },
+                    NewsGatorLearningModuleNgVideoScenarios: {
+                        group: "custom",
+                        category: 2
+                    },
+                    NewsGatorV15Document: {
+                        group: "content",
+                        category: 3
+                    },
+                    NewsGatorV15EditDocument: {
+                        group: "content",
+                        category: 3
+                    },
+                    NewsGatorV15Task: {
+                        group: "content",
+                        category: 3
+                    },
+                    NewsGatorV15Event: {
+                        group: "content",
+                        category: 3
+                    },
+                    NewsGatorV15Announcements: {
+                        group: "content",
+                        category: 3
+                    },
+                    NewsGatorV15Contact: {
+                        group: "content",
+                        category: 3
+                    },
+                    SocialRatings: {
+                        group: "content",
+                        category: 3
+                    },
+                    NewsGatorV15Link: {
+                        group: "content",
+                        category: 3
+                    },
+                    ColleagueAddition: {
+                        group: "social",
+                        category: 3
+                    },
+                    NewsGatorV15JoinCommunity: {
+                        group: "social",
+                        category: 3
+                    },
+                    ProfilePropertyChange: {
+                        group: "profile",
+                        category: 3
+                    },
+                    Birthday_Reminder: {
+                        group: "profile",
+                        category: 3
+                    },
+                    WorkplaceAnniversary_Reminder: {
+                        group: "profile",
+                        category: 3
+                    },
+                    TitleChange: {
+                        group: "profile",
+                        category: 3
+                    },
+                    ManagerChange: {
+                        group: "profile",
+                        category: 3
+                    },
+                    DLMembershipChange: {
+                        group: "profile",
+                        category: 3
+                    }
+                }
+            }, t)
+        },
+        renderEventUserSettings: function(i, f, e) {
+            function o() {
+                n(f).empty().append(n("<div/>").prop("id", i.parentContainer)),
+                $parent = n("#" + i.parentContainer),
+                $parent.append(n("<div/>").prop("id", i.newsFeedSettingsContainer)),
+                $container = n("#" + i.newsFeedSettingsContainer),
+                $container.append(n("<h3/>").text(ngText.Settings_NewsFeedHeader).addClass("head")),
+                $choices = n('<ul id="ngEventChoices"/>'),
+                n("<li>").append(n("<input>").attr({
+                    type: "radio",
+                    name: "ngNewsFeedChoice",
+                    id: "ngNFMinimumChoice"
+                }).addClass("chk")).append(n('<label for="ngNFMinimumChoice" />').append(ngText.Settings_NewsFeedLowDesc)).appendTo($choices),
+                n("<li>").append(n("<input>").attr({
+                    type: "radio",
+                    name: "ngNewsFeedChoice",
+                    id: "ngNFImportantChoice"
+                }).addClass("chk")).append(n('<label for="ngNFImportantChoice" />').append(ngText.Settings_NewsFeedMediumDesc)).appendTo($choices),
+                n("<li>").append(n("<input>").attr({
+                    type: "radio",
+                    name: "ngNewsFeedChoice",
+                    id: "ngNFAllChoice"
+                }).addClass("chk")).append(n('<label for="ngNFAllChoice" />').append(ngText.Settings_NewsFeedHighDesc)).appendTo($choices),
+                n("<li>").append(n("<input>").attr({
+                    type: "radio",
+                    name: "ngNewsFeedChoice",
+                    id: "ngNFCustomChoice"
+                }).addClass("chk")).append(n('<label for="ngNFCustomChoice" />').append(ngText.Settings_NewsFeedCustomChoice)).appendTo($choices),
+                $parent.append($choices),
+                $parent.append(n("<div/>").prop("id", i.eventSettingsContainer).addClass("accordion").hide()),
+                $events = n("#" + i.eventSettingsContainer),
+                $choices.find("input").change(function() {
+                    var f = n(this), r;
+                    $events.hide(),
+                    r = [],
+                    this.id == "ngNFCustomChoice" ? $events.show() : this.id == "ngNFAllChoice" ? $events.find("input:checkbox:not(:checked)").each(function() {
+                        var t = n(this), i;
+                        t.prop("checked", !0),
+                        i = t.prop("name").replace("ngSetting_", ""),
+                        r.push({
+                            Id: i,
+                            IsFollowing: !1
+                        })
+                    }) : ($events.find('input:checkbox[category="1"]:not(:checked)').each(function() {
+                        var t = n(this), i;
+                        t.prop("checked", !0),
+                        i = t.prop("name").replace("ngSetting_", ""),
+                        r.push({
+                            Id: i,
+                            IsFollowing: !1
+                        })
+                    }),
+                    $events.find('input:checkbox[category="3"]:checked').each(function() {
+                        var t = n(this), i;
+                        t.prop("checked", !1),
+                        i = t.prop("name").replace("ngSetting_", ""),
+                        r.push({
+                            Id: i,
+                            IsFollowing: !0
+                        })
+                    }),
+                    this.id == "ngNFImportantChoice" ? $events.find('input:checkbox[category="2"]:not(:checked)').each(function() {
+                        var t = n(this), i;
+                        t.prop("checked", !0),
+                        i = t.prop("name").replace("ngSetting_", ""),
+                        r.push({
+                            Id: i,
+                            IsFollowing: !1
+                        })
+                    }) : this.id == "ngNFMinimumChoice" && $events.find('input:checkbox[category="2"]:checked').each(function() {
+                        var t = n(this), i;
+                        t.prop("checked", !1),
+                        i = t.prop("name").replace("ngSetting_", ""),
+                        r.push({
+                            Id: i,
+                            IsFollowing: !0
+                        })
+                    })),
+                    r.length && n.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        url: String.format("{0}/{1}", t.spWebUrl, i.toggleActivityTypesUri),
+                        data: JSON.stringify(r),
+                        dataType: "json",
+                        success: function() {
+                            u.giveFeedback(f)
+                        },
+                        error: function(n) {
+                            f.parent().find("label").append('<span class="ngSettings-error">' + ngText.ErrorSavingChanges + "<\/span>").find("span").fadeOut(4e3),
+                            Sys.Debug.trace(NG.GetDefaultErrorMessage(n.status))
+                        }
+                    })
+                })
+            }
+            function s() {
+                var f = $events.find("input:checkbox:not(:checked)"), u, t;
+                if (!f.length) {
+                    $choices.find("#ngNFAllChoice").prop("checked", !0);
+                    return
+                }
+                var n = $events.find('input:checkbox[category="1"]:not(:checked)')
+                  , i = $events.find('input:checkbox[category="2"]:not(:checked)')
+                  , r = $events.find('input:checkbox[category="3"]:not(:checked)');
+                if (n.length) {
+                    $choices.find("#ngNFCustomChoice").prop("checked", !0).trigger("change");
+                    return
+                }
+                if (u = $events.find('input:checkbox[category="2"]'),
+                t = $events.find('input:checkbox[category="3"]'),
+                !n.length && i.length == u.length && r.length == t.length) {
+                    $choices.find("#ngNFMinimumChoice").prop("checked", !0);
+                    return
+                }
+                if (!n.length && !i.length && r.length == t.length) {
+                    $choices.find("#ngNFImportantChoice").prop("checked", !0);
+                    return
+                }
+                $choices.find("#ngNFCustomChoice").prop("checked", !0).trigger("change")
+            }
+            n.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: String.format("{0}/" + i.endPointUri, t.spWebUrl),
+                success: function(f) {
+                    o(),
+                    f.length > 0 ? ($settingsContent = n("<ul >"),
+                    n.each(f, function(t, u) {
+                        var f = i.eventList[u.Name], h = f === r ? 3 : f.category, o = "", s, e;
+                        u.IsFollowing && (o = 'checked="checked"'),
+                        s = n("<li>").append(n('<input type="checkbox" ' + o + ' id="' + u.Name + "_" + u.Id + '">').attr({
+                            name: "ngSetting_" + u.Id,
+                            category: h
+                        }).addClass("chk ngNotificationSetting")).append(n('<label for="' + u.Name + "_" + u.Id + '" />').append(u.DisplayName)),
+                        e = f === r ? "custom" : f.group,
+                        i.eventGrouping[e].htmlStaging = n(i.eventGrouping[e].htmlStaging).append(s)
+                    })) : $settingsContent = n('<div class="ngAlertContainer">' + ngText.EventNoSettingsAvailable + "<\/div>"),
+                    n.each(i.eventGrouping, function(t, i) {
+                        $events.append(n("<h3 />").text(i.title).addClass("head").append(n("<span/>"))),
+                        $events.append(i.htmlStaging)
+                    }),
+                    $events.append($settingsContent),
+                    s(),
+                    n(NG.Events).trigger("ngEventSettingsSectionRendered"),
+                    $events.find("input").change(function() {
+                        var r = n(this), e = r.prop("name").replace("ngSetting_", ""), f;
+                        f = r.is(":checked") ? i.followActivityTypeUri : i.hideActivityTypeUri,
+                        n.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: String.format("{0}/{1}{2}/", t.spWebUrl, f, e),
+                            success: function() {
+                                u.giveFeedback(r)
+                            },
+                            error: function() {
+                                r.parent().find("label").append('<span class="ngSettings-error">' + ngText.ErrorSavingChanges + "<\/span>").find("span").fadeOut(4e3)
+                            }
+                        })
+                    }),
+                    e && e()
+                },
+                error: function(n) {
+                    alert(NG.GetDefaultErrorMessage(n.status))
+                }
+            })
+        },
+        renderEventSettings: function(i) {
+            var e = this
+              , r = this.data("options")
+              , f = u.getEventDialogSettings(i)
+              , o = n("<span/>").addClass("ngLoading").appendTo(n(r.settingsContainer));
+            u.renderEventUserSettings(f, n(r.settingsContainer), function() {
+                var u;
+                if (t.ngAutoLanguages) {
+                    for (n(r.settingsContainer).prepend(n("<div/>").prop("id", "ngLangSettingsWrapper")),
+                    $langParent = n("#ngLangSettingsWrapper"),
+                    $langParent.append(n("<div/>").prop("id", "ngLangSettings")),
+                    $langContainer = n("#ngLangSettings"),
+                    $langContainer.append(n("<h3/>").text(ngText.TranslateSettingsTitle).addClass("head")),
+                    $langChoices = n("<ul/>"),
+                    u = !1,
+                    index = 0; index < t.ngAutoLanguages.length; ++index)
+                        try {
+                            var o = t.ngAutoLanguages[index].DisplayName
+                              , e = t.ngAutoLanguages[index].Id
+                              , s = t.ngAutoLanguages[index].Selected
+                              , i = "ngLangChoice" + e;
+                            s == "true" ? (u = !0,
+                            n("<li>").append(n("<input>").attr({
+                                type: "radio",
+                                name: "ngLanguageChoice",
+                                id: i,
+                                checked: "checked",
+                                value: e
+                            }).addClass("chk")).append(n('<label for="' + i + '" />').append(o)).appendTo($langChoices)) : n("<li>").append(n("<input>").attr({
+                                type: "radio",
+                                name: "ngLanguageChoice",
+                                id: i,
+                                value: e
+                            }).addClass("chk")).append(n('<label for="' + i + '" />').append(o)).appendTo($langChoices)
+                        } catch (h) {}
+                    u == !0 ? n("<li>").append(n("<input>").attr({
+                        type: "radio",
+                        name: "ngLanguageChoice",
+                        id: "ngLangChoice0",
+                        value: "0"
+                    }).addClass("chk")).append(n('<label for="ngLangChoice0" />').append(ngText.TranslateSettingsOff)).prependTo($langChoices) : n("<li>").append(n("<input>").attr({
+                        type: "radio",
+                        name: "ngLanguageChoice",
+                        id: "ngLangChoice0",
+                        value: "0",
+                        checked: "checked"
+                    }).addClass("chk")).append(n('<label for="ngLangChoice0" />').append(ngText.TranslateSettingsOff)).prependTo($langChoices),
+                    $langParent.append($langChoices),
+                    n('input[name="ngLanguageChoice"]').click(function() {
+                        n.ajax({
+                            type: "POST",
+                            async: !1,
+                            url: String.format("{0}/{1}", t.spWebUrl, f.setStreamLcidUri + n(this).val() + "/"),
+                            dataType: "xml",
+                            xhr: function() {
+                                return SharePointAjax.SetAjaxRequester ? SharePointAjax.SetAjaxRequester() : n.ajaxSettings.xhr()
+                            },
+                            success: function() {
+                                n('label[for="' + n('input[name="ngLanguageChoice"]:checked').attr("id") + '"]').animate({
+                                    color: "Green",
+                                    duration: "800"
+                                }).delay(1e3).animate({
+                                    color: "#00000",
+                                    duration: "800"
+                                })
+                            },
+                            error: function() {
+                                new NG.Tooltip(target,ngText.RequestError,5e3,"bottom")
+                            }
+                        })
+                    })
+                }
+            })
+        },
+        giveFeedback: function(n) {
+            n.parent().find("label").animate({
+                color: "Green",
+                duration: "800"
+            }).delay(1e3).animate({
+                color: "#666666",
+                duration: "800"
+            })
+        },
+        getNotificationDialogSettings: function(t) {
+            return n.extend({
+                endPointUri: "_vti_bin/ng/eventnotification.svc/Settings/",
+                groupEndPointUri: "_vti_bin/ng/eventnotification.svc/Settings/Groups/",
+                digestEndPointUri: "_vti_bin/ng/userprofile.svc/Settings/Digest/",
+                digestWeeklyEndPointUri: "_vti_bin/ng/userprofile.svc/Settings/WeeklyDigest/",
+                questionsEndPointUri: "_vti_bin/ng/userprofile.svc/Settings/QuestionNotificationSettings/",
+                subscribedTagsEndPointUri: "_vti_bin/ng/client.svc/SubscribedTags/",
+                contentWrapper: "ngSettingsNotifications"
+            }, t)
+        },
+        getGeneralNotificationUserSettings: function(i, r, f, e, o) {
+            return n.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: String.format("{0}/{1}", t.spWebUrl, i.endPointUri),
+                success: function(i) {
+                    var h = n('<div class="ngInstantOptions" />').append(n('<h3 class="head subhead" id="ngCustomInstantHeader" />').text(ngText.InstantWhatVerb)).appendTo(f), p = n('<div id="ngCustomInstant"/>'), v, s, d, g, c, a, l;
+                    n('<div class="ngInstantSettingsDesc subhead-desc" />').html(ngText.Settings_InstantDesc).appendTo(h),
+                    v = n('<table id="ngInstantRollupOptions"/>'),
+                    s = n('<tr class="ngNotifyWebOptions" />'),
+                    n("<td />").html(ngText.WebChannelLabel).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyWebPresetAll" name="ngNotifyWebPreset" class="ngInstantChannelAllRadio" data-channel="Web" />').append(n('<label for="ngNotifyWebPresetAll" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantAllDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyWebPresetMed" name="ngNotifyWebPreset" class="ngInstantChannelMedRadio" data-channel="Web" />').append(n('<label for="ngNotifyWebPresetMed" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantMedDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyWebPresetLow" name="ngNotifyWebPreset" class="ngInstantChannelLowRadio" data-channel="Web" />').append(n('<label for="ngNotifyWebPresetLow" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantLowDesc)).appendTo(s),
+                    s.appendTo(v),
+                    s = n('<tr class="ngNotifyEmailOptions" />'),
+                    n("<td/>").html(ngText.EmailChannelLabel).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyEmailPresetAll" name="ngNotifyEmailPreset" class="ngInstantChannelAllRadio" data-channel="Email" />').append(n('<label for="ngNotifyEmailPresetAll" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantAllDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyEmailPresetMed" name="ngNotifyEmailPreset" class="ngInstantChannelMedRadio" data-channel="Email" />').append(n('<label for="ngNotifyEmailPresetMed" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantMedDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyEmailPresetLow" name="ngNotifyEmailPreset" class="ngInstantChannelLowRadio" data-channel="Email" />').append(n('<label for="ngNotifyEmailPresetLow" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantLowDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyEmailPresetOff" name="ngNotifyEmailPreset" class="ngInstantChannelOffRadio" data-channel="Email" />').append(n('<label for="ngNotifyEmailPresetOff" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantOffDesc)).appendTo(s),
+                    s.appendTo(v),
+                    s = n('<tr class="ngNotifyMobileOptions" />'),
+                    n("<td />").html(ngText.MobileChannelLabel).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyMobilePresetAll" name="ngNotifyMobilebPreset" class="ngInstantChannelAllRadio" data-channel="Mobile" />').append(n('<label for="ngNotifyMobilePresetAll" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantAllDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyMobilePresetMed" name="ngNotifyMobilebPreset" class="ngInstantChannelMedRadio" data-channel="Mobile" />').append(n('<label for="ngNotifyMobilePresetMed" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantMedDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyMobilePresetLow" name="ngNotifyMobilebPreset" class="ngInstantChannelLowRadio" data-channel="Mobile" />').append(n('<label for="ngNotifyMobilePresetLow" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantLowDesc)).appendTo(s),
+                    n("<td />").append('<input type="radio" id="ngNotifyMobilePresetOff" name="ngNotifyMobilebPreset" class="ngInstantChannelOffRadio" data-channel="Mobile" />').append(n('<label for="ngNotifyMobilePresetOff" class="ngNotifyPresetDesc" />').text(ngText.Settings_InstantOffDesc)).appendTo(s),
+                    s.appendTo(v),
+                    s = n('<tr class="ngNotifyActions" />'),
+                    d = n('<a href="javascript:void(0);" id="ngInstantCustomLink" class="ngInstantSettingsActions">' + ngText.Settings_InstantCustomDesc + '<span class="ngToggle ngToggleDown"><\/span><\/a>'),
+                    g = n('<a href="javascript:void(0);" id="ngInstantRestoreDefaultLink" class="ngInstantSettingsActions">' + ngText.RestoreDefaultLabel + "<\/a>"),
+                    n('<td colspan="2"/>').append(d).appendTo(s),
+                    n('<td colspan="3" class="ngRight"/>').append(g).appendTo(s),
+                    s.appendTo(v),
+                    h.append(v),
+                    c = {
+                        low: ["MentionedSubscribedTag", "PrivateMessage", "MentionedInQuestion", "MentionedInActivity", "MentionedInThread", "RecievedWorkflow", "DocumentFollowing", "MentionedSpecialistsTag"],
+                        med: ["AnsweredSubscribedQuestion", "CommentOnSubscribedThread", "AnsweredQuestion", "ReceivedBadge", "ReceivedKudos", "CommentOnActivityEvent"]
+                    },
+                    n.each(i, function(t, i) {
+                        if (i.Id === "00000000-0000-0000-0000-000000000000")
+                            n.each(i.Settings, function(t, i) {
+                                checkbox = n("<input>").attr({
+                                    type: "checkbox",
+                                    name: "ngSetting_" + i.InternalName,
+                                    id: "ngSetting_" + i.InternalName
+                                }).addClass("chk ngNotificationSetting"),
+                                i.Enabled && checkbox.prop("checked", !0),
+                                i.InternalName == "NGReceiveDigestEmail" ? n('<li class="radio"/>').append(checkbox).append(n('<label for="ngSetting_' + i.InternalName + '" />').append(ngText.ReceiveDaily)).appendTo(e) : n('<li class="radio"/>').append(checkbox).append(n('<label for="ngSetting_' + i.InternalName + '" />').append(ngText.ReceiveInstant)).appendTo(o)
+                            });
+                        else {
+                            var u = n('<table id="ngCustomInstantTable"/>')
+                              , r = n("<tr/>");
+                            n("<th/>").html(i.DisplayName).addClass("head customHead").appendTo(r),
+                            n('<th class="ngCenter"/>').html(ngText.WebChannelLabel).appendTo(r),
+                            n('<th class="ngCenter"/>').html(ngText.EmailChannelLabel).appendTo(r),
+                            n('<th class="ngCenter"/>').html(ngText.MobileChannelLabel).appendTo(r),
+                            u.append(r),
+                            n.each(i.Settings, function(t, i) {
+                                r = n("<tr/>"),
+                                n("<td/>").html(i.DisplayName).appendTo(r);
+                                var f = n("<input>").data("ng-notifyData", {
+                                    Name: i.InternalName,
+                                    Channel: "Web"
+                                }).attr({
+                                    type: "checkbox",
+                                    name: "ngSetting_" + i.InternalName + "_Web"
+                                }).data("ng-internalName", i.InternalName).addClass("chk ngNotificationSetting ngNotificationWeb");
+                                n('<td class="ngCenter"/>').append(f).appendTo(r),
+                                i.WebEnabled && f.prop("checked", !0),
+                                f = n("<input>").data("ng-notifyData", {
+                                    Name: i.InternalName,
+                                    Channel: "Email"
+                                }).attr({
+                                    type: "checkbox",
+                                    name: "ngSetting_" + i.InternalName + "_Email"
+                                }).data("ng-internalName", i.InternalName).addClass("chk ngNotificationSetting ngNotificationEmail"),
+                                n('<td class="ngCenter"/>').append(f).appendTo(r),
+                                i.EmailEnabled && f.prop("checked", !0),
+                                f = n("<input>").data("ng-notifyData", {
+                                    Name: i.InternalName,
+                                    Channel: "Mobile"
+                                }).attr({
+                                    type: "checkbox",
+                                    name: "ngSetting_" + i.InternalName + "_Mobile"
+                                }).data("ng-internalName", i.InternalName).addClass("chk ngNotificationSetting ngNotificationMobile"),
+                                n('<td class="ngCenter"/>').append(f).appendTo(r),
+                                i.MobileEnabled && f.prop("checked", !0),
+                                u.append(r)
+                            }),
+                            p.append(u)
+                        }
+                    }),
+                    p.appendTo(h),
+                    r.append(f),
+                    d.bind("click", function() {
+                        p.toggle();
+                        var n = d.find("span.ngToggle");
+                        n.hasClass("ngToggleDown") ? n.removeClass("ngToggleDown").addClass("ngToggleUp") : n.removeClass("ngToggleUp").addClass("ngToggleDown")
+                    }),
+                    g.bind("click", function() {
+                        h.find(".ngInstantChannelMedRadio").prop("checked", !0).trigger("change")
+                    });
+                    var w = h.find(".ngNotificationWeb")
+                      , b = h.find(".ngNotificationEmail")
+                      , k = h.find(".ngNotificationMobile")
+                      , it = function() {
+                        p.hide()
+                    }
+                      , rt = function() {
+                        p.show()
+                    }
+                      , y = function(t) {
+                        return n.map(t, function(t) {
+                            if (n(t).is(":checked"))
+                                return n(t).data("ng-notifyData").Name
+                        })
+                    }
+                      , nt = function(n) {
+                        var t = w;
+                        return n === "Email" ? t = b : n === "Mobile" && (t = k),
+                        t
+                    }
+                      , tt = function(t, i) {
+                        var r = nt(i);
+                        r.each(function(i, r) {
+                            var u = n(r)
+                              , f = n.inArray(u.data("ng-notifyData").Name, t) != -1;
+                            f != u.is(":checked") && (u.is(":checked") ? u.prop("checked", !1) : u.prop("checked", !0),
+                            u.trigger("change", {
+                                preset: !0
+                            }))
+                        })
+                    };
+                    h.find(".ngInstantChannelLowRadio").bind("change", function() {
+                        tt(c.low, n(this).data("channel")),
+                        u.giveFeedback(n(this))
+                    }),
+                    h.find(".ngInstantChannelMedRadio").bind("change", function() {
+                        tt(c.low.concat(c.med), n(this).data("channel")),
+                        u.giveFeedback(n(this))
+                    }),
+                    h.find(".ngInstantChannelAllRadio").bind("change", function() {
+                        var t = n(this).data("channel")
+                          , i = nt(t);
+                        i.each(function(t, i) {
+                            var r = n(i);
+                            r.is(":checked") || (r.prop("checked", !0),
+                            r.trigger("change", {
+                                preset: !0
+                            }))
+                        }),
+                        u.giveFeedback(n(this))
+                    }),
+                    h.find(".ngInstantChannelOffRadio").bind("change", function() {
+                        var t = n(this).data("channel")
+                          , i = nt(t);
+                        i.each(function(t, i) {
+                            var r = n(i);
+                            r.is(":checked") && (r.prop("checked", !1),
+                            r.trigger("change", {
+                                preset: !0
+                            }))
+                        }),
+                        u.giveFeedback(n(this))
+                    }),
+                    a = function(n, t, i) {
+                        return n.length == t.length ? (i.find(".ngInstantChannelAllRadio").prop("checked", !0),
+                        l = !1) : c.low.length + c.med.length == t.length ? c.low.concat(c.med).sort().join() == t.sort().join() && (i.find(".ngInstantChannelMedRadio").prop("checked", !0),
+                        l = !1) : c.low.length == t.length ? c.low.sort().join() == t.sort().join() && (i.find(".ngInstantChannelLowRadio").prop("checked", !0),
+                        l = !1) : t.length ? i.find("input:radio").prop("checked", !1) : (i.find(".ngInstantChannelOffRadio").prop("checked", !0),
+                        l = !1),
+                        l
+                    }
+                    ,
+                    l = !0,
+                    l = a(w, y(w), h.find(".ngNotifyWebOptions")),
+                    l = a(b, y(b), h.find(".ngNotifyEmailOptions")),
+                    l = a(k, y(k), h.find(".ngNotifyMobileOptions")),
+                    l || it(),
+                    r.not("#ngCommunitySpheres").find("input.ngNotificationSetting").change(function(i, r) {
+                        var f = n(this)
+                          , o = f.prop("name").replace("ngSetting_", "");
+                        if (o != "WeeklyDigestEnabled") {
+                            var c = o.split("_")
+                              , s = String.format("{0}/{1}{2}/Email/?enable={3}", t.spWebUrl, "_vti_bin/ng/eventnotification.svc/Settings/", c[0], f.is(":checked").toString())
+                              , e = f.data("ng-notifyData");
+                            e && (s = String.format("{0}/{1}{2}/{3}/?enable={4}", t.spWebUrl, "_vti_bin/ng/eventnotification.svc/Settings/", e.Name, e.Channel, f.is(":checked").toString())),
+                            n.ajax({
+                                type: "POST",
+                                contentType: "application/json; charset=utf-8",
+                                url: s,
+                                success: function() {
+                                    if (u.giveFeedback(f),
+                                    (!r || r.preset !== !0) && e)
+                                        switch (e.Channel) {
+                                        case "Web":
+                                            a(w, y(w), h.find(".ngNotifyWebOptions"));
+                                            break;
+                                        case "Email":
+                                            a(b, y(b), h.find(".ngNotifyEmailOptions"));
+                                            break;
+                                        case "Mobile":
+                                            a(k, y(k), h.find(".ngNotifyMobileOptions"))
+                                        }
+                                },
+                                error: function(n) {
+                                    alert(NG.GetDefaultErrorMessage(n.status)),
+                                    f.prop("checked", !f.is(":checked"))
+                                }
+                            })
+                        }
+                    })
+                },
+                error: function() {}
+            })
+        },
+        renderNotificationSettings: function() {
+            function et() {
+                var i = n("li").children("input[name=ngQnASetting_UnansweredQuestions]")
+                  , r = n("li").children("input[name=ngQnASetting_UnacceptedQuestions]")
+                  , t = {};
+                return t.IsSubscribedToUnansweredQuestions = i.prop("checked") == !0,
+                t.IsSubscribedToUnacceptedQuestions = r.prop("checked") == !0,
+                t
+            }
+            function b() {
+                var i = et()
+                  , u = Sys.Serialization.JavaScriptSerializer.serialize(i);
+                n.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: u,
+                    url: String.format("{0}/{1}", t.spWebUrl, r.questionsEndPointUri + "Save/")
+                })
+            }
+            function ot(t) {
+                var i, r;
+                t.IsQnACurator && (i = n("<input>").attr({
+                    type: "checkbox",
+                    name: "ngQnASetting_UnansweredQuestions",
+                    id: "ngQnASetting_UnansweredQuestions"
+                }).addClass("chk"),
+                n("<li/>").addClass("radio").append(i).append(n('<label for="ngQnASetting_UnansweredQuestions" />').append(ngText.UnansweredQuestionsSettingsLabel)).appendTo(w),
+                t.IsSubscribedToUnansweredQuestions && i.prop("checked", !0),
+                i.change(function() {
+                    b()
+                })),
+                r = n("<input>").attr({
+                    type: "checkbox",
+                    name: "ngQnASetting_UnacceptedQuestions",
+                    id: "ngQnASetting_UnacceptedQuestions"
+                }).addClass("chk"),
+                n("<li/>").addClass("radio").append(r).append(n('<label for="ngQnASetting_UnacceptedQuestions" />').append(ngText.UnacceptedQuestionsSettingsLabel)).appendTo(w),
+                t.IsSubscribedToUnacceptedQuestions && r.prop("checked", !0),
+                n(r).change(function() {
+                    b()
+                })
+            }
+            function k(n, t) {
+                var i = n.val() * 24 + t.val() * 1
+                  , r = Math.round((new Date).getTimezoneOffset() / 60);
+                return (i + r) % 168
+            }
+            function d(i, r, u) {
+                var o = n(this)
+                  , f = k(r, u)
+                  , e = String.format("{0}/{1}Schedule/?timeUTC={2}&day={3}", t.spWebUrl, i, encodeURIComponent(f % 24 + ":00"), Math.floor(f / 24));
+                n.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: e,
+                    success: function() {},
+                    error: function(n) {
+                        alert(NG.GetDefaultErrorMessage(n.status))
+                    }
+                })
+            }
+            function st(t, r, u, f) {
+                var s, e;
+                try {
+                    var h = Math.round((new Date).getTimezoneOffset() / 60)
+                      , c = u.split(":")
+                      , l = c[0] * 1
+                      , o = r * 24 + l - h;
+                    for (o < 0 && (o += 168),
+                    s = Math.floor(o / 24),
+                    $timePicker = g(t, o % 24 + ":00", f, !0),
+                    e = n('<select id="dayPicker" data-placeholder="' + ngText.DigestSendTimePlaceholder + 'day" id="ngDigestSendTime" class="chosendelay" />'),
+                    i = 0; i < 7; ++i)
+                        n("<option>").prop({
+                            value: i,
+                            selected: i == s
+                        }).text(ngText.dayNames[i]).appendTo(e);
+                    return e.appendTo(t),
+                    $timePicker.change(function() {
+                        d(f, e, $timePicker)
+                    }),
+                    e.change(function() {
+                        d(f, e, $timePicker)
+                    }),
+                    e
+                } catch (a) {}
+            }
+            function g(r, u, f, e) {
+                var h, c, o, s;
+                try {
+                    for (h = new Date,
+                    u != null && (c = u.split(":"),
+                    e ? h.setHours(c[0]) : h.setUTCHours(c[0])),
+                    o = new Date,
+                    o.setHours(0),
+                    s = n('<select id="timePicker" data-placeholder="' + ngText.DigestSendTimePlaceholder + '" id="ngDigestSendTime" class="chosendelay" />'),
+                    n("<option>").prop({
+                        value: e ? o.getHours() : o.getUTCHours(),
+                        selected: 0 == h.getHours()
+                    }).text("midnight").appendTo(s),
+                    i = 1; i < 24; ++i)
+                        o.setHours(i),
+                        n("<option>").prop({
+                            value: e ? o.getHours() : o.getUTCHours(),
+                            selected: i == h.getHours()
+                        }).text(i + ":00").appendTo(s);
+                    return s.appendTo(r),
+                    e || s.change(function() {
+                        var i = n(this)
+                          , r = String.format("{0}/{1}Schedule/?timeUTC={2}", t.spWebUrl, f, encodeURIComponent(i.attr("value") + ":00"));
+                        n.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: r,
+                            success: function() {},
+                            error: function(n) {
+                                alert(NG.GetDefaultErrorMessage(n.status))
+                            }
+                        })
+                    }),
+                    s
+                } catch (l) {}
+            }
+            var at = this
+              , s = this.data("options")
+              , r = u.getNotificationDialogSettings(s)
+              , vt = n("<span/>").addClass("ngLoading").appendTo(n(s.settingsContainer))
+              , f = n('<div id="' + r.contentWrapper + '">')
+              , h = n("<ul/>").addClass("ngTabs");
+            n("<li/>").prop({
+                id: "ngTabDigest",
+                "class": "head",
+                ngTabContent: "#ngDigest"
+            }).text(ngText.TabDigestVerb).appendTo(h),
+            n("<li/>").prop({
+                id: "ngTabWeeklyDigest",
+                "class": "head",
+                ngTabContent: "#ngWeeklyDigest"
+            }).text(ngText.TabWeeklyDigestVerb).appendTo(h),
+            n("<li/>").prop({
+                id: "ngTabNotifyAbout",
+                "class": "head",
+                ngTabContent: "#ngInstant"
+            }).text(ngText.TabNotifyAboutVerb).appendTo(h);
+            var e = n("<div/>").prop({
+                id: "ngDigest",
+                "class": "ngTabContent"
+            }).hide()
+              , nt = n("<ul>").appendTo(e.append(n("<span/>").text(ngText.DigestOnOffVerb)))
+              , tt = n("<div/>").appendTo(e.append(n('<h3 class="head subhead"/>').text(ngText.DigestWhenVerb)))
+              , p = n("<ul>").appendTo(e.append(n('<h3 class="head subhead"/>').text(ngText.DigestWhatVerb)))
+              , l = n("<ul>").appendTo(e.append(n('<h3 class="head subhead"/>').text(ngText.DigestFormatVerb)))
+              , w = n("<ul>").appendTo(e.append(n("<span/>").text(ngText.QuestionNotificationsSectionName)))
+              , a = n("<div/>").prop({
+                id: "ngWeeklyDigest",
+                "class": "ngTabContent"
+            }).hide()
+              , it = n("<ul>").appendTo(a.append(n("<span/>").text(ngText.DigestOnOffVerb)))
+              , v = n("<div />").appendTo(a.append(n('<h3 class="head subhead"/>').text(ngText.DigestWhenVerb)))
+              , o = n("<div/>").prop({
+                id: "ngInstant",
+                "class": "ngTabContent"
+            }).hide()
+              , rt = n("<ul>").appendTo(o.append(n("<span/>").text(ngText.DigestOnOffVerb)))
+              , y = n("<div/>").append(n('<h3 class="head subhead" />').text(ngText.SubscribedTagTitle)).append(n('<span class="subhead-desc" />').text(ngText.SubscribedTagDesc)).append(n('<div id="ngSubscribedTags" class="subhead" />').append(n('<textarea rows="4" cols="50" /><input type="submit" value="' + ngText.UpdateSubscribedTagButton + '" class="ngButton btnSubscribeTags" />')))
+              , c = n("<ul/>").prop({
+                id: "ngCommunitySpheres"
+            })
+              , ut = u.getGeneralNotificationUserSettings(r, f, o, nt, rt)
+              , ft = n.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: String.format("{0}/{1}", t.spWebUrl, r.groupEndPointUri),
+                success: function(i) {
+                    var u;
+                    if (i.length > 0) {
+                        var r = []
+                          , e = n("<table/>").appendTo(c)
+                          , f = n("<tr/>").appendTo(n("<thead />"));
+                        f.appendTo(e),
+                        u = n("<tbody/>"),
+                        e.append(u),
+                        f.append(n("<th/>").text(ngText.NameVerb)),
+                        n.each(i, function(t, i) {
+                            var e = n("<tr/>"), o;
+                            for (u.append(e),
+                            e.append(n("<td/>").text(i.DisplayName)),
+                            o = 0; o < r.length; ++o)
+                                e.append(n("<td/>").addClass("ngCenter"));
+                            n.each(i.Settings, function(t, i) {
+                                var o = n.inArray(i.DisplayName, r), s;
+                                o == -1 && (r.push(i.DisplayName),
+                                o = n.inArray(i.DisplayName, r),
+                                f.append(n("<th/>").text(i.DisplayName)),
+                                u.find("tr").append(n("<td/>").addClass("ngCenter"))),
+                                s = n(e[0].cells[o + 1]),
+                                checkbox = n("<input>").attr({
+                                    type: "checkbox",
+                                    name: "ngSetting_" + i.InternalName
+                                }).addClass("chk"),
+                                i.Enabled && checkbox.prop("checked", !0),
+                                s.attr("DiaplayName", i.DisplayName).append(checkbox)
+                            })
+                        }),
+                        c.find("input").change(function() {
+                            var i = n(this)
+                              , r = i.prop("name").replace("ngSetting_", "")
+                              , u = String.format("{0}/{1}{2}", t.spWebUrl, r, i.is(":checked") ? "" : "x/");
+                            n.ajax({
+                                type: "POST",
+                                contentType: "application/json; charset=utf-8",
+                                url: u,
+                                success: function() {},
+                                error: function(n) {
+                                    alert(NG.GetDefaultErrorMessage(n.status))
+                                }
+                            })
+                        })
+                    } else
+                        n('<li class="ngNoMaxWidth">' + ngText.NoCommunitiesMessage + "<\/li>").appendTo(c)
+                },
+                error: function() {}
+            });
+            var ht = n.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: String.format("{0}/{1}", t.spWebUrl, r.questionsEndPointUri),
+                success: function(n) {
+                    ot(n)
+                }
+            })
+              , ct = n.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: String.format("{0}/{1}", t.spWebUrl, r.digestEndPointUri),
+                success: function(i) {
+                    var f, e;
+                    i.DigestSections && n.each(i.DigestSections, function(t, i) {
+                        checkbox = n("<input>").attr({
+                            type: "checkbox",
+                            name: "ngDigestSetting_" + i.InternalName,
+                            id: "ngDigestSetting_" + i.InternalName
+                        }).addClass("chk"),
+                        i.Enabled && checkbox.prop("checked", !0),
+                        n("<li/>").append(checkbox).append(n('<label for="ngDigestSetting_' + i.InternalName + '" />').append(i.DisplayName)).appendTo(p)
+                    }),
+                    p.find("input").change(function() {
+                        var i = n(this)
+                          , f = i.prop("name").replace("ngDigestSetting_", "")
+                          , e = String.format("{0}/{1}Section/{2}/{3}/", t.spWebUrl, r.digestEndPointUri, f, i.is(":checked") ? "Add" : "Remove");
+                        n.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: e,
+                            success: function() {
+                                u.giveFeedback(i)
+                            },
+                            error: function(n) {
+                                alert(NG.GetDefaultErrorMessage(n.status))
+                            }
+                        })
+                    }),
+                    f = n('<input type="radio" name="ngDigestSettingGroupSections" id="ngDigestSettingGroupSections1" />').attr({
+                        value: "false"
+                    }),
+                    n("<li/>").addClass("radio").append(f).append(n('<label for="ngDigestSettingGroupSections1" />').append(ngText.DigestFormatChronological)).appendTo(l),
+                    e = n('<input type="radio" name="ngDigestSettingGroupSections" id="ngDigestSettingGroupSections2" />').attr({
+                        value: "true"
+                    }),
+                    n("<li/>").addClass("radio").append(e).append(n('<label for="ngDigestSettingGroupSections2" />').append(ngText.DigestFormatGroup)).appendTo(l),
+                    i.DisplayGrouped ? e.prop("checked", !0) : f.prop("checked", !0),
+                    l.find(":radio").change(function() {
+                        var i = n(this)
+                          , u = String.format("{0}/{1}GroupSections/{2}/", t.spWebUrl, r.digestEndPointUri, i.attr("value"));
+                        n.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: u,
+                            success: function() {},
+                            error: function(n) {
+                                alert(NG.GetDefaultErrorMessage(n.status))
+                            }
+                        })
+                    }),
+                    g(tt, i.SendTime, r.digestEndPointUri, !1)
+                },
+                error: function() {}
+            })
+              , yt = n.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: String.format("{0}/{1}", t.spWebUrl, r.digestWeeklyEndPointUri),
+                success: function(i) {
+                    var f = st(v, i.SendDay, i.SendTime, r.digestWeeklyEndPointUri);
+                    checkbox = n("<input>").attr({
+                        type: "checkbox",
+                        name: "ngSetting_WeeklyDigestEnabled",
+                        id: "ngSetting_WeeklyDigestEnabled"
+                    }).addClass("chk ngNotificationSetting"),
+                    i.Enabled && checkbox.prop("checked", !0),
+                    n('<li class="radio"/>').append(checkbox).append(n('<label for="ngSetting_WeeklyDigestEnabled" />').append(ngText.ReceiveWeeklyDigest)).appendTo(it),
+                    checkbox.change(function() {
+                        var i = n(this)
+                          , e = v.find("#dayPicker")
+                          , o = v.find("#timePicker")
+                          , f = k(e, o)
+                          , s = String.format("{0}/{1}Schedule/?timeUTC={2}&day={3}&enabled={4}", t.spWebUrl, r.digestWeeklyEndPointUri, encodeURIComponent(f % 24 + ":00"), Math.floor(f / 24), i.is(":checked"));
+                        n.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: s,
+                            success: function() {
+                                u.giveFeedback(i)
+                            },
+                            error: function(n) {
+                                alert(NG.GetDefaultErrorMessage(n.status))
+                            }
+                        })
+                    })
+                },
+                error: function() {}
+            })
+              , lt = n.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: String.format("{0}/{1}Get/?accept=json", t.spWebUrl, r.subscribedTagsEndPointUri),
+                success: function(i) {
+                    var f, u, e;
+                    y.appendTo(o),
+                    f = y.find("textarea"),
+                    u = y.find("input"),
+                    f.val(i.join(";")),
+                    e = {
+                        multiple: !0,
+                        mustMatch: !1,
+                        autoFill: !0,
+                        matchContains: !0,
+                        multipleSeparator: ";",
+                        selectFirst: !0,
+                        formatItem: function(n) {
+                            return n
+                        },
+                        getFunc: NG.TagAutoCompleteLoad,
+                        scroll: !0,
+                        max: 20,
+                        cacheLength: 500
+                    },
+                    NG.InputControl(f, u, function() {}, {
+                        autocomplete: e
+                    });
+                    u.on("click", function(i) {
+                        i.preventDefault();
+                        var e = f.val();
+                        n.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: String.format("{0}/{1}Save/?tags={2}", t.spWebUrl, r.subscribedTagsEndPointUri, encodeURI(e)),
+                            success: function() {
+                                u.addClass("btnSuccess").val(ngText.UpdateSubscribedTagSuccess),
+                                setTimeout(function() {
+                                    u.removeClass("btnSuccess").val(ngText.UpdateSubscribedTagButton)
+                                }, 1e3)
+                            },
+                            error: function() {
+                                u.addClass("btnError").val(ngText.UpdateSubscribedTagTryAgain),
+                                setTimeout(function() {
+                                    u.removeClass("btnError").val(ngText.UpdateSubscribedTagButton)
+                                }, 1e3)
+                            }
+                        })
+                    })
+                },
+                error: function() {}
+            });
+            f.append(h).append(e).append(a),
+            n.when(ut, ft, ct, ht).done(function() {
+                n.when(lt).done(function() {
+                    n('<span style="margin-top:30px; margin-left:0px;" />').addClass("head subhead").text(ngText.CommunitySpheresTitle).append(n("<span/>").addClass("spriteStream")).appendTo(o),
+                    o.append(c),
+                    f.find(".ngTabs li").unbind("click").on("click", function(t) {
+                        n(this).parent().children().removeClass("active"),
+                        n(this).addClass("active"),
+                        f.find("h3.head").filter(".down").removeClass("down").next().toggle(),
+                        f.find(".ngTabContent").hide().filter(n(this).prop("ngTabContent")).show(),
+                        t.preventDefault()
+                    }).first().trigger("click"),
+                    n(s.settingsContainer).empty().append(f),
+                    n().chosen && n("#ngDigestSendTime").chosen({
+                        disable_search_threshold: 9999
+                    }),
+                    n(s.settingsContainer).find('input[name="ngSetting_notification_emails"]').change(function() {
+                        var t = n(this);
+                        t.parent().find("div").first().show()
+                    }),
+                    n(NG.Events).trigger("ngNotificationsSettingsSectionRendered")
+                })
+            })
+        }
+    };
+    n.fn.ngsettings = function(t) {
+        if (u[t])
+            return u[t].apply(this, Array.prototype.slice.call(arguments, 1));
+        if (typeof t != "object" && t)
+            n.error("Method " + t + " does not exist on jQuery.NG.Settings");
+        else
+            return u.init.apply(this, arguments)
+    }
+    ,
+    n.fn.ngsettings.defaults = {
+        parent: "#ngSettings",
+        settingsContainer: "#ngSettingsContainer",
+        dialogButtonContainer: ".ui-dialog-buttonset",
+        spWebUrl: t.spWebUrl,
+        subscriptionsAllowed: null,
+        dialogWidth: 700,
+        showInDialog: !0
+    }
+}(jQuery142, window),
+function(n) {
+    var t = {
+        init: function(t) {
+            var i = n.extend({}, n.fn.wordSwap.defaults, t)
+              , r = n(this).data("options", i);
+            return this.each(function() {
+                i.target !== n.noop && n(this).attr({
+                    "swap-initial": i.initial,
+                    "swap-alt": i.alt,
+                    "swap-target": i.target
+                })
+            })
+        },
+        swap: function(t) {
+            var i = this
+              , u = this.data("options")
+              , f = n.extend({
+                dialogPosition: "top"
+            }, t || {})
+              , r = n(i.attr("swap-target"));
+            return i.attr("swapped") ? (i.removeAttr("swapped"),
+            r.text(i.attr("swap-initial"))) : (i.attr("swapped", "true"),
+            r.text(i.attr("swap-alt"))),
+            r
+        },
+        swaptoalt: function() {
+            var t = this
+              , r = this.data("options")
+              , i = n(t.attr("swap-target"));
+            return t.attr("swapped", "true"),
+            i.text(t.attr("swap-alt")),
+            i
+        },
+        reset: function() {
+            var t = this
+              , r = this.data("options")
+              , i = n(t.attr("swap-target"));
+            return t.removeAttr("swapped"),
+            i.text(t.attr("swap-initial")),
+            i
+        }
+    };
+    n.fn.wordSwap = function(i) {
+        if (t[i])
+            return t[i].apply(this, Array.prototype.slice.call(arguments, 1));
+        if (typeof i != "object" && i)
+            n.error("Method " + i + " does not exist on jQuery.wordSwap");
+        else
+            return t.init.apply(this, arguments)
+    }
+    ,
+    n.fn.wordSwap.defaults = {
+        alt: n.noop,
+        target: n.noop,
+        initial: n.noop
+    }
+}(jQuery142, window),
+function(n) {
+    var t = {
+        init: function(i) {
+            var r = n.extend({}, n.fn.smartFit.defaults, i)
+              , u = n(this).data("options", r);
+            return this.each(function() {
+                t.smartFit.call(u)
+            })
+        },
+        smartFit: function() {
+            var s = this, i = this.data("options"), t = n(this), u = i.maxFontPx, h = i.minFontPx, r, f, e, o = t.height(), c = t.width();
+            t.children().length === 0 ? (t.wrapInner("<" + i.innerWrapper + "/>"),
+            r = n(i.innerWrapper, t)) : r = n(":first-child", t);
+            do
+                t.css("font-size", u),
+                f = r.height(),
+                e = r.width(),
+                i.overrideElementHeight && (o = f,
+                i.overrideElementHeight = !1),
+                u--;
+            while ((f > o || e > c) && u > h);return s
+        }
+    };
+    n.fn.smartFit = function(i) {
+        if (t[i])
+            return t[i].apply(this, Array.prototype.slice.call(arguments, 1));
+        if (typeof i != "object" && i)
+            n.error("Method " + i + " does not exist on jQuery.smartFit");
+        else
+            return t.init.apply(this, arguments)
+    }
+    ,
+    n.fn.smartFit.defaults = {
+        minFontPx: 14,
+        maxFontPx: 16,
+        overrideElementHeight: !1,
+        innerWrapper: "span"
+    }
+}(jQuery142, window),
+function(n) {
+    var t = {
+        init: function(i) {
+            var r = n.extend({}, n.fn.ngToggleTarget.defaults, i)
+              , u = n(this).data("options", r);
+            return this.each(function() {
+                t.ngToggleTarget.call(u)
+            })
+        },
+        ngToggleTarget: function() {
+            var u = this
+              , t = this.data("options")
+              , f = n(this)
+              , r = t.target
+              , i = !1;
+            if (!r) {
+                Sys.Debug.trace("Must supply a target to toggle");
+                return
+            }
+            f.on("click", function() {
+                i = !i,
+                i && t.showCallback(),
+                r.slideToggle(t.speed, function() {
+                    if (i)
+                        n("body").one("click.ngToggleTarget", function() {
+                            i = !1,
+                            t.hideCallback()
+                        })
+                })
+            });
+            return t.closeMenuOnClick || r.click(function(n) {
+                n.stopPropagation()
+            }),
+            u
+        }
+    };
+    n.fn.ngToggleTarget = function(i) {
+        if (t[i])
+            return t[i].apply(this, Array.prototype.slice.call(arguments, 1));
+        if (typeof i != "object" && i)
+            n.error("Method " + i + " does not exist on jQuery.ngToggleMenu");
+        else
+            return t.init.apply(this, arguments)
+    }
+    ,
+    n.fn.ngToggleTarget.defaults = {
+        target: null,
+        speed: "fast",
+        showCallback: function() {},
+        hideCallback: function() {},
+        closeMenuOnClick: !0
+    }
+}(jQuery142, window),
+function(n) {
+    "use strict";
+    var t = !1;
+    n(document).on("click", "a[data-reveal-id]", function(t) {
+        t.preventDefault();
+        var i = n(this).attr("data-reveal-id");
+        n("#" + i).reveal(n(this).data())
+    });
+    n.fn.reveal = function(i) {
+        var r = n(document)
+          , u = {
+            animation: "fadeAndPop",
+            animationSpeed: 300,
+            closeOnBackgroundClick: !0,
+            dismissModalClass: "close-reveal-modal",
+            open: n.noop,
+            opened: n.noop,
+            close: n.noop,
+            closed: n.noop
+        };
+        return i = n.extend({}, u, i),
+        this.not(".reveal-modal.open").each(function() {
+            function a() {
+                s = !1
+            }
+            function l() {
+                s = !0
+            }
+            function v() {
+                var i = n(".reveal-modal.open");
+                i.length === 1 && (t = !0,
+                i.trigger("reveal:close"))
+            }
+            function y() {
+                s || (l(),
+                v(),
+                u.addClass("open"),
+                i.animation === "fadeAndPop" && (e.open.top = r.scrollTop() - h,
+                e.open.opacity = 0,
+                u.css(e.open),
+                f.fadeIn(i.animationSpeed / 2),
+                u.delay(i.animationSpeed / 2).animate({
+                    top: r.scrollTop() + o + "px",
+                    opacity: 1
+                }, i.animationSpeed, function() {
+                    u.trigger("reveal:opened")
+                })),
+                i.animation === "fade" && (e.open.top = r.scrollTop() + o,
+                e.open.opacity = 0,
+                u.css(e.open),
+                f.fadeIn(i.animationSpeed / 2),
+                u.delay(i.animationSpeed / 2).animate({
+                    opacity: 1
+                }, i.animationSpeed, function() {
+                    u.trigger("reveal:opened")
+                })),
+                i.animation === "none" && (e.open.top = r.scrollTop() + o,
+                e.open.opacity = 1,
+                u.css(e.open),
+                f.css({
+                    display: "block"
+                }),
+                u.trigger("reveal:opened")))
+            }
+            function p() {
+                var t = u.find(".flex-video")
+                  , n = t.find("iframe");
+                n.length > 0 && (n.attr("src", n.data("src")),
+                t.fadeIn(100))
+            }
+            function w() {
+                s || (l(),
+                u.removeClass("open"),
+                i.animation === "fadeAndPop" && (u.animate({
+                    top: r.scrollTop() - h + "px",
+                    opacity: 0
+                }, i.animationSpeed / 2, function() {
+                    u.css(e.close)
+                }),
+                t ? u.trigger("reveal:closed") : f.delay(i.animationSpeed).fadeOut(i.animationSpeed, function() {
+                    u.trigger("reveal:closed")
+                })),
+                i.animation === "fade" && (u.animate({
+                    opacity: 0
+                }, i.animationSpeed, function() {
+                    u.css(e.close)
+                }),
+                t ? u.trigger("reveal:closed") : f.delay(i.animationSpeed).fadeOut(i.animationSpeed, function() {
+                    u.trigger("reveal:closed")
+                })),
+                i.animation === "none" && (u.css(e.close),
+                t || f.css({
+                    display: "none"
+                }),
+                u.trigger("reveal:closed")),
+                t = !1)
+            }
+            function b() {
+                u.unbind(".reveal"),
+                f.unbind(".reveal"),
+                c.unbind(".reveal"),
+                n("body").unbind(".reveal")
+            }
+            function k() {
+                var t = u.find(".flex-video")
+                  , n = t.find("iframe");
+                n.length > 0 && (n.data("src", n.attr("src")),
+                n.attr("src", ""),
+                t.fadeOut(100))
+            }
+            var u = n(this), o = parseInt(u.css("top"), 10), h = u.height() + o, s = !1, f = n(".reveal-modal-bg"), e = {
+                open: {
+                    top: 0,
+                    opacity: 0,
+                    visibility: "visible",
+                    display: "block"
+                },
+                close: {
+                    top: o,
+                    opacity: 1,
+                    visibility: "hidden",
+                    display: "none"
+                }
+            }, c;
+            f.length === 0 && (f = n("<div />", {
+                "class": "reveal-modal-bg"
+            }).insertAfter(u),
+            f.fadeTo("fast", .8)),
+            u.bind("reveal:open.reveal", y),
+            u.bind("reveal:open.reveal", p),
+            u.bind("reveal:close.reveal", w),
+            u.bind("reveal:closed.reveal", k),
+            u.bind("reveal:opened.reveal reveal:closed.reveal", a),
+            u.bind("reveal:closed.reveal", b),
+            u.bind("reveal:open.reveal", i.open),
+            u.bind("reveal:opened.reveal", i.opened),
+            u.bind("reveal:close.reveal", i.close),
+            u.bind("reveal:closed.reveal", i.closed),
+            u.trigger("reveal:open"),
+            c = n("." + i.dismissModalClass).bind("click.reveal", function(n) {
+                n.stopPropagation(),
+                u.trigger("reveal:close")
+            }),
+            i.closeOnBackgroundClick && (f.css({
+                cursor: "pointer"
+            }),
+            f.bind("click.reveal", function(n) {
+                n.stopPropagation(),
+                u.trigger("reveal:close")
+            })),
+            n("body").bind("keyup.reveal", function(n) {
+                n.which === 27 && u.trigger("reveal:close")
+            })
+        })
+    }
+}(jQuery142),
+!function(n, t) {
+    "use strict";
+    var i = function(t, i) {
+        this.$element = n(t),
+        this.options = n.extend({}, n.fn.shrinkAndLink.defaults, i),
+        this.init()
+    }, u, r;
+    i.prototype = {
+        constructor: i,
+        init: function() {
+            var n = this
+              , t = n.shrink(n.$element.html());
+            n.$element.html(t)
+        },
+        shrink: function(n) {
+            var t = this;
+            return n.replace(/\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi, function(n) {
+                return u(n, t.options)
+            })
+        }
+    },
+    u = function(n, t) {
+        var i = n.match(/\((.*?)+\)/), u = typeof t.maxLength != "undefined" ? t.maxLength : 20, e = u, o = t.keepWWW ? "//" : "//www.", n = n.replace("http:" + o, "").replace("https:" + o, "").replace(i ? i[0] : null, ""), f;
+        if (n.length <= u)
+            return n;
+        f = n.match(/[a-z0-9.\-]+[.][a-z]{2,4}/),
+        t.forceShowDomain && f && f[0].length * 1.8 >= u && (e = f[0].length * 1.8 / 2 + 5);
+        var h = u / 2
+          , c = r(n, e, !1)
+          , l = r(n, h, !0)
+          , s = c + "..." + l
+          , a = i ? i[0].replace(/[()]/g, "") : s;
+        return t.convertToLink ? '<a href="' + n + '" title="' + n + '">' + a + "<\/a>" : s
+    }
+    ,
+    r = function(t, i, r) {
+        for (var e = [" ", "/", "&"], o = i * .8, r = typeof r != "undefined" ? r : !1, t = r ? t.split("").reverse().join("") : t, f = "", u = 0; u < i - 1; u++)
+            if (f += t.charAt(u),
+            u >= o && n.inArray(t.charAt(u), e))
+                break;
+        return r ? f.split("").reverse().join("") : f
+    }
+    ,
+    n.fn.shrinkAndLink = function(t) {
+        return this.each(function() {
+            var u = n(this)
+              , r = u.data("shrinkAndLink")
+              , f = typeof t == "object" && t;
+            r || u.data("shrinkAndLink", r = new i(this,f)),
+            typeof t == "string" && r[t]()
+        })
+    }
+    ,
+    n.fn.shrinkAndLink.defaults = {
+        keepWWW: !1,
+        convertToLink: !0,
+        maxLength: 20,
+        forceShowDomain: !0
+    },
+    n.fn.shrinkAndLink.Constructor = i,
+    n.fn.shrinkAndLink.noConflict = function() {
+        return n.fn.shrinkAndLink = old,
+        this
+    }
+    ;
+    n(t).on("load", function() {
+        n("[data-shortlink]").each(function() {
+            var t = n(this)
+              , i = t.data();
+            t.shrinkAndLink(i)
+        })
+    })
+}(window.jQuery142, window),
+ExecuteOrDelayUntilScriptLoaded(fixRTEBug, "sp.ui.rte.js"),
+document.documentElement.className += "ontouchstart"in document.documentElement ? " touch" : " no-touch",
+function(n) {
+    n.fn.visible = function(t, i) {
+        var r = n(this).eq(0)
+          , f = r.get(0)
+          , e = n(window)
+          , o = e.scrollTop()
+          , h = o + e.height()
+          , u = r.offset().top
+          , s = u + r.height()
+          , c = t === !0 ? s : u
+          , l = t === !0 ? u : s
+          , a = i === !0 ? f.offsetWidth * f.offsetHeight : !0;
+        return !!a && l <= h && c >= o
+    }
+}(jQuery142),
+function(n) {
+	//only max site and not IE 8 will add the event handler
+	if(IsMaxSite())
+	{
+		n(NG.Events).bind("activityStreamRendered activityStreamAllCommentsRendered", function (e, t) {
+			n(t.element).find("img").each(function(){
+				var src=n(this).attr("src");
+				if(IsMaxConnectDefaultZoneUrl(src))
+				{	
+					if(!IsIE8())
+					{
+						src=MaxConnectUrlForMax(src);
+						n(this).attr("src",src);
+					}
+				}
+				else if( IsIE8()
+						 && /^http:[\/][\/]/i.test(src))
+				{
+					var subStr=src.substring(src.indexOf("//")+2);
+					n(this).attr("src",subStr.substring(subStr.indexOf("/")));
+				}
+			});
+		});
+	}
+}(jQuery142);
+
